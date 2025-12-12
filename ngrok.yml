@@ -1,7 +1,5 @@
 version: "2"
-authtoken: ${NGROK_AUTHTOKEN}
 tunnels:
   backend:
     addr: backend_telegram:5000
     proto: http
-    inspect: false

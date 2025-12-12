@@ -1,6 +1,6 @@
 # 🤖 TFG - Bot de Telegram con IA (Raspberry Pi)
 
-Sistema de bot de Telegram con inteligencia artificial (Google Gemini), monitorización completa y túnel Cloudflare para acceso público desde Raspberry Pi.
+Sistema de bot de Telegram con inteligencia artificial (Google Gemini), monitorización completa y túnel ngrok para acceso público desde Raspberry Pi.
 
 ## 📋 Requisitos Previos
 
@@ -114,7 +114,7 @@ chmod +x start.sh
 
 El script automáticamente:
 1. ✅ Levanta todos los contenedores Docker
-2. ✅ Crea un túnel Cloudflare público
+2. ✅ Crea un túnel ngrok público
 3. ✅ Configura el webhook de Telegram
 4. ✅ Muestra la URL pública de acceso
 
@@ -123,12 +123,13 @@ El script automáticamente:
 ```
 🚀 Iniciando Arquitectura del TFG (Modo Limpieza)...
 🧹 Borrando túnel anterior para limpiar logs...
-⏳ Esperando 15 segundos a que Cloudflare genere la URL...
-✅ Túnel ACTIVO en: https://xxxxx.trycloudflare.com
+⏳ Esperando 15 segundos a que ngrok genere la URL...
+✅ Túnel ACTIVO en: https://xxxxx.ngrok.io
 
 🎉 ¡ÉXITO! Sistema 100% Operativo.
-🔐 Admin Dashboard: https://xxxxx.trycloudflare.com (Requiere Login)
-💬 Chat Público:    https://xxxxx.trycloudflare.com/public/terminal
+🔐 Admin Dashboard: https://xxxxx.ngrok.io (Requiere Login)
+💬 Chat Público:    https://xxxxx.ngrok.io/public/terminal
+🌐 ngrok UI:        http://localhost:4040
 ```
 
 ---
@@ -160,8 +161,8 @@ docker logs -f backend_telegram
 # Logs del worker (IA)
 docker logs -f worker
 
-# Logs del túnel Cloudflare
-docker logs -f cloudflare_tunnel
+# Logs del túnel ngrok
+docker logs -f ngrok_tunnel
 ```
 
 ### Reiniciar Servicios
@@ -225,27 +226,29 @@ sudo usermod -aG docker $USER
 # Cierra sesión y vuelve a entrar
 ```
 
-### ❌ El túnel Cloudflare no genera URL
+### ❌ El túnel ngrok no genera URL
 
-**Causa**: Problemas de red o Cloudflare saturado
+**Causa**: Token inválido o problemas de red
 
 **Solución**:
-```bash
-# Reinicia solo el túnel
-docker restart cloudflare_tunnel
 
-# Espera 10 segundos y revisa logs
-docker logs cloudflare_tunnel
+```bash
+# Verificar token en .env
+cat .env | grep NGROK_AUTHTOKEN
+
+# Reiniciar el túnel
+docker restart ngrok_tunnel
+sleep 20
+
+# Ver logs
+docker logs ngrok_tunnel
 ```
 
-### ❌ El bot no responde en Telegram
+**Alternativa**: Obtener la URL desde la UI:
 
-**Causa**: Webhook mal configurado
-
-**Solución**:
 ```bash
-# Obtén la URL del túnel
-docker logs cloudflare_tunnel | grep "https://"
+# Visitar en el navegador
+http://localhost:4040
 
 # Configura manualmente el webhook (reemplaza <TOKEN> y <URL>)
 curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=<URL>/webhook/<TOKEN>"
@@ -279,7 +282,7 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=<URL>/webhook/<TOKEN>"
 │  └──────────────┘      └──────────────┘           │
 │                                                     │
 │  ┌──────────────┐                                  │
-│  │   Cloudflare │ ◄── Túnel Público               │
+│  │     ngrok    │ ◄── Túnel Público               │
 │  │    Tunnel    │                                  │
 │  └──────┬───────┘                                  │
 └─────────┼──────────────────────────────────────────┘
@@ -293,7 +296,7 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=<URL>/webhook/<TOKEN>"
 ## 📝 Notas Importantes
 
 1. **Seguridad**: Cambia las contraseñas por defecto (`admin:tfg2025`) en producción
-2. **Túnel Cloudflare**: La URL cambia cada vez que reinicias. Es temporal y gratuita.
+2. **Túnel ngrok**: Con cuenta gratis puedes tener URL fija. Más estable que Cloudflare.
 3. **Recursos**: El sistema usa ~500MB de RAM. Asegúrate de tener suficiente.
 4. **Persistencia**: Los datos se guardan en MongoDB Atlas (nube), no en la Raspberry Pi
 
@@ -312,4 +315,4 @@ Si encuentras problemas:
 
 Este proyecto es parte de un Trabajo de Fin de Grado sobre arquitecturas de microservicios con IA.
 
-**Tecnologías**: Docker, Flask, RabbitMQ, MongoDB, Google Gemini, Prometheus, Grafana, Cloudflare
+**Tecnologías**: Docker, Flask, RabbitMQ, MongoDB, Google Gemini, Prometheus, Grafana, ngrok
