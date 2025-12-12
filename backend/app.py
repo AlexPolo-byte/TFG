@@ -225,11 +225,15 @@ def web_send():
         }
         
         # Enviar a RabbitMQ
-        channel.basic_publish(
+        connection = pika.BlockingConnection(pika.URLParameters(RABBITMQ_URI))
+        ch = connection.channel()
+        ch.queue_declare(queue=RABBITMQ_QUEUE, durable=True)
+        ch.basic_publish(
             exchange='',
             routing_key=RABBITMQ_QUEUE,
             body=json.dumps({"message": message, "source": "web"})
         )
+        connection.close()
         
         return jsonify({"status": "sent", "message_id": message["message_id"]})
     except Exception as e:
