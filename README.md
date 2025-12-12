@@ -127,7 +127,7 @@ El script automáticamente:
 ✅ Túnel ACTIVO en: https://xxxxx.ngrok.io
 
 🎉 ¡ÉXITO! Sistema 100% Operativo.
-🔐 Admin Dashboard: https://xxxxx.ngrok.io (Requiere Login)
+🔐 Admin Dashboard: https://xxxxx.ngrok.io (Login: admin/tfg2025)
 💬 Chat Público:    https://xxxxx.ngrok.io/public/terminal
 🌐 ngrok UI:        http://localhost:4040
 ```

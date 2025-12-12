@@ -258,11 +258,13 @@ def user_gallery(chat_id):
 @app.route("/errors")
 @login_required
 def errors_list():
-    errs = []
-    for d in messages_collection.find({"$or": [{"status": "error"}, {"ai_response": {"$regex": "Error"}}]}).sort("_id", -1):
-        if '_id' in d: d['_id'] = str(d['_id'])
-        errs.append(d)
+    errs = list(messages_collection.find({"status": "error"}).sort("timestamp", -1).limit(50))
     return render_template("errors.html", errors=errs)
+
+@app.route("/public/terminal")
+def public_terminal():
+    """Ruta pública para chat sin login"""
+    return render_template("chat.html")
 
 @app.route("/login", methods=['GET','POST'])
 def login():

@@ -52,7 +52,7 @@ RESPONSE=$(curl -s "https://api.telegram.org/bot$TELEGRAM_TOKEN/setWebhook?url=$
 if echo "$RESPONSE" | grep -q '"ok":true'; then
     echo ""
     echo "🎉 ¡ÉXITO! Sistema 100% Operativo."
-    echo "🔐 Admin Dashboard: $TUNNEL_URL (Requiere Login)"
+    echo "🔐 Admin Dashboard: $TUNNEL_URL (Login: admin/tfg2025)"
     echo "💬 Chat Público:    $TUNNEL_URL/public/terminal"
     echo "🌐 ngrok UI:        http://localhost:4040"
     echo ""
