@@ -9,7 +9,17 @@ from prometheus_client import Counter, start_http_server
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 MADRID_TZ = pytz.timezone('Europe/Madrid')
-ADMIN_USER = "admin"; ADMIN_PASS = "tfg2025"; SECRET_KEY = "clave_tfg"
+ADMIN_USER = os.environ.get('ADMIN_USER', 'admin')
+ADMIN_PASS = os.environ.get('ADMIN_PASS', 'tfg2025')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'clave_tfg')
+
+# --- VALIDACIÓN DE VARIABLES DE ENTORNO ---
+required_vars = ['TELEGRAM_TOKEN', 'MONGO_URI', 'RABBITMQ_URI']
+missing_vars = [var for var in required_vars if not os.environ.get(var)]
+if missing_vars:
+    logger.error(f"❌ FALTAN VARIABLES DE ENTORNO: {', '.join(missing_vars)}")
+    logger.error("💡 Crea un archivo .env con: TELEGRAM_TOKEN, MONGO_URI, RABBITMQ_URI")
+    sys.exit(1)
 
 TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
 MONGO_URI = os.environ.get('MONGO_URI')
@@ -29,19 +39,29 @@ class User(UserMixin):
 def load_user(user_id): return User(user_id) if user_id == ADMIN_USER else None
 
 try:
+    logger.info("🔌 Conectando a MongoDB...")
     mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
     db = mongo_client.get_default_database()
     messages_collection = db.messages
-except: sys.exit(1)
+    logger.info("✅ MongoDB conectado correctamente")
+except Exception as e:
+    logger.error(f"❌ ERROR CONECTANDO A MONGODB: {e}")
+    logger.error("💡 Verifica que MONGO_URI en .env sea correcto")
+    sys.exit(1)
 
 class RabbitMQClient:
     def __init__(self): self.conn = None; self.ch = None; self._conn()
     def _conn(self):
         try:
-            self.conn = pika.BlockingConnection(pika.URLParameters(RABBITMQ_URI))
+            params = pika.URLParameters(RABBITMQ_URI)
+            params.socket_timeout = 5  # Timeout de 5 segundos
+            self.conn = pika.BlockingConnection(params)
             self.ch = self.conn.channel()
             self.ch.queue_declare(queue=RABBITMQ_QUEUE, durable=True)
-        except: self.conn = None
+            logger.info("✅ RabbitMQ conectado")
+        except Exception as e:
+            logger.error(f"⚠️ RabbitMQ no disponible: {e}")
+            self.conn = None
     def publish(self, msg):
         if not self.conn or self.conn.is_closed: self._conn()
         if self.conn:
@@ -110,7 +130,12 @@ def api_logs():
     c_name = request.args.get('container', 'worker')
     logs = []
     try:
-        raw = docker.from_env().containers.list(filters={"name": c_name})[0].logs(tail=100, timestamps=True).decode('utf-8', errors='ignore')
+        client = docker.from_env()
+        containers = client.containers.list(filters={"name": c_name})
+        if not containers:
+            logger.warning(f"⚠️ Contenedor '{c_name}' no encontrado")
+            return jsonify([])
+        raw = containers[0].logs(tail=100, timestamps=True).decode('utf-8', errors='ignore')
         for l in raw.split('\n'):
             if len(l.split(' ', 1)) < 2: continue
             ts, msg = l.split(' ', 1)
@@ -118,7 +143,10 @@ def api_logs():
             try: t_fmt = pytz.utc.localize(datetime.datetime.strptime(ts[:19], "%Y-%m-%dT%H:%M:%S")).astimezone(MADRID_TZ).strftime("%H:%M:%S")
             except: t_fmt = ts[:8]
             logs.append({"time": t_fmt, "level": lvl, "msg": msg})
-    except: pass
+    except PermissionError:
+        logger.error("❌ Sin permisos Docker. Ejecuta: sudo usermod -aG docker $USER")
+    except Exception as e:
+        logger.error(f"❌ Error accediendo a Docker: {e}")
     return jsonify(list(reversed(logs)))
 
 # --- VISTAS ---

@@ -7,6 +7,7 @@ import requests
 import threading
 import io
 import base64
+import redis
 from pymongo import MongoClient
 from functools import partial
 from prometheus_client import Counter, Histogram, start_http_server
@@ -17,12 +18,23 @@ from PIL import Image
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# --- VALIDACIÓN DE VARIABLES DE ENTORNO ---
+required_vars = ['TELEGRAM_TOKEN', 'MONGO_URI', 'RABBITMQ_URI', 'GOOGLE_API_KEY']
+missing_vars = [var for var in required_vars if not os.environ.get(var)]
+if missing_vars:
+    logger.error(f"❌ FALTAN VARIABLES DE ENTORNO: {', '.join(missing_vars)}")
+    logger.error("💡 Revisa tu archivo .env y asegúrate de tener todas las variables")
+    import sys
+    sys.exit(1)
+
 TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
 MONGO_URI = os.environ.get('MONGO_URI')
 RABBITMQ_URI = os.environ.get('RABBITMQ_URI')
 QUEUE_NAME = os.environ.get('RABBITMQ_QUEUE', 'telegram_queue')
 WORKER_EXPORTER_PORT = int(os.environ.get('WORKER_EXPORTER_PORT', 9092))
 GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
+ADMIN_CHAT_ID = os.environ.get('ADMIN_CHAT_ID')  # Para notificaciones de errores
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://redis:6379/0')
 
 # --- MÉTRICAS ---
 MESSAGES_PROCESSED = Counter('worker_messages_total', 'Mensajes procesados', ['type'])
@@ -103,7 +115,29 @@ def setup_ia():
 # Inicializamos la IA
 model = setup_ia()
 
+# --- CONFIGURACIÓN DE REDIS ---
+try:
+    redis_client = redis.from_url(REDIS_URL, decode_responses=True, socket_connect_timeout=5)
+    redis_client.ping()
+    logger.info("✅ Redis conectado para caché")
+except Exception as e:
+    logger.warning(f"⚠️ Redis no disponible: {e}. Caché desactivado.")
+    redis_client = None
+
 # --- FUNCIONES AUXILIARES ---
+
+def notify_admin_error(error_msg):
+    """Envía notificación de error crítico al admin"""
+    if not ADMIN_CHAT_ID:
+        return
+    try:
+        send_telegram_msg(
+            chat_id=int(ADMIN_CHAT_ID),
+            text=f"🚨 ERROR CRÍTICO:\n{error_msg[:500]}"
+        )
+        logger.info(f"📧 Notificación de error enviada al admin")
+    except Exception as e:
+        logger.error(f"❌ Error enviando notificación al admin: {e}")
 
 def send_telegram_msg(chat_id, text, reply_to=None):
     """Envía mensaje a Telegram ignorando errores de red"""
@@ -115,7 +149,7 @@ def send_telegram_msg(chat_id, text, reply_to=None):
             timeout=10
         )
     except Exception as e:
-        logger.error(f"Error enviando Telegram: {e}")
+        logger.error(f"❌ Error enviando mensaje a Telegram: {e}")
 
 def download_telegram_photo(file_id):
     """Descarga foto de Telegram a memoria RAM"""
@@ -123,7 +157,9 @@ def download_telegram_photo(file_id):
         path = requests.get(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getFile?file_id={file_id}", timeout=10).json()['result']['file_path']
         content = requests.get(f"https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{path}", timeout=20).content
         return Image.open(io.BytesIO(content))
-    except: return None
+    except Exception as e:
+        logger.error(f"❌ Error descargando foto de Telegram: {e}")
+        return None
 
 def image_to_base64(img):
     """
@@ -155,7 +191,9 @@ def get_chat_context(collection, chat_id, limit=5):
             if u_text and ai_text:
                 history_text += f"Usuario: {u_text}\nIA: {ai_text}\n"
         return history_text
-    except: return ""
+    except Exception as e:
+        logger.error(f"⚠️ Error recuperando contexto del chat: {e}")
+        return ""
 
 # --- LÓGICA PRINCIPAL ---
 
@@ -181,24 +219,73 @@ def process_message(collection, ch, method, properties, body):
         if msg_type == 'text':
             user_text = message.get('text', '')
 
+            # --- COMANDOS DEL BOT ---
             if user_text.strip() == "/start":
-                response_text = "¡Hola! Soy Alex. Tengo memoria y puedo ver fotos. ¿En qué te ayudo?"
+                response_text = "¡Hola! 👋 Soy Alex, tu asistente de tecnología.\n\n✨ Puedo:\n- Responder preguntas sobre informática\n- Analizar imágenes\n- Recordar conversaciones\n\nUsa /help para más info."
                 sentiment = "POSITIVO"
+            
+            elif user_text.strip() == "/help":
+                response_text = "📚 COMANDOS DISPONIBLES:\n\n/start - Presentación\n/help - Esta ayuda\n/stats - Estadísticas del sistema\n\n💡 También puedes enviarme fotos para que las analice."
+                sentiment = "NEUTRO"
+            
+            elif user_text.strip() == "/stats":
+                try:
+                    total_msgs = collection.count_documents({})
+                    user_msgs = collection.count_documents({"message.chat.id": chat_id})
+                    response_text = f"📊 ESTADÍSTICAS:\n\n💬 Total mensajes: {total_msgs}\n👤 Tus mensajes: {user_msgs}\n🤖 Sistema operativo correctamente"
+                    sentiment = "POSITIVO"
+                except Exception as e:
+                    response_text = "Error obteniendo estadísticas."
+                    logger.error(f"Error en /stats: {e}")
+            
             elif model:
                 try:
-                    # Inyectamos la memoria en el prompt
-                    history = get_chat_context(collection, chat_id)
-                    final_prompt = f"HISTORIAL PREVIO:\n{history}\n\nUSUARIO DICE:\n{user_text}"
+                    # Verificar caché primero
+                    cache_key = f"ai_response:{hash(user_text)}"
+                    if redis_client:
+                        try:
+                            cached = redis_client.get(cache_key)
+                            if cached:
+                                logger.info("⚡ Respuesta desde caché")
+                                response_data = json.loads(cached)
+                                response_text = response_data['text']
+                                sentiment = response_data['sentiment']
+                            else:
+                                raise KeyError("No en caché")  # Forzar generación
+                        except:
+                            # Generar respuesta nueva
+                            history = get_chat_context(collection, chat_id)
+                            final_prompt = f"HISTORIAL PREVIO:\n{history}\n\nUSUARIO DICE:\n{user_text}"
+                            raw = model.generate_content(final_prompt).text
 
-                    raw = model.generate_content(final_prompt).text
+                            # Procesar sentimiento
+                            if "[POSITIVO]" in raw: sentiment="POSITIVO"; response_text=raw.replace("[POSITIVO]","").strip()
+                            elif "[NEGATIVO]" in raw: sentiment="NEGATIVO"; response_text=raw.replace("[NEGATIVO]","").strip()
+                            elif "[NEUTRO]" in raw: sentiment="NEUTRO"; response_text=raw.replace("[NEUTRO]","").strip()
+                            else: response_text = raw
 
-                    # Limpiamos el tag de sentimiento
-                    if "[POSITIVO]" in raw: sentiment="POSITIVO"; response_text=raw.replace("[POSITIVO]","").strip()
-                    elif "[NEGATIVO]" in raw: sentiment="NEGATIVO"; response_text=raw.replace("[NEGATIVO]","").strip()
-                    elif "[NEUTRO]" in raw: sentiment="NEUTRO"; response_text=raw.replace("[NEUTRO]","").strip()
-                    else: response_text = raw # Si falla el formato
+                            # Guardar en caché (1 hora)
+                            try:
+                                redis_client.setex(
+                                    cache_key,
+                                    3600,
+                                    json.dumps({'text': response_text, 'sentiment': sentiment})
+                                )
+                            except: pass
+                    else:
+                        # Sin Redis, generar directamente
+                        history = get_chat_context(collection, chat_id)
+                        final_prompt = f"HISTORIAL PREVIO:\n{history}\n\nUSUARIO DICE:\n{user_text}"
+                        raw = model.generate_content(final_prompt).text
+
+                        if "[POSITIVO]" in raw: sentiment="POSITIVO"; response_text=raw.replace("[POSITIVO]","").strip()
+                        elif "[NEGATIVO]" in raw: sentiment="NEGATIVO"; response_text=raw.replace("[NEGATIVO]","").strip()
+                        elif "[NEUTRO]" in raw: sentiment="NEUTRO"; response_text=raw.replace("[NEUTRO]","").strip()
+                        else: response_text = raw
+                        
                 except Exception as e:
                     logger.error(f"IA Error: {e}")
+                    notify_admin_error(f"Error IA en chat {chat_id}: {e}")
                     response_text = "Estoy saturado, dame un momento."
             else:
                 response_text = "IA no disponible."
@@ -264,16 +351,20 @@ def process_message(collection, ch, method, properties, body):
 def start_worker():
     # Conexión DB
     try:
-        db = MongoClient(MONGO_URI).get_default_database()
+        logger.info("🔌 Conectando a MongoDB...")
+        db = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000).get_default_database()
         logger.info("✅ MongoDB Conectado")
-    except:
-        logger.error("❌ Fallo MongoDB")
+    except Exception as e:
+        logger.error(f"❌ Error conectando a MongoDB: {e}")
+        logger.error("💡 Verifica MONGO_URI en tu archivo .env")
         return
 
     # Bucle RabbitMQ
     while True:
         try:
+            logger.info("🔌 Conectando a RabbitMQ...")
             params = pika.URLParameters(RABBITMQ_URI)
+            params.socket_timeout = 10  # Timeout de 10 segundos
             conn = pika.BlockingConnection(params)
             ch = conn.channel()
             ch.queue_declare(queue=QUEUE_NAME, durable=True)

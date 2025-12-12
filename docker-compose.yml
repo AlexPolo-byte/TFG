@@ -19,7 +19,7 @@ services:
   backend_telegram:
     build: ./backend
     container_name: backend_telegram
-    restart: always
+    restart: unless-stopped
     env_file: .env  # Lee las variables del archivo .env automáticamente
     ports:
       - "5000:5000"
@@ -28,6 +28,14 @@ services:
     environment:
       - FLASK_EXPORTER_PORT=9091
       - TZ=Europe/Madrid
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - redis
     networks:
       - tfg_network
 
@@ -37,17 +45,43 @@ services:
   worker:
     build: ./backend
     container_name: worker
-    restart: always
+    restart: unless-stopped
     env_file: .env
     command: python worker.py
     environment:
       - WORKER_EXPORTER_PORT=9092
       - TZ=Europe/Madrid
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f worker.py || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - redis
     networks:
       - tfg_network
 
   # ----------------------------------------------------
-  # 4. MONITORIZACIÓN (Logs y Métricas)
+  # 4. REDIS (Caché para respuestas IA)
+  # ----------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 100mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - tfg_network
+
+  # ----------------------------------------------------
+  # 5. MONITORIZACIÓN (Logs y Métricas)
   # ----------------------------------------------------
   prometheus:
     image: prom/prometheus:latest

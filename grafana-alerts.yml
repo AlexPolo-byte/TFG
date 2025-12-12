@@ -1,0 +1,62 @@
+# Configuración de Alertas para Grafana
+# Importar este archivo en Grafana para configurar alertas automáticas
+
+groups:
+  - name: TFG_Alerts
+    interval: 30s
+    rules:
+      # Alerta de CPU alta
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) > 0.8
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU alta en {{ $labels.instance }}"
+          description: "El uso de CPU está por encima del 80% durante 2 minutos"
+
+      # Alerta de memoria alta
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / 1024 / 1024) > 400
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Memoria alta en {{ $labels.instance }}"
+          description: "El uso de memoria está por encima de 400MB"
+
+      # Alerta de errores frecuentes
+      - alert: HighErrorRate
+        expr: rate(worker_messages_total{type="error"}[5m]) > 10
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Tasa de errores alta"
+          description: "Más de 10 errores por minuto en el worker"
+
+      # Alerta de servicio caído
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Servicio {{ $labels.job }} caído"
+          description: "El servicio no responde desde hace 1 minuto"
+
+      # Alerta de tiempo de procesamiento lento
+      - alert: SlowProcessing
+        expr: histogram_quantile(0.95, rate(worker_processing_seconds_bucket[5m])) > 10
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Procesamiento lento"
+          description: "El 95% de los mensajes tardan más de 10 segundos"
+
+# Instrucciones de configuración:
+# 1. Ir a Grafana → Alerting → Alert rules
+# 2. Importar este archivo YAML
+# 3. Configurar canal de notificación (Telegram, Email, etc.)
+# 4. Las alertas se activarán automáticamente
