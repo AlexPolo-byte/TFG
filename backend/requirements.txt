@@ -1,0 +1,16 @@
+flask
+flask-cors
+google-generativeai>=0.8.3
+Pillow
+Flask
+python-telegram-bot
+pymongo[srv]>=4.0
+pika
+gunicorn
+requests
+prometheus_client
+flask-login
+humanize
+psutil
+pytz
+docker

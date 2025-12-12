@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+    <title>TFG System</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root { --primary: #007AFF; --bg-body: #F5F5F7; --bg-surface: #FFFFFF; --text-main: #1D1D1F; --border: #E5E5EA; --radius: 16px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
+
+        .app-nav { width: 260px; background: var(--bg-surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px; z-index: 100; flex-shrink: 0; }
+        .nav-brand { font-weight: 700; font-size: 1.1rem; color: var(--text-main); display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+        .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .nav-item a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: #86868B; text-decoration: none; border-radius: 12px; font-weight: 500; transition: all 0.2s; }
+        .nav-item a:hover, .nav-item a.active { background-color: #E0F0FF; color: var(--primary); }
+        .nav-footer { border-top: 1px solid var(--border); padding-top: 16px; }
+
+        .app-content { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .content-scroll { flex: 1; overflow-y: auto; padding: 30px; padding-bottom: 100px; -webkit-overflow-scrolling: touch; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .app-nav { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; height: auto; padding: 10px 20px; padding-bottom: max(10px, env(safe-area-inset-bottom)); border-right: none; border-top: 1px solid var(--border); flex-direction: row; justify-content: space-between; }
+            .nav-brand, .nav-text-desktop, .nav-footer { display: none; }
+            .nav-list { flex-direction: row; justify-content: space-between; width: 100%; margin: 0; }
+            .nav-item a { flex-direction: column; padding: 6px; gap: 4px; font-size: 0.7rem; }
+            .nav-item i { font-size: 1.4rem; }
+            .content-scroll { padding: 20px; }
+        }
+        
+        .card-std { background: var(--bg-surface); border-radius: var(--radius); padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.02); }
+        .badge-soft { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .fade-in { animation: fadeIn 0.4s ease-out; } 
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <nav class="app-nav">
+        <div class="nav-brand"><i class="bi bi-cpu-fill" style="color: var(--primary)"></i> TFG System</div>
+        <ul class="nav-list">
+            <li class="nav-item"><a href="{{ url_for('index') }}" class="{{ 'active' if request.path == '/' else '' }}"><i class="bi bi-grid"></i> <span class="nav-text-desktop">Dashboard</span></a></li>
+            <li class="nav-item"><a href="{{ url_for('users') }}" class="{{ 'active' if request.path == '/users' else '' }}"><i class="bi bi-people"></i> <span class="nav-text-desktop">Usuarios</span></a></li>
+            <li class="nav-item"><a href="{{ url_for('errors') }}" class="{{ 'active' if request.path == '/errors' else '' }}"><i class="bi bi-exclamation-triangle"></i> <span class="nav-text-desktop">Alertas</span></a></li>
+        </ul>
+        <div class="nav-footer">
+            <a href="{{ url_for('logout') }}" style="text-decoration: none; color: #FF3B30; display: flex; align-items: center; gap: 10px; font-weight: 500;"><i class="bi bi-box-arrow-right"></i> Salir</a>
+        </div>
+    </nav>
+    <main class="app-content">
+        <div class="content-scroll">{% block content %}{% endblock %}</div>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

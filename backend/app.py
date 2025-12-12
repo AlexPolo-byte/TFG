@@ -1,0 +1,196 @@
+import os, sys, json, logging, threading, datetime, time, humanize, psutil, pytz, docker
+from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from pymongo import MongoClient
+import pika
+from prometheus_client import Counter, start_http_server
+
+# Config
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+MADRID_TZ = pytz.timezone('Europe/Madrid')
+ADMIN_USER = "admin"; ADMIN_PASS = "tfg2025"; SECRET_KEY = "clave_tfg"
+
+TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
+MONGO_URI = os.environ.get('MONGO_URI')
+RABBITMQ_URI = os.environ.get('RABBITMQ_URI')
+RABBITMQ_QUEUE = os.environ.get('RABBITMQ_QUEUE', 'telegram_queue')
+FLASK_EXPORTER_PORT = int(os.environ.get('FLASK_EXPORTER_PORT', 9091))
+
+app = Flask(__name__)
+app.secret_key = SECRET_KEY
+REQUEST_COUNT = Counter('flask_http_requests_total', 'Total HTTP')
+RABBIT_ERRORS = Counter('rabbitmq_publish_errors_total', 'Errores Rabbit')
+
+login_manager = LoginManager(); login_manager.init_app(app); login_manager.login_view = 'login'
+class User(UserMixin):
+    def __init__(self, id): self.id = id
+@login_manager.user_loader
+def load_user(user_id): return User(user_id) if user_id == ADMIN_USER else None
+
+try:
+    mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+    db = mongo_client.get_default_database()
+    messages_collection = db.messages
+except: sys.exit(1)
+
+class RabbitMQClient:
+    def __init__(self): self.conn = None; self.ch = None; self._conn()
+    def _conn(self):
+        try:
+            self.conn = pika.BlockingConnection(pika.URLParameters(RABBITMQ_URI))
+            self.ch = self.conn.channel()
+            self.ch.queue_declare(queue=RABBITMQ_QUEUE, durable=True)
+        except: self.conn = None
+    def publish(self, msg):
+        if not self.conn or self.conn.is_closed: self._conn()
+        if self.conn:
+            try: self.ch.basic_publish('', RABBITMQ_QUEUE, json.dumps(msg, default=str)); return True
+            except: pass
+        return False
+mq_client = RabbitMQClient()
+
+@app.template_filter('human_time')
+def human_time(ts):
+    if not ts: return ""
+    try: return humanize.naturaltime(datetime.datetime.fromtimestamp(ts, pytz.utc).astimezone(MADRID_TZ))
+    except: return ts
+
+# --- API ---
+@app.route("/api/stats")
+@login_required
+def api_stats():
+    now = datetime.datetime.now(MADRID_TZ)
+    total = messages_collection.count_documents({})
+    today_ts = now.replace(hour=0, minute=0, second=0).timestamp()
+    today_cnt = messages_collection.count_documents({"message.date": {"$gte": today_ts}})
+    err_cnt = messages_collection.count_documents({"status": {"$nin": ["procesado_ia", "procesado_cloud", None]}})
+
+    # Gráfica
+    labels = []; vals = []
+    start_8h = now.timestamp() - 28800
+    cursor = messages_collection.find({"message.date": {"$gte": start_8h}})
+    data_map = {}
+    for i in range(7, -1, -1):
+        lbl = (now - datetime.timedelta(hours=i)).strftime("%H:00")
+        labels.append(lbl); data_map[lbl] = 0
+    for m in cursor:
+        try:
+            h = datetime.datetime.fromtimestamp(m['message']['date'], pytz.utc).astimezone(MADRID_TZ).strftime("%H:00")
+            if h in data_map: data_map[h] += 1
+        except: pass
+    vals = [data_map[l] for l in labels]
+
+    # Sentimiento
+    sent_data = list(messages_collection.aggregate([{"$group": {"_id": "$sentiment", "count": {"$sum": 1}}}]))
+    s_map = {"POSITIVO":0, "NEUTRO":0, "NEGATIVO":0}
+    for s in sent_data: 
+        if s['_id'] in s_map: s_map[s['_id']] = s['count']
+    
+    # Mensajes Live
+    msgs = []
+    for m in messages_collection.find().sort("message.date", -1).limit(10):
+        try:
+            t_str = datetime.datetime.fromtimestamp(m['message']['date'], pytz.utc).astimezone(MADRID_TZ).strftime("%H:%M:%S")
+            txt = "[Foto Analizada]" if m.get('type')=='photo' else m['message'].get('text','')
+            msgs.append({"time": t_str, "user": m['message']['chat'].get('first_name','Anon'), "text": txt[:40], "sentiment": m.get('sentiment','NEUTRO'), "status": m.get('status','unk'), "type": m.get('type','text')})
+        except: pass
+
+    return jsonify({
+        "total": total, "today": today_cnt, "errors": err_cnt,
+        "chart_line": {"labels": labels, "data": vals},
+        "sentiment_data": [s_map["POSITIVO"], s_map["NEUTRO"], s_map["NEGATIVO"]],
+        "system": {"cpu": psutil.cpu_percent(), "ram": psutil.virtual_memory().percent},
+        "messages": msgs, "last_updated": now.strftime('%H:%M:%S')
+    })
+
+@app.route("/api/logs")
+@login_required
+def api_logs():
+    c_name = request.args.get('container', 'worker')
+    logs = []
+    try:
+        raw = docker.from_env().containers.list(filters={"name": c_name})[0].logs(tail=100, timestamps=True).decode('utf-8', errors='ignore')
+        for l in raw.split('\n'):
+            if len(l.split(' ', 1)) < 2: continue
+            ts, msg = l.split(' ', 1)
+            lvl = "ERROR" if "ERROR" in msg or "Exception" in msg else "WARN" if "WARN" in msg else "INFO"
+            try: t_fmt = pytz.utc.localize(datetime.datetime.strptime(ts[:19], "%Y-%m-%dT%H:%M:%S")).astimezone(MADRID_TZ).strftime("%H:%M:%S")
+            except: t_fmt = ts[:8]
+            logs.append({"time": t_fmt, "level": lvl, "msg": msg})
+    except: pass
+    return jsonify(list(reversed(logs)))
+
+# --- VISTAS ---
+@app.route("/")
+@login_required
+def index(): return render_template("dashboard.html", last_msgs=[])
+
+@app.route("/users")
+@login_required
+def users_list():
+    users = list(messages_collection.aggregate([
+        {"$group": {"_id": "$message.chat.id", "first_name": {"$first": "$message.chat.first_name"}, "username": {"$first": "$message.chat.username"}, "last_msg_date": {"$max": "$message.date"}, "msg_count": {"$sum": 1}}},
+        {"$sort": {"last_msg_date": -1}}
+    ]))
+    return render_template("users.html", users=users)
+
+@app.route("/user/<int:chat_id>")
+@login_required
+def user_history(chat_id):
+    # Buscamos mensajes ordenados por fecha
+    msgs_cursor = messages_collection.find({"message.chat.id": chat_id}).sort("message.date", -1) # 1 para orden cronológico (chat normal)
+    msgs = list(msgs_cursor)
+    
+    # Buscamos info del usuario
+    user_info = messages_collection.find_one({"message.chat.id": chat_id})
+    name = "Usuario Desconocido"
+    
+    # Protección extra contra datos vacíos
+    if user_info and 'message' in user_info and 'chat' in user_info['message']:
+        name = user_info['message']['chat'].get('first_name', 'Anonimo')
+        
+    return render_template("history.html", msgs=msgs, chat_id=chat_id, name=name)
+
+# 👇 NUEVA RUTA: GALERÍA POR USUARIO
+@app.route("/user/<int:chat_id>/gallery")
+@login_required
+def user_gallery(chat_id):
+    imgs = list(messages_collection.find({"message.chat.id": chat_id, "image_data": {"$exists": True}}).sort("processed_at", -1))
+    u = messages_collection.find_one({"message.chat.id": chat_id})
+    name = u['message']['chat'].get('first_name','User') if u else 'User'
+    return render_template("gallery.html", images=imgs, name=name, chat_id=chat_id)
+
+@app.route("/errors")
+@login_required
+def errors_list():
+    errs = []
+    for d in messages_collection.find({"$or": [{"status": "error"}, {"ai_response": {"$regex": "Error"}}]}).sort("_id", -1):
+        if '_id' in d: d['_id'] = str(d['_id'])
+        errs.append(d)
+    return render_template("errors.html", errors=errs)
+
+@app.route("/login", methods=['GET','POST'])
+def login():
+    if request.method=='POST':
+        if request.form['username']==ADMIN_USER and request.form['password']==ADMIN_PASS:
+            login_user(User(ADMIN_USER)); return redirect(url_for('index'))
+    return render_template('login.html')
+@app.route("/logout")
+@login_required
+def logout(): logout_user(); return redirect(url_for('login'))
+@app.route(f"/webhook/{TELEGRAM_TOKEN}", methods=['POST'])
+def webhook():
+    if request.method=="POST":
+        REQUEST_COUNT.inc(); u = request.get_json()
+        try: u['received_at']=datetime.datetime.now().timestamp(); messages_collection.insert_one(u)
+        except: pass
+        if mq_client.publish(u): return jsonify({"status":"ok"}),200
+        return jsonify({"status":"error"}),500
+    return jsonify({"error":"405"}),405
+@app.route("/health")
+def health(): return "OK",200
+
+if __name__ == "__main__":
+    t = threading.Thread(target=start_http_server, args=(FLASK_EXPORTER_PORT,), daemon=True); t.start()
+    app.run(host='0.0.0.0', port=5000)
