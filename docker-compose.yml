@@ -1,15 +1,20 @@
 version: '3.8'
 
 services:
-  # ----------------------------------------------------
-  # 1. TÚNEL CLOUDFLARE (Tu IP Pública Gratis y Segura)
-  # ----------------------------------------------------
-  tunnel:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflare_tunnel
+  # === TÚNEL PÚBLICO (ngrok) ===
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok_tunnel
     restart: unless-stopped
-    # Esto expone el servicio 'backend_telegram' puerto 5000 a internet
-    command: tunnel --url http://backend_telegram:5000
+    command:
+      - "start"
+      - "--all"
+      - "--config"
+      - "/etc/ngrok.yml"
+    volumes:
+      - ./ngrok.yml:/etc/ngrok.yml
+    ports:
+      - "4040:4040"  # Web UI de ngrok
     networks:
       - tfg_network
 

@@ -17,6 +17,7 @@ RABBITMQ_URI = os.environ.get('RABBITMQ_URI')
 
 # === VARIABLES OPCIONALES ===
 RABBITMQ_QUEUE = os.environ.get('RABBITMQ_QUEUE', 'telegram_queue')
+QUEUE_NAME = RABBITMQ_QUEUE  # Alias para compatibilidad
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://redis:6379/0')
 ADMIN_CHAT_ID = os.environ.get('ADMIN_CHAT_ID')
 FLASK_EXPORTER_PORT = int(os.environ.get('FLASK_EXPORTER_PORT', 9091))
