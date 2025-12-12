@@ -124,6 +124,72 @@ def api_stats():
         "messages": msgs, "last_updated": now.strftime('%H:%M:%S')
     })
 
+@app.route("/api/users")
+@login_required
+def api_users():
+    users = list(messages_collection.aggregate([
+        {"$lookup": {
+            "from": "users",
+            "localField": "message.chat.id",
+            "foreignField": "chat_id",
+            "as": "user_info"
+        }},
+        {"$group": {
+            "_id": "$message.chat.id",
+            "first_name": {"$first": "$message.chat.first_name"},
+            "msg_count": {"$sum": 1},
+            "mode": {"$first": {"$arrayElemAt": ["$user_info.mode", 0]}}
+        }},
+        {"$sort": {"msg_count": -1}}
+    ]))
+    return jsonify(users)
+
+@app.route("/api/favorites/<int:chat_id>")
+@login_required
+def api_favorites(chat_id):
+    # Acceder a colección favorites
+    favs = list(db.favorites.find({"chat_id": chat_id}).sort("saved_at", -1).limit(10))
+    for f in favs:
+        if '_id' in f:
+            f['_id'] = str(f['_id'])
+    return jsonify(favs)
+
+@app.route("/api/feedback/stats")
+@login_required
+def api_feedback_stats():
+    # Acceder a colección feedback
+    total = db.feedback.count_documents({})
+    positive = db.feedback.count_documents({"rating": "positive"})
+    negative = db.feedback.count_documents({"rating": "negative"})
+    return jsonify({
+        "total": total,
+        "positive": positive,
+        "negative": negative,
+        "satisfaction": round((positive / total * 100) if total > 0 else 0, 1)
+    })
+
+@app.route("/api/sentiment/timeline")
+@login_required
+def api_sentiment_timeline():
+    import datetime
+    now = datetime.datetime.now(MADRID_TZ)
+    start_24h = now.timestamp() - 86400
+    
+    pipeline = [
+        {"$match": {"processed_at": {"$gte": start_24h}}},
+        {"$group": {
+            "_id": {
+                "hour": {"$hour": {"$toDate": {"$multiply": ["$processed_at", 1000]}}},
+                "sentiment": "$sentiment"
+            },
+            "count": {"$sum": 1}
+        }},
+        {"$sort": {"_id.hour": 1}}
+    ]
+    
+    results = list(messages_collection.aggregate(pipeline))
+    return jsonify(results)
+
 @app.route("/api/logs")
 @login_required
 def api_logs():
