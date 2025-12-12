@@ -193,27 +193,74 @@ def api_sentiment_timeline():
 @app.route("/api/logs")
 @login_required
 def api_logs():
-    c_name = request.args.get('container', 'worker')
-    logs = []
+    container = request.args.get('container', 'backend_telegram')
     try:
-        client = docker.from_env()
-        containers = client.containers.list(filters={"name": c_name})
-        if not containers:
-            logger.warning(f"⚠️ Contenedor '{c_name}' no encontrado")
-            return jsonify([])
-        raw = containers[0].logs(tail=100, timestamps=True).decode('utf-8', errors='ignore')
-        for l in raw.split('\n'):
-            if len(l.split(' ', 1)) < 2: continue
-            ts, msg = l.split(' ', 1)
-            lvl = "ERROR" if "ERROR" in msg or "Exception" in msg else "WARN" if "WARN" in msg else "INFO"
-            try: t_fmt = pytz.utc.localize(datetime.datetime.strptime(ts[:19], "%Y-%m-%dT%H:%M:%S")).astimezone(MADRID_TZ).strftime("%H:%M:%S")
-            except: t_fmt = ts[:8]
-            logs.append({"time": t_fmt, "level": lvl, "msg": msg})
-    except PermissionError:
-        logger.error("❌ Sin permisos Docker. Ejecuta: sudo usermod -aG docker $USER")
+        c = docker_client.containers.get(container)
+        logs = c.logs(tail=100).decode('utf-8', errors='ignore')
+        return jsonify({"logs": logs})
+    except docker.errors.NotFound:
+        logger.warning(f"⚠️ Contenedor '{container}' no encontrado")
+        return jsonify({"logs": f"Contenedor '{container}' no encontrado"})
     except Exception as e:
-        logger.error(f"❌ Error accediendo a Docker: {e}")
-    return jsonify(list(reversed(logs)))
+        return jsonify({"logs": f"Error: {str(e)}"})
+
+# === WEB CHAT APIs (público) ===
+@app.route("/api/web/send", methods=['POST'])
+def web_send():
+    """Envía mensaje desde el chat público"""
+    try:
+        data = request.get_json()
+        text = data.get('text', '').strip()
+        session_id = data.get('session_id', 'web_unknown')
+        
+        if not text:
+            return jsonify({"error": "Mensaje vacío"}), 400
+        
+        # Crear mensaje simulado de Telegram
+        message = {
+            "message_id": int(time.time() * 1000),
+            "chat": {"id": session_id, "first_name": "Web User"},
+            "text": text,
+            "date": int(time.time())
+        }
+        
+        # Enviar a RabbitMQ
+        channel.basic_publish(
+            exchange='',
+            routing_key=RABBITMQ_QUEUE,
+            body=json.dumps({"message": message, "source": "web"})
+        )
+        
+        return jsonify({"status": "sent", "message_id": message["message_id"]})
+    except Exception as e:
+        logger.error(f"Error en /api/web/send: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/web/poll")
+def web_poll():
+    """Polling para obtener respuestas del bot"""
+    try:
+        session_id = request.args.get('session_id', 'web_unknown')
+        last_check = float(request.args.get('last_check', 0))
+        
+        # Buscar mensajes nuevos para esta sesión
+        messages = list(messages_collection.find({
+            "message.chat.id": session_id,
+            "processed_at": {"$gt": last_check},
+            "ai_response": {"$exists": True}
+        }).sort("processed_at", 1).limit(10))
+        
+        responses = []
+        for msg in messages:
+            responses.append({
+                "text": msg.get("ai_response", ""),
+                "timestamp": msg.get("processed_at", time.time())
+            })
+        
+        return jsonify({"messages": responses})
+    except Exception as e:
+        logger.error(f"Error en /api/web/poll: {e}")
+        return jsonify({"messages": []})
 
 # --- VISTAS ---
 @app.route("/")
