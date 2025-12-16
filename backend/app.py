@@ -144,9 +144,14 @@ def api_users():
     ]))
     return jsonify(users)
 
-@app.route("/api/favorites/<int:chat_id>")
+@app.route("/api/favorites/<chat_id>")
 @login_required
 def api_favorites(chat_id):
+    # Convertir a int si es numérico
+    try:
+        chat_id = int(chat_id)
+    except ValueError:
+        pass
     # Acceder a colección favorites
     favs = list(db.favorites.find({"chat_id": chat_id}).sort("saved_at", -1).limit(10))
     for f in favs:
@@ -324,11 +329,17 @@ def users_list():
     ]))
     return render_template("users.html", users=users)
 
-@app.route("/user/<int:chat_id>")
+@app.route("/user/<chat_id>")
 @login_required
 def user_history(chat_id):
+    # Convertir a int si es numérico, sino dejar como string
+    try:
+        chat_id = int(chat_id)
+    except ValueError:
+        pass  # Mantener como string para IDs web (adm_*, web_*)
+    
     # Buscamos mensajes ordenados por fecha
-    msgs_cursor = messages_collection.find({"message.chat.id": chat_id}).sort("message.date", -1) # 1 para orden cronológico (chat normal)
+    msgs_cursor = messages_collection.find({"message.chat.id": chat_id}).sort("message.date", -1)
     msgs = list(msgs_cursor)
     
     # Buscamos info del usuario
@@ -342,9 +353,14 @@ def user_history(chat_id):
     return render_template("history.html", msgs=msgs, chat_id=chat_id, name=name)
 
 # 👇 NUEVA RUTA: GALERÍA POR USUARIO
-@app.route("/user/<int:chat_id>/gallery")
+@app.route("/user/<chat_id>/gallery")
 @login_required
 def user_gallery(chat_id):
+    # Convertir a int si es numérico, sino dejar como string
+    try:
+        chat_id = int(chat_id)
+    except ValueError:
+        pass  # Mantener como string para IDs web
     imgs = list(messages_collection.find({"message.chat.id": chat_id, "image_data": {"$exists": True}}).sort("processed_at", -1))
     u = messages_collection.find_one({"message.chat.id": chat_id})
     name = u['message']['chat'].get('first_name','User') if u else 'User'
