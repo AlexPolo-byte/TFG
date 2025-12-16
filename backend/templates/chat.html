@@ -137,18 +137,30 @@
     </div>
 
     <script>
-        // Generar nueva sesión cada vez que se carga la página
-        let sid = 'web_' + Date.now();
-        let username = null; // No cachear, siempre pedir
+        // Usar localStorage para persistencia (como una web normal)
+        let sid = localStorage.getItem('chat_sid');
+        if (!sid) {
+            sid = 'web_' + Date.now();
+            localStorage.setItem('chat_sid', sid);
+        }
+
+        let username = localStorage.getItem('chat_username');
         let last = Date.now() / 1000;
 
-        // Siempre mostrar modal al cargar (nueva sesión)
-        document.getElementById('id-modal').style.display = 'flex';
+        // Solo mostrar modal si NO hay username guardado
+        if (!username) {
+            document.getElementById('id-modal').style.display = 'flex';
+        } else {
+            // Si ya hay username, ocultar modal y cargar historial
+            document.getElementById('id-modal').style.display = 'none';
+            loadHistory();
+        }
 
         function saveUser() {
             const u = document.getElementById('username-in').value.trim();
             if (u) {
                 username = u;
+                localStorage.setItem('chat_username', username);
                 document.getElementById('id-modal').style.display = 'none';
                 // Cargar historial después de identificarse
                 loadHistory();
