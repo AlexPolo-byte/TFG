@@ -275,6 +275,40 @@ def web_poll():
         logger.error(f"Error en /api/web/poll: {e}")
         return jsonify({"messages": []})
 
+@app.route("/api/web/history")
+def web_history():
+    """Recuperar historial completo para persistencia (F5)"""
+    try:
+        session_id = request.args.get('session_id', 'web_unknown')
+        
+        # Buscar todos los mensajes de esta sesión ordenados por fecha
+        messages = list(messages_collection.find({
+            "message.chat.id": session_id
+        }).sort("message.date", 1))
+        
+        history = []
+        for m in messages:
+            # Mensaje del usuario
+            if "message" in m and "text" in m["message"]:
+                history.append({
+                    "text": m["message"]["text"],
+                    "from_user": True,
+                    "timestamp": m["message"]["date"]
+                })
+            
+            # Respuesta del bot (si existe)
+            if "ai_response" in m:
+                history.append({
+                    "text": m["ai_response"],
+                    "from_user": False,
+                    "timestamp": m.get("processed_at", 0)
+                })
+                
+        return jsonify({"history": history})
+    except Exception as e:
+        logger.error(f"Error en /api/web/history: {e}")
+        return jsonify({"history": []})
+
 # --- VISTAS ---
 @app.route("/")
 @login_required

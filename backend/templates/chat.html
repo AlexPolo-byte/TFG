@@ -147,6 +147,35 @@
         }
         document.getElementById('in').addEventListener('keypress', e => { if (e.key === 'Enter') s() });
 
+        // Cargar historial al iniciar
+        function loadHistory() {
+            fetch(`/api/web/history?session_id=${sid}`)
+                .then(r => r.json())
+                .then(d => {
+                    if (d.history && d.history.length > 0) {
+                        // Limpiar chat actual (menos el saludo inicial)
+                        const box = document.getElementById('box');
+                        // Mantener solo el primer mensaje (saludo)
+                        const greeting = box.firstElementChild;
+                        box.innerHTML = '';
+                        if (greeting) box.appendChild(greeting);
+
+                        d.history.forEach(msg => {
+                            add(msg.text, msg.from_user);
+                        });
+                        // Actualizar último timestamp para no duplicar en polling
+                        if (d.history.length > 0) {
+                            const lastMsg = d.history[d.history.length - 1];
+                            last = Math.max(last, lastMsg.timestamp);
+                        }
+                    }
+                })
+                .catch(() => { });
+        }
+
+        // Cargar historial y luego iniciar polling
+        loadHistory();
+
         setInterval(() => {
             fetch(`/api/web/poll?session_id=${sid}&last_check=${last}`).then(r => r.json()).then(d => {
                 if (d.messages && d.messages.length > 0) {
