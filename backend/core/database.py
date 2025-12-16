@@ -35,27 +35,27 @@ class Database:
     @property
     def messages(self):
         """Colección de mensajes"""
-        return self._db.messages if self._db else None
+        return self._db.messages if self._db is not None else None
     
     @property
     def users(self):
         """Colección de usuarios"""
-        return self._db.users if self._db else None
+        return self._db.users if self._db is not None else None
     
     @property
     def favorites(self):
         """Colección de favoritos"""
-        return self._db.favorites if self._db else None
+        return self._db.favorites if self._db is not None else None
     
     @property
     def feedback(self):
         """Colección de feedback"""
-        return self._db.feedback if self._db else None
+        return self._db.feedback if self._db is not None else None
     
     @property
     def reminders(self):
         """Colección de recordatorios"""
-        return self._db.reminders if self._db else None
+        return self._db.reminders if self._db is not None else None
 
 # Instancia global
 db = Database()
