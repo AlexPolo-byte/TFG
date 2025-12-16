@@ -137,22 +137,21 @@
     </div>
 
     <script>
-        // Tu lógica JS original
-        let sid = localStorage.getItem('sid'); if (!sid) { sid = 'adm_' + Date.now(); localStorage.setItem('sid', sid); }
-        let username = localStorage.getItem('chat_username');
+        // Generar nueva sesión cada vez que se carga la página
+        let sid = 'web_' + Date.now();
+        let username = null; // No cachear, siempre pedir
         let last = Date.now() / 1000;
 
-        // Comprobar si ya tenemos usuario
-        if (username) {
-            document.getElementById('id-modal').style.display = 'none';
-        }
+        // Siempre mostrar modal al cargar (nueva sesión)
+        document.getElementById('id-modal').style.display = 'flex';
 
         function saveUser() {
             const u = document.getElementById('username-in').value.trim();
             if (u) {
                 username = u;
-                localStorage.setItem('chat_username', username);
                 document.getElementById('id-modal').style.display = 'none';
+                // Cargar historial después de identificarse
+                loadHistory();
             }
         }
 
@@ -204,9 +203,7 @@
                 .catch(() => { });
         }
 
-        // Cargar historial y luego iniciar polling
-        loadHistory();
-
+        // Iniciar polling (el historial se carga después de identificarse)
         setInterval(() => {
             fetch(`/api/web/poll?session_id=${sid}&last_check=${last}`).then(r => r.json()).then(d => {
                 if (d.messages && d.messages.length > 0) {
