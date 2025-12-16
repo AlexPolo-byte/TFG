@@ -225,9 +225,11 @@ def web_send():
             "date": int(time.time())
         }
         
+        
         # Enviar a RabbitMQ
         connection = pika.BlockingConnection(pika.URLParameters(RABBITMQ_URI))
         channel = connection.channel()
+        logger.info(f"📤 Publicando mensaje a cola: {RABBITMQ_QUEUE}")
         channel.queue_declare(queue=RABBITMQ_QUEUE, durable=True)
         channel.basic_publish(
             exchange='',
