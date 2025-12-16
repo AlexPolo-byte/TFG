@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'clave_tfg')
 
 # === CONSTANTES ===
 MAX_CODE_LINES = 500
-CACHE_TTL_SECONDS = 3600  # 1 hora
+CACHE_TTL_SECONDS = 7200  # 2 horas (aumentado para mejor rendimiento)
 MAX_FAVORITES = 50
 MAX_REMINDERS_PER_USER = 10
 

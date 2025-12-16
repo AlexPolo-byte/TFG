@@ -28,8 +28,10 @@ class AIService:
                     available_models.append(m.name)
                     logger.info(f"   👉 Disponible: {m.name}")
             
-            # Seleccionar modelo (preferir flash, luego pro)
-            target = next((m for m in available_models if 'flash' in m), None)
+            # Seleccionar modelo (preferir flash-lite para velocidad, luego flash, luego pro)
+            target = next((m for m in available_models if 'flash-lite' in m), None)
+            if not target:
+                target = next((m for m in available_models if 'flash' in m), None)
             if not target:
                 target = next((m for m in available_models if 'pro' in m), None)
             if not target and available_models:
@@ -42,8 +44,8 @@ class AIService:
                     system_instruction=SIMPLE_PROMPT,
                     generation_config=genai.types.GenerationConfig(
                         candidate_count=1,
-                        max_output_tokens=2048,  # Aumentado de 800 a 2048 para respuestas completas
-                        temperature=0.8,  # Aumentado de 0.7 a 0.8 para más creatividad
+                        max_output_tokens=2048,  # Respuestas completas
+                        temperature=0.7,  # Balance entre creatividad y velocidad
                         top_p=0.95,  # Añadido para mejor diversidad
                         top_k=40,  # Añadido para mejor calidad
                     )
