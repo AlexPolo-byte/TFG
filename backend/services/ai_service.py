@@ -42,8 +42,10 @@ class AIService:
                     system_instruction=SIMPLE_PROMPT,
                     generation_config=genai.types.GenerationConfig(
                         candidate_count=1,
-                        max_output_tokens=800,
-                        temperature=0.7,
+                        max_output_tokens=2048,  # Aumentado de 800 a 2048 para respuestas completas
+                        temperature=0.8,  # Aumentado de 0.7 a 0.8 para más creatividad
+                        top_p=0.95,  # Añadido para mejor diversidad
+                        top_k=40,  # Añadido para mejor calidad
                     )
                 )
             else:
