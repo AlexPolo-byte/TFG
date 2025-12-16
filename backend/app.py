@@ -252,12 +252,16 @@ def web_poll():
         session_id = request.args.get('session_id', 'web_unknown')
         last_check = float(request.args.get('last_check', 0))
         
+        logger.info(f"🔍 Polling: session_id={session_id}, last_check={last_check}")
+        
         # Buscar mensajes nuevos para esta sesión
         messages = list(messages_collection.find({
             "message.chat.id": session_id,
             "processed_at": {"$gt": last_check},
             "ai_response": {"$exists": True}
         }).sort("processed_at", 1).limit(10))
+        
+        logger.info(f"📨 Encontrados {len(messages)} mensajes para session_id={session_id}")
         
         responses = []
         for msg in messages:
