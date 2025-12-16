@@ -28,10 +28,12 @@ class AIService:
                     available_models.append(m.name)
                     logger.info(f"   👉 Disponible: {m.name}")
             
-            # Seleccionar modelo (preferir flash-lite para velocidad, luego flash, luego pro)
-            target = next((m for m in available_models if 'flash-lite' in m), None)
+            # Seleccionar modelo (preferir flash 2.5 o 2.0, evitar lite por cuotas restrictivas)
+            target = next((m for m in available_models if 'gemini-2.5-flash' in m and 'lite' not in m), None)
             if not target:
-                target = next((m for m in available_models if 'flash' in m), None)
+                target = next((m for m in available_models if 'gemini-2.0-flash' in m and 'lite' not in m), None)
+            if not target:
+                target = next((m for m in available_models if 'flash' in m and 'lite' not in m), None)
             if not target:
                 target = next((m for m in available_models if 'pro' in m), None)
             if not target and available_models:
