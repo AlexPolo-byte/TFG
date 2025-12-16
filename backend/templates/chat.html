@@ -121,10 +121,40 @@
         <button onclick="s()"><i class="bi bi-send-fill"></i></button>
     </div>
 
+    <!-- MODAL DE IDENTIFICACIÓN -->
+    <div id="id-modal"
+        style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:9999;">
+        <div
+            style="background:white;padding:30px;border-radius:20px;width:90%;max-width:350px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+            <h2 style="margin-bottom:15px;color:#007AFF;">👋 ¡Hola!</h2>
+            <p style="margin-bottom:20px;color:#666;">Para hablar con Alex, dinos cómo te llamas (para las métricas 😉).
+            </p>
+            <input type="text" id="username-in" placeholder="Tu nombre..."
+                style="width:100%;padding:12px;margin-bottom:20px;border:2px solid #ddd;border-radius:10px;font-size:16px;">
+            <button onclick="saveUser()" style="width:100%;padding:12px;border-radius:10px;font-size:16px;">Entrar al
+                Chat 🚀</button>
+        </div>
+    </div>
+
     <script>
         // Tu lógica JS original
         let sid = localStorage.getItem('sid'); if (!sid) { sid = 'adm_' + Date.now(); localStorage.setItem('sid', sid); }
+        let username = localStorage.getItem('chat_username');
         let last = Date.now() / 1000;
+
+        // Comprobar si ya tenemos usuario
+        if (username) {
+            document.getElementById('id-modal').style.display = 'none';
+        }
+
+        function saveUser() {
+            const u = document.getElementById('username-in').value.trim();
+            if (u) {
+                username = u;
+                localStorage.setItem('chat_username', username);
+                document.getElementById('id-modal').style.display = 'none';
+            }
+        }
 
         function add(t, u) {
             const d = document.createElement('div');
@@ -142,10 +172,11 @@
             fetch('/api/web/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: t, session_id: sid, username: 'Admin' })
+                body: JSON.stringify({ text: t, session_id: sid, username: username || "Anonimo" })
             }).catch(() => { });
         }
         document.getElementById('in').addEventListener('keypress', e => { if (e.key === 'Enter') s() });
+        document.getElementById('username-in').addEventListener('keypress', e => { if (e.key === 'Enter') saveUser() });
 
         // Cargar historial al iniciar
         function loadHistory() {

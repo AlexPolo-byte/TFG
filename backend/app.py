@@ -213,6 +213,7 @@ def web_send():
         data = request.get_json()
         text = data.get('text', '').strip()
         session_id = data.get('session_id', 'web_unknown')
+        username = data.get('username', 'Web User') # Capuramos nombre de usuario
         
         if not text:
             return jsonify({"error": "Mensaje vacío"}), 400
@@ -220,7 +221,7 @@ def web_send():
         # Crear mensaje simulado de Telegram
         message = {
             "message_id": int(time.time() * 1000),
-            "chat": {"id": session_id, "first_name": "Web User"},
+            "chat": {"id": session_id, "first_name": username}, # Usamos el nombre real
             "text": text,
             "date": int(time.time())
         }
