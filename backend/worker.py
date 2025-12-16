@@ -149,9 +149,20 @@ def process_message(ch, method, properties, body):
                         raw = ai.generate_response(prompt, mode)
                         
                         if raw:
-                            # Usar respuesta directamente (sin procesar etiquetas de sentimiento)
-                            response_text = raw.strip()
-                            sentiment = "NEUTRO"  # Valor por defecto
+                            # Analizar sentimiento para métricas (pero no mostrar al usuario)
+                            if "[POSITIVO]" in raw:
+                                sentiment = "POSITIVO"
+                                response_text = raw.replace("[POSITIVO]", "").strip()
+                            elif "[NEGATIVO]" in raw:
+                                sentiment = "NEGATIVO"
+                                response_text = raw.replace("[NEGATIVO]", "").strip()
+                            elif "[NEUTRO]" in raw:
+                                sentiment = "NEUTRO"
+                                response_text = raw.replace("[NEUTRO]", "").strip()
+                            else:
+                                # Si no hay etiqueta, asumimos neutro
+                                sentiment = "NEUTRO"
+                                response_text = raw.strip()
                             
                             # Guardar en caché
                             cache.set(cache_key, {'text': response_text, 'sentiment': sentiment})
@@ -186,8 +197,9 @@ def process_message(ch, method, properties, body):
                             sentiment = "NEUTRO"
                             response_text = raw.replace("[NEUTRO]", "").strip()
                         else:
-                            response_text = raw.strip()
+                            # Si no hay etiqueta, asumimos neutro
                             sentiment = "NEUTRO"
+                            response_text = raw.strip()
                     else:
                         response_text = "Error descargando imagen."
                 except Exception as e:
