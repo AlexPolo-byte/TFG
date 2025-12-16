@@ -6,30 +6,38 @@
         <p class="page-subtitle">Base de datos de interacciones</p>
     </div>
     <div style="position: relative;">
-        <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
-        <input type="text" id="userSearch" placeholder="Buscar usuario..." style="padding: 10px 10px 10px 36px; border: 1px solid var(--border); border-radius: 10px; outline: none; width: 200px; font-family: inherit;">
+        <i class="bi bi-search"
+            style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+        <input type="text" id="userSearch" placeholder="Buscar usuario..."
+            style="padding: 10px 10px 10px 36px; border: 1px solid var(--border); border-radius: 10px; outline: none; width: 200px; font-family: inherit;">
     </div>
 </div>
 
 <div class="card-std" style="padding: 0; overflow: hidden;" id="usersContainer">
     {% for user in users %}
-    <div class="user-row" data-name="{{ user.first_name }}" style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; transition: background 0.2s;">
+    <div class="user-row" data-name="{{ user.first_name or 'Anónimo' }}"
+        style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; transition: background 0.2s;">
         <div style="display: flex; align-items: center; gap: 15px;">
-            <div style="width: 40px; height: 40px; background: #E4F2FF; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600;">
-                {{ user.first_name[:1] }}
+            <div
+                style="width: 40px; height: 40px; background: #E4F2FF; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                {{ (user.first_name or 'A')[:1] }}
             </div>
             <div>
-                <div style="font-weight: 600; font-size: 1rem;">{{ user.first_name }}</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">ID: {{ user._id }} &bull; {{ user.last_msg_date | human_time }}</div>
+                <div style="font-weight: 600; font-size: 1rem;">{{ user.first_name or 'Anónimo' }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">ID: {{ user._id }} &bull; {{
+                    user.last_msg_date | human_time }}</div>
             </div>
         </div>
-        
+
         <div style="display: flex; align-items: center; gap: 10px;">
-            <span class="badge-soft" style="background: #F2F2F7; color: var(--text-muted);">{{ user.msg_count }} msgs</span>
-            <a href="/user/{{ user._id }}" class="btn btn-sm" style="text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--bg-body); color: var(--primary);">
+            <span class="badge-soft" style="background: #F2F2F7; color: var(--text-muted);">{{ user.msg_count }}
+                msgs</span>
+            <a href="/user/{{ user._id }}" class="btn btn-sm"
+                style="text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--bg-body); color: var(--primary);">
                 <i class="bi bi-chat-dots-fill"></i>
             </a>
-            <a href="/user/{{ user._id }}/gallery" class="btn btn-sm" style="text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #FFF4E5; color: #FF9500;">
+            <a href="/user/{{ user._id }}/gallery" class="btn btn-sm"
+                style="text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #FFF4E5; color: #FF9500;">
                 <i class="bi bi-images"></i>
             </a>
         </div>
@@ -38,7 +46,7 @@
 </div>
 
 <script>
-    document.getElementById('userSearch').addEventListener('keyup', function() {
+    document.getElementById('userSearch').addEventListener('keyup', function () {
         let filter = this.value.toUpperCase();
         document.querySelectorAll('.user-row').forEach(row => {
             let name = row.getAttribute('data-name').toUpperCase();
