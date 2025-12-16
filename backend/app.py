@@ -208,6 +208,7 @@ def api_logs():
 @app.route("/api/web/send", methods=['POST'])
 def web_send():
     """Envía mensaje desde el chat público"""
+    connection = None
     try:
         data = request.get_json()
         text = data.get('text', '').strip()
@@ -226,19 +227,21 @@ def web_send():
         
         # Enviar a RabbitMQ
         connection = pika.BlockingConnection(pika.URLParameters(RABBITMQ_URI))
-        ch = connection.channel()
-        ch.queue_declare(queue=RABBITMQ_QUEUE, durable=True)
-        ch.basic_publish(
+        channel = connection.channel()
+        channel.queue_declare(queue=RABBITMQ_QUEUE, durable=True)
+        channel.basic_publish(
             exchange='',
             routing_key=RABBITMQ_QUEUE,
             body=json.dumps({"message": message, "source": "web"})
         )
-        connection.close()
         
         return jsonify({"status": "sent", "message_id": message["message_id"]})
     except Exception as e:
         logger.error(f"Error en /api/web/send: {e}")
         return jsonify({"error": str(e)}), 500
+    finally:
+        if connection and not connection.is_closed:
+            connection.close()
 
 @app.route("/api/web/poll")
 def web_poll():
