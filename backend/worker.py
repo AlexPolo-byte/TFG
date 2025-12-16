@@ -208,9 +208,11 @@ def process_message(ch, method, properties, body):
             response_text = "Solo entiendo texto y fotos por ahora."
         
         # Guardar en MongoDB
+        logger.info(f"💾 Guardando respuesta para chat_id={chat_id}, message_id={message_id}")
         db.messages.update_one(
             {"message.message_id": message_id},
             {"$set": {
+                "message": message,  # Guardar el mensaje completo para que el polling lo encuentre
                 "status": "procesado_ia",
                 "processed_at": time.time(),
                 "ai_response": response_text,
