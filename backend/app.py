@@ -49,6 +49,14 @@ except Exception as e:
     logger.error("💡 Verifica que MONGO_URI en .env sea correcto")
     sys.exit(1)
 
+# Initialize Docker client for logs
+try:
+    docker_client = docker.from_env()
+    logger.info("✅ Docker client conectado")
+except Exception as e:
+    logger.warning(f"⚠️ Docker client no disponible: {e}")
+    docker_client = None
+
 class RabbitMQClient:
     def __init__(self): self.conn = None; self.ch = None; self._conn()
     def _conn(self):
@@ -199,15 +207,20 @@ def api_sentiment_timeline():
 @login_required
 def api_logs():
     container = request.args.get('container', 'backend_telegram')
+    
+    if not docker_client:
+        return jsonify({"logs": "⚠️ Docker client no disponible. Sistema ejecutándose fuera de Docker."})
+    
     try:
         c = docker_client.containers.get(container)
         logs = c.logs(tail=100).decode('utf-8', errors='ignore')
         return jsonify({"logs": logs})
     except docker.errors.NotFound:
         logger.warning(f"⚠️ Contenedor '{container}' no encontrado")
-        return jsonify({"logs": f"Contenedor '{container}' no encontrado"})
+        return jsonify({"logs": f"❌ Contenedor '{container}' no encontrado. Disponibles: backend_telegram, worker, ngrok_tunnel"})
     except Exception as e:
-        return jsonify({"logs": f"Error: {str(e)}"})
+        logger.error(f"❌ Error obteniendo logs: {e}")
+        return jsonify({"logs": f"❌ Error: {str(e)}"})
 
 # === WEB CHAT APIs (público) ===
 @app.route("/api/web/send", methods=['POST'])

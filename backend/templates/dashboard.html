@@ -1,39 +1,46 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4 fade-in" style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center;">
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in"
+    style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center;">
     <div>
         <h1 style="font-size: 1.5rem; font-weight: 700; margin: 0;">Dashboard</h1>
         <p style="color: #86868B; font-size: 0.9rem; margin: 0;">Sistema Central &bull; Madrid Node</p>
     </div>
     <div style="text-align: right;">
         <span style="font-size: 0.7rem; color: #86868B; display: block; margin-bottom: 4px;">ÚLTIMO SYNC</span>
-        <span class="badge-soft" style="background: #E5E5EA; color: var(--text-main); font-family: monospace;" id="last-update">Conectando...</span>
+        <span class="badge-soft" style="background: #E5E5EA; color: var(--text-main); font-family: monospace;"
+            id="last-update">Conectando...</span>
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 24px;" class="fade-in">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 24px;"
+    class="fade-in">
     <a href="https://cloud.mongodb.com" target="_blank" style="text-decoration: none;">
-        <div class="card-std" style="padding: 15px; display: flex; align-items: center; gap: 10px; transition: transform 0.2s;">
+        <div class="card-std"
+            style="padding: 15px; display: flex; align-items: center; gap: 10px; transition: transform 0.2s;">
             <i class="bi bi-database-fill" style="color: #00ED64; font-size: 1.2rem;"></i>
             <span style="color: #1D1D1F; font-weight: 600; font-size: 0.9rem;">MongoDB</span>
         </div>
     </a>
     <a href="https://customer.cloudamqp.com" target="_blank" style="text-decoration: none;">
-        <div class="card-std" style="padding: 15px; display: flex; align-items: center; gap: 10px; transition: transform 0.2s;">
+        <div class="card-std"
+            style="padding: 15px; display: flex; align-items: center; gap: 10px; transition: transform 0.2s;">
             <i class="bi bi-envelope-fill" style="color: #FF6600; font-size: 1.2rem;"></i>
             <span style="color: #1D1D1F; font-weight: 600; font-size: 0.9rem;">RabbitMQ</span>
         </div>
     </a>
     <a href="http://192.168.1.150:3000" target="_blank" style="text-decoration: none;">
-        <div class="card-std" style="padding: 15px; display: flex; align-items: center; gap: 10px; transition: transform 0.2s;">
+        <div class="card-std"
+            style="padding: 15px; display: flex; align-items: center; gap: 10px; transition: transform 0.2s;">
             <i class="bi bi-graph-up-arrow" style="color: #F46800; font-size: 1.2rem;"></i>
             <span style="color: #1D1D1F; font-weight: 600; font-size: 0.9rem;">Grafana</span>
         </div>
     </a>
 </div>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 24px;">
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 24px;">
     <div class="card-std">
         <div style="display: flex; justify-content: space-between; align-items: start;">
             <span style="color: #86868B; font-size: 0.8rem; font-weight: 700;">PROCESADOS</span>
@@ -41,7 +48,7 @@
         </div>
         <div style="font-size: 1.8rem; font-weight: 700; margin-top: 10px;" id="counter-total">0</div>
     </div>
-    
+
     <div class="card-std">
         <div style="display: flex; justify-content: space-between; align-items: start;">
             <span style="color: #86868B; font-size: 0.8rem; font-weight: 700;">HOY (24H)</span>
@@ -49,17 +56,20 @@
         </div>
         <div style="font-size: 1.8rem; font-weight: 700; margin-top: 10px;" id="counter-today">0</div>
     </div>
-    
+
     <div class="card-std">
         <div style="display: flex; justify-content: space-between; align-items: start;">
             <span style="color: #86868B; font-size: 0.8rem; font-weight: 700;">CPU RPI 4</span>
             <i class="bi bi-motherboard" style="color: #FF9500;"></i>
         </div>
         <div style="display: flex; align-items: baseline; gap: 5px; margin-top: 10px;">
-            <div style="font-size: 1.8rem; font-weight: 700;" id="cpu-val">0</div><span style="font-size: 1rem;">%</span>
+            <div style="font-size: 1.8rem; font-weight: 700;" id="cpu-val">0</div><span
+                style="font-size: 1rem;">%</span>
         </div>
-        <div style="width: 100%; height: 6px; background: #E5E5EA; border-radius: 3px; margin-top: 8px; overflow: hidden;">
-            <div id="cpu-bar" style="width: 0%; height: 100%; background: #FF9500; transition: width 0.5s; border-radius: 3px;"></div>
+        <div
+            style="width: 100%; height: 6px; background: #E5E5EA; border-radius: 3px; margin-top: 8px; overflow: hidden;">
+            <div id="cpu-bar"
+                style="width: 0%; height: 100%; background: #FF9500; transition: width 0.5s; border-radius: 3px;"></div>
         </div>
     </div>
 
@@ -72,7 +82,8 @@
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px;">
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px;">
     <div class="card-std">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 style="font-size: 1rem; font-weight: 600; margin: 0;">Flujo de Actividad</h3>
@@ -90,68 +101,88 @@
         </div>
         <div style="height: 180px; width: 100%; position: relative;">
             <canvas id="sentimentChart"></canvas>
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
+            <div
+                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
                 <div style="font-weight: 700; font-size: 1.5rem; color: var(--text-main);">AI</div>
                 <div style="font-size: 0.6rem; color: var(--text-muted);">CORE</div>
             </div>
         </div>
         <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px; font-size: 0.8rem;">
-            <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #34C759;"></span> Positivo</span>
-            <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #E5E5EA;"></span> Neutro</span>
-            <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #FF3B30;"></span> Negativo</span>
+            <span style="display: flex; align-items: center; gap: 5px;"><span
+                    style="width: 8px; height: 8px; border-radius: 50%; background: #34C759;"></span> Positivo</span>
+            <span style="display: flex; align-items: center; gap: 5px;"><span
+                    style="width: 8px; height: 8px; border-radius: 50%; background: #E5E5EA;"></span> Neutro</span>
+            <span style="display: flex; align-items: center; gap: 5px;"><span
+                    style="width: 8px; height: 8px; border-radius: 50%; background: #FF3B30;"></span> Negativo</span>
         </div>
     </div>
 </div>
 
 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; width: 100%;">
-    
-    <div class="card-std" style="padding: 0; overflow: hidden; height: 400px; display: flex; flex-direction: column; grid-column: span 2;"> <div style="padding: 15px 20px; border-bottom: 1px solid var(--border); background: #fafafa; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin: 0;">INTERACCIONES RECIENTES</h3>
+
+    <div class="card-std"
+        style="padding: 0; overflow: hidden; height: 400px; display: flex; flex-direction: column; grid-column: span 2;">
+        <div
+            style="padding: 15px 20px; border-bottom: 1px solid var(--border); background: #fafafa; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin: 0;">INTERACCIONES
+                RECIENTES</h3>
             <i class="bi bi-arrow-repeat" style="color: var(--text-muted);"></i>
-         </div>
-         <div style="overflow-x: auto; flex: 1;">
-             <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
-                 <thead>
-                     <tr style="text-align: left; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
-                         <th style="padding: 15px 20px; font-weight: 600;">Hora</th>
-                         <th style="padding: 15px 20px; font-weight: 600;">Usuario</th>
-                         <th style="padding: 15px 20px; font-weight: 600;">Mensaje</th>
-                         <th style="padding: 15px 20px; font-weight: 600; text-align: center;">IA Mood</th>
-                         <th style="padding: 15px 20px; font-weight: 600; text-align: right;">Estado</th>
-                     </tr>
-                 </thead>
-                 <tbody id="messages-body">
-                     <tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">Cargando feed...</td></tr>
-                 </tbody>
-             </table>
-         </div>
+        </div>
+        <div style="overflow-x: auto; flex: 1;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr
+                        style="text-align: left; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+                        <th style="padding: 15px 20px; font-weight: 600;">Hora</th>
+                        <th style="padding: 15px 20px; font-weight: 600;">Usuario</th>
+                        <th style="padding: 15px 20px; font-weight: 600;">Mensaje</th>
+                        <th style="padding: 15px 20px; font-weight: 600; text-align: center;">IA Mood</th>
+                        <th style="padding: 15px 20px; font-weight: 600; text-align: right;">Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="messages-body">
+                    <tr>
+                        <td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">Cargando
+                            feed...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="card-std" style="padding: 0; height: 400px; display: flex; flex-direction: column; grid-column: span 2;">
-        
+    <div class="card-std"
+        style="padding: 0; height: 400px; display: flex; flex-direction: column; grid-column: span 2;">
+
         <div style="padding: 15px; border-bottom: 1px solid var(--border);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <h3 style="font-size: 0.9rem; font-weight: 600; margin: 0;">SYSTEM LOGS</h3>
-                <i class="bi bi-arrow-clockwise" id="refresh-logs" style="cursor: pointer; color: var(--primary);" onclick="fetchLogs()"></i>
+                <i class="bi bi-arrow-clockwise" id="refresh-logs" style="cursor: pointer; color: var(--primary);"
+                    onclick="fetchLogs()"></i>
             </div>
-            
+
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <select id="log-selector" style="flex: 1; padding: 6px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; background: #fff; outline: none;">
+                <select id="log-selector"
+                    style="flex: 1; padding: 6px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; background: #fff; outline: none;">
                     <option value="worker">CONTAINER: WORKER</option>
                     <option value="backend_telegram">CONTAINER: BACKEND</option>
                     <option value="cloudflare_tunnel">CONTAINER: NETWORK</option>
                 </select>
-                
+
                 <div style="display: flex; gap: 4px;">
-                    <button onclick="setFilter('ALL', this)" class="badge-soft active-filter" style="border: 1px solid var(--border); cursor: pointer; background: #1C1C1E; color: white;">ALL</button>
-                    <button onclick="setFilter('INFO', this)" class="badge-soft" style="border: 1px solid var(--border); cursor: pointer; background: white;">INFO</button>
-                    <button onclick="setFilter('WARN', this)" class="badge-soft" style="border: 1px solid var(--border); cursor: pointer; background: white;">WARN</button>
-                    <button onclick="setFilter('ERROR', this)" class="badge-soft" style="border: 1px solid var(--border); cursor: pointer; background: white;">ERR</button>
+                    <button onclick="setFilter('ALL', this)" class="badge-soft active-filter"
+                        style="border: 1px solid var(--border); cursor: pointer; background: #1C1C1E; color: white;">ALL</button>
+                    <button onclick="setFilter('INFO', this)" class="badge-soft"
+                        style="border: 1px solid var(--border); cursor: pointer; background: white;">INFO</button>
+                    <button onclick="setFilter('WARN', this)" class="badge-soft"
+                        style="border: 1px solid var(--border); cursor: pointer; background: white;">WARN</button>
+                    <button onclick="setFilter('ERROR', this)" class="badge-soft"
+                        style="border: 1px solid var(--border); cursor: pointer; background: white;">ERR</button>
                 </div>
             </div>
         </div>
 
-        <div id="logs-container" style="flex: 1; overflow-y: auto; background: #1C1C1E; color: #E5E5EA; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.75rem; line-height: 1.5;">
+        <div id="logs-container"
+            style="flex: 1; overflow-y: auto; background: #1C1C1E; color: #E5E5EA; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.75rem; line-height: 1.5;">
             <div style="text-align: center; color: #636366; margin-top: 50px;">Conectando a Docker Socket...</div>
         </div>
     </div>
@@ -167,7 +198,7 @@
     // Activity Line Chart
     const ctxLine = document.getElementById('activityChart').getContext('2d');
     let gradientLine = ctxLine.createLinearGradient(0, 0, 0, 300);
-    gradientLine.addColorStop(0, 'rgba(0, 122, 255, 0.2)'); 
+    gradientLine.addColorStop(0, 'rgba(0, 122, 255, 0.2)');
     gradientLine.addColorStop(1, 'rgba(0, 122, 255, 0.0)');
 
     const activityChart = new Chart(ctxLine, {
@@ -184,7 +215,7 @@
             labels: ['Positivo', 'Neutro', 'Negativo'],
             datasets: [{
                 data: [0, 0, 0],
-                backgroundColor: ['#34C759', '#E5E5EA', '#FF3B30'], 
+                backgroundColor: ['#34C759', '#E5E5EA', '#FF3B30'],
                 borderWidth: 0,
                 hoverOffset: 4
             }]
@@ -225,7 +256,7 @@
                     let statusBadge = `<span class="badge-soft" style="background:#E5E5EA; color:#8E8E93">${msg.status}</span>`;
                     if (msg.status === 'procesado_ia') statusBadge = '<span class="badge-soft" style="background:#D1FAE5; color:#059669">Completado</span>';
 
-                    let textDisplay = msg.type === 'photo' ? '<span style="color:#FF9500"><i class="bi bi-camera-fill"></i> Imagen</span>' : `<span style="color:#1C1C1E">${msg.text.substring(0, 40)}${msg.text.length>40?'...':''}</span>`;
+                    let textDisplay = msg.type === 'photo' ? '<span style="color:#FF9500"><i class="bi bi-camera-fill"></i> Imagen</span>' : `<span style="color:#1C1C1E">${msg.text.substring(0, 40)}${msg.text.length > 40 ? '...' : ''}</span>`;
 
                     tbody.innerHTML += `
                         <tr style="border-bottom: 1px solid #F2F2F7;">
@@ -237,7 +268,7 @@
                         </tr>`;
                 });
             } else {
-               tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">Sin datos recientes</td></tr>'; 
+                tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">Sin datos recientes</td></tr>';
             }
         }).catch(e => console.error(e));
     }
@@ -253,8 +284,47 @@
         icon.style.transform = 'rotate(180deg)';
         setTimeout(() => icon.style.transform = 'rotate(0deg)', 500);
 
-        fetch(`/api/logs?container=${container}`).then(r => r.json()).then(logs => {
-            allLogs = logs;
+        fetch(`/api/logs?container=${container}`).then(r => r.json()).then(data => {
+            const logsText = data.logs || '';
+
+            // Si es un mensaje de error, mostrarlo directamente
+            if (logsText.startsWith('⚠️') || logsText.startsWith('❌')) {
+                allLogs = [{
+                    time: new Date().toLocaleTimeString(),
+                    level: 'WARN',
+                    msg: logsText
+                }];
+                renderLogs();
+                return;
+            }
+
+            // Parsear logs línea por línea
+            const lines = logsText.split('\n').filter(line => line.trim());
+            allLogs = lines.map(line => {
+                // Intentar extraer timestamp, level y mensaje
+                const timestamp = new Date().toLocaleTimeString();
+                let level = 'INFO';
+                let msg = line;
+
+                // Detectar nivel de log
+                if (line.includes('ERROR') || line.includes('❌')) {
+                    level = 'ERROR';
+                } else if (line.includes('WARNING') || line.includes('WARN') || line.includes('⚠️')) {
+                    level = 'WARN';
+                } else if (line.includes('INFO') || line.includes('✅') || line.includes('🔌')) {
+                    level = 'INFO';
+                }
+
+                return { time: timestamp, level: level, msg: msg };
+            });
+
+            renderLogs();
+        }).catch(err => {
+            allLogs = [{
+                time: new Date().toLocaleTimeString(),
+                level: 'ERROR',
+                msg: `Error fetching logs: ${err.message}`
+            }];
             renderLogs();
         });
     }
@@ -263,7 +333,7 @@
         currentFilter = filter;
         // Reset estilos botones
         document.querySelectorAll('button[onclick^="setFilter"]').forEach(b => {
-             b.style.background = 'white'; b.style.color = '#1C1C1E';
+            b.style.background = 'white'; b.style.color = '#1C1C1E';
         });
         // Activar botón pulsado
         btn.style.background = '#1C1C1E'; btn.style.color = 'white';
@@ -278,7 +348,7 @@
         if (filtered.length === 0) { div.innerHTML = '<div style="opacity:0.5; text-align:center; margin-top:20px;">Sin registros</div>'; return; }
 
         filtered.forEach(log => {
-            let color = '#E5E5EA'; 
+            let color = '#E5E5EA';
             if (log.level === 'ERROR') color = '#FF453A'; // Rojo Apple
             if (log.level === 'WARN') color = '#FF9F0A';  // Naranja Apple
             if (log.level === 'INFO') color = '#30D158';  // Verde Apple
@@ -295,7 +365,7 @@
     document.getElementById('log-selector').addEventListener('change', fetchLogs);
     setInterval(updateStats, 3000);
     setInterval(fetchLogs, 5000);
-    
+
     // Iniciar
     updateStats();
     fetchLogs();
