@@ -182,7 +182,10 @@
             document.getElementById('in').value = '';
             fetch('/api/web/send', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'ngrok-skip-browser-warning': 'true'
+                },
                 body: JSON.stringify({ text: t, session_id: sid, username: username || "Anonimo" })
             }).catch(() => { });
         }
@@ -191,8 +194,9 @@
 
         // Cargar historial al iniciar
         function loadHistory() {
-            fetch(`/api/web/history?session_id=${sid}`)
-                .then(r => r.json())
+            fetch(`/api/web/history?session_id=${sid}`, {
+                headers: { 'ngrok-skip-browser-warning': 'true' }
+            }).then(r => r.json())
                 .then(d => {
                     if (d.history && d.history.length > 0) {
                         // Limpiar chat actual (menos el saludo inicial)
@@ -217,7 +221,9 @@
 
         // Iniciar polling (el historial se carga después de identificarse)
         setInterval(() => {
-            fetch(`/api/web/poll?session_id=${sid}&last_check=${last}`).then(r => r.json()).then(d => {
+            fetch(`/api/web/poll?session_id=${sid}&last_check=${last}`, {
+                headers: { 'ngrok-skip-browser-warning': 'true' }
+            }).then(r => r.json()).then(d => {
                 if (d.messages && d.messages.length > 0) {
                     d.messages.forEach(u => { add(u.text, false); last = Math.max(last, u.timestamp); });
                 }

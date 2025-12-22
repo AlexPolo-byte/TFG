@@ -225,7 +225,9 @@
 
     // --- 2. LÓGICA DE ACTUALIZACIÓN (AJAX) ---
     function updateStats() {
-        fetch('/api/stats').then(r => r.json()).then(data => {
+        fetch('/api/stats', {
+            headers: { 'ngrok-skip-browser-warning': 'true' }
+        }).then(r => r.json()).then(data => {
             // Stats básicas
             document.getElementById('counter-total').innerText = data.total;
             document.getElementById('counter-today').innerText = data.today;
@@ -284,7 +286,9 @@
         icon.style.transform = 'rotate(180deg)';
         setTimeout(() => icon.style.transform = 'rotate(0deg)', 500);
 
-        fetch(`/api/logs?container=${container}`).then(r => r.json()).then(data => {
+        fetch(`/api/logs?container=${container}`, {
+            headers: { 'ngrok-skip-browser-warning': 'true' }
+        }).then(r => r.json()).then(data => {
             const logsText = data.logs || '';
 
             // Si es un mensaje de error, mostrarlo directamente
