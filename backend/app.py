@@ -391,7 +391,7 @@ def errors_list():
     errs = list(messages_collection.find({"status": "error"}).sort("timestamp", -1).limit(50))
     return render_template("errors.html", errors=errs)
 
-@app.route("/public/terminal")
+@app.route("/chat")
 def public_terminal():
     """Ruta pública para chat sin login"""
     return render_template("chat.html")

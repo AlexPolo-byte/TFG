@@ -53,7 +53,7 @@ if echo "$RESPONSE" | grep -q '"ok":true'; then
     echo ""
     echo "🎉 ¡ÉXITO! Sistema 100% Operativo."
     echo "🔐 Admin Dashboard: $TUNNEL_URL (Login: admin/tfg2025)"
-    echo "💬 Chat Público:    $TUNNEL_URL/public/terminal"
+    echo "💬 Chat Público:    $TUNNEL_URL/chat"
     echo "🌐 ngrok UI:        http://localhost:4040"
     echo ""
 else
