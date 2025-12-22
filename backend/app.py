@@ -78,6 +78,12 @@ class RabbitMQClient:
         return False
 mq_client = RabbitMQClient()
 
+# Add ngrok header to all responses to skip browser warning
+@app.after_request
+def add_ngrok_header(response):
+    response.headers['ngrok-skip-browser-warning'] = 'true'
+    return response
+
 @app.template_filter('human_time')
 def human_time(ts):
     if not ts: return ""
