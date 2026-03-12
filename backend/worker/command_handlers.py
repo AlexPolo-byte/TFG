@@ -5,7 +5,6 @@ Cada comando tiene su propio handler limpio
 from features.user_management import user_manager
 from features.favorites import favorites_manager
 from features.code_generator import code_generator
-from features.reminders import reminder_manager
 from features.input_validator import input_validator
 from features.rate_limiter import rate_limiter
 from core.database import db
@@ -24,7 +23,6 @@ class CommandHandlers:
         response += "/favoritos - Ver guardados\n"
         response += "/guardar - Guardar respuesta\n"
         response += "/codigo - Generar código\n"
-        response += "/recordar - Crear recordatorio\n"
         response += "/stats - Estadísticas\n"
         response += "/help - Ayuda completa"
         return response, "POSITIVO"
@@ -38,7 +36,6 @@ class CommandHandlers:
         response += "/favoritos - Ver guardados\n"
         response += "/guardar - Guardar última respuesta\n"
         response += "/codigo <desc> - Generar código\n"
-        response += "/recordar en X minutos <msg> - Recordatorio\n"
         response += "/stats - Estadísticas\n\n"
         response += "💡 Envíame fotos para análisis avanzado"
         return response, "NEUTRO"
@@ -132,34 +129,6 @@ class CommandHandlers:
             return error, "NEGATIVO"
         return f"💻 CÓDIGO GENERADO:\n\n{code}", "POSITIVO"
     
-    @staticmethod
-    def handle_reminder(chat_id, text):
-        """Comando /recordar"""
-        # Rate limiting: 5 recordatorios por día
-        allowed, remaining, retry_after = rate_limiter.check_command_limit(chat_id, 'recordar', limit=5, window=86400)
-        if not allowed:
-            return f"⏱️ Límite diario alcanzado. Espera {retry_after//3600} horas.", "NEGATIVO"
-        
-        import re
-        delay = reminder_manager.parse_time(text)
-        if not delay:
-            return "Formato: /recordar en X minutos <mensaje>", "NEUTRO"
-        
-        # Extraer mensaje
-        reminder_text = re.sub(
-            r'en\s+\d+\s+(minuto|minutos|hora|horas|día|días)\s*',
-            '',
-            text.replace('/recordar', ''),
-            flags=re.IGNORECASE
-        ).strip()
-        
-        if not reminder_text:
-            return "Falta el mensaje.\nEjemplo: /recordar en 5 minutos revisar código", "NEUTRO"
-        
-        run_time, error = reminder_manager.create(chat_id, reminder_text, delay)
-        if error:
-            return error, "NEGATIVO"
-        return f"⏰ Recordatorio para {run_time.strftime('%H:%M:%S')}", "POSITIVO"
 
 # Instancia global
 commands = CommandHandlers()

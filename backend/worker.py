@@ -126,8 +126,6 @@ def process_message(ch, method, properties, body):
                 response_text, sentiment = commands.handle_save_favorite(chat_id)
             elif user_text.startswith("/codigo"):
                 response_text, sentiment = commands.handle_code(chat_id, user_text)
-            elif user_text.startswith("/recordar"):
-                response_text, sentiment = commands.handle_reminder(chat_id, user_text)
             
             # Pregunta normal a la IA
             elif ai.model:
