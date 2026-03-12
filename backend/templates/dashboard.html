@@ -347,7 +347,7 @@
     function renderLogs() {
         const div = document.getElementById('logs-container');
         div.innerHTML = "";
-        const filtered = allLogs.filter(log => currentFilter === 'ALL' || log.level === currentFilter);
+        const filtered = allLogs.filter(log => currentFilter === 'ALL' || log.level === currentFilter).reverse();
 
         if (filtered.length === 0) { div.innerHTML = '<div style="opacity:0.5; text-align:center; margin-top:20px;">Sin registros</div>'; return; }
 
