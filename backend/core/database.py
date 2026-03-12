@@ -52,10 +52,6 @@ class Database:
         """Colección de feedback"""
         return self._db.feedback if self._db is not None else None
     
-    @property
-    def reminders(self):
-        """Colección de recordatorios"""
-        return self._db.reminders if self._db is not None else None
 
 # Instancia global
 db = Database()

@@ -1,5 +1,4 @@
 Flask==3.0.0
-flask-cors==4.0.0
 flask-login==0.6.3
 google-generativeai>=0.8.3
 Pillow==10.1.0
@@ -14,7 +13,3 @@ docker==7.0.0
 redis==5.0.1
 pytest==7.4.3
 pytest-mock==3.12.0
-gTTS==2.5.0
-python-telegram-bot==20.7
-wordcloud==1.9.3
-matplotlib==3.8.2
