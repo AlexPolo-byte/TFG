@@ -388,7 +388,13 @@ def user_gallery(chat_id):
 @app.route("/errors")
 @login_required
 def errors_list():
-    errs = list(messages_collection.find({"status": "error"}).sort("timestamp", -1).limit(50))
+    # Busca mensajes cuyo status NO es el éxito, o cuya respuesta de IA indica error
+    errs = list(messages_collection.find({
+        "$or": [
+            {"status": {"$nin": ["procesado_ia", "procesado_cloud", None]}},
+            {"ai_response": {"$regex": "^(Error|Estoy saturado|IA no disponible)", "$options": "i"}}
+        ]
+    }).sort("processed_at", -1).limit(50))
     return render_template("errors.html", errors=errs)
 
 @app.route("/chat")

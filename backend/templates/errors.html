@@ -7,14 +7,28 @@
 {% for err in errors %}
 <div class="card-std" style="margin-bottom: 16px; border-left: 4px solid #FF3B30; padding: 20px;">
     <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-        <span style="font-weight: 600; color: #FF3B30;">{{ err.status }}</span>
-        <span style="font-size: 0.8rem; color: var(--text-muted);">{{ err.message.date | human_time }}</span>
+        <span style="font-weight: 600; color: #FF3B30;">{{ err.status | default('sin-status') }}</span>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">
+            {{ err.get('processed_at') or err.get('message', {}).get('date') | human_time }}
+        </span>
     </div>
-    
+
     <div style="margin-bottom: 10px;">
-        <span style="font-weight: 600;">{{ err.message.chat.first_name }}</span>: 
-        <span style="color: var(--text-muted);">"{{ err.message.text }}"</span>
+        <span style="font-weight: 600;">
+            {{ err.get('message', {}).get('chat', {}).get('first_name', 'Anónimo') }}
+        </span>:
+        {% if err.get('type') == 'photo' %}
+            <span style="color: #FF9500;"><i class="bi bi-camera-fill"></i> [Imagen]</span>
+        {% else %}
+            <span style="color: var(--text-muted);">"{{ err.get('message', {}).get('text', '—') }}"</span>
+        {% endif %}
     </div>
+
+    {% if err.get('ai_response') %}
+    <div style="background: #FFF1F0; border: 1px solid #FECACA; padding: 10px; border-radius: 8px; font-size: 0.8rem; color: #991B1B; margin-bottom: 10px;">
+        <strong>Respuesta IA:</strong> {{ err.ai_response }}
+    </div>
+    {% endif %}
 
     <div style="background: #F2F2F7; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 0.75rem; color: var(--text-main); overflow-x: auto;">
         {{ err | tojson(indent=2) }}
