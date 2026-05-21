@@ -17,7 +17,6 @@ from prometheus_client import Counter, Histogram, start_http_server
 from PIL import Image
 import io
 
-# Imports de la nueva estructura
 from config.settings import (
     RABBITMQ_URI, QUEUE_NAME, WORKER_EXPORTER_PORT,
     validate_config, logger
@@ -34,12 +33,10 @@ from features.rate_limiter import rate_limiter
 from handlers.command_handlers import CommandHandlers
 commands = CommandHandlers()
 
-# Métricas
 MESSAGES_PROCESSED = Counter('worker_messages_total', 'Mensajes procesados', ['type'])
 PROCESSING_TIME = Histogram('worker_processing_seconds', 'Tiempo de proceso')
 
 def get_chat_context(chat_id, limit=5):
-    """Obtiene contexto de conversación"""
     try:
         cursor = db.messages.find(
             {"message.chat.id": chat_id, "type": "text", "status": "procesado_ia"},
@@ -58,7 +55,7 @@ def get_chat_context(chat_id, limit=5):
         return ""
 
 def process_message(ch, method, properties, body):
-    """Procesa un mensaje de la cola"""
+    # TODO: Refactorizar esto algun dia, esta cogiendo demasiado tamaño
     start = time.time()
     
     try:
@@ -73,10 +70,9 @@ def process_message(ch, method, properties, body):
             ch.basic_ack(delivery_tag=method.delivery_tag)
             return
         
-        # Obtener/crear usuario
         user = user_manager.get_or_create(chat_id, first_name)
         
-        # === RATE LIMITING ===
+        # limitador cutre
         allowed, remaining, retry_after = rate_limiter.check_message_limit(chat_id, limit=10, window=60)
         if not allowed:
             if source != 'web':
@@ -88,16 +84,13 @@ def process_message(ch, method, properties, body):
         sentiment = "NEUTRO"
         msg_type = "text" if 'text' in message else "photo" if 'photo' in message else "other"
         
-        # === PROCESAR TEXTO ===
         if msg_type == 'text':
             user_text = message.get('text', '').strip()
             
-            # === VALIDACIÓN DE EDAD ===
+            # forzamos edad si es nuevo
             if user.get('age') is None and not user_text.startswith('/edad') and user_text != '/start':
                 response_text = "¡Espera! 🛑 Antes de seguir, necesito saber tu edad para poder explicarte las cosas a tu nivel.\n\nPor favor, responde con `/edad <tu_edad>` (ejemplo: `/edad 25`)."
                 sentiment = "NEUTRO"
-            
-            # === VALIDACIÓN DE ENTRADA ===
             else:
                 valid, error = input_validator.validate_command_input(user_text)
                 if not valid:
@@ -170,7 +163,6 @@ def process_message(ch, method, properties, body):
                 else:
                     response_text = "IA no disponible."
         
-        # === PROCESAR FOTO ===
         elif msg_type == 'photo':
             if source != 'web':
                 telegram.send_message(chat_id, "👀 Analizando imagen...", message_id)

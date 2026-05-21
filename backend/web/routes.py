@@ -31,6 +31,7 @@ def user_history(chat_id):
     msgs_cursor = db.messages.find({"message.chat.id": chat_id}).sort("message.date", -1)
     msgs = list(msgs_cursor)
     
+    # pillamos el nombre de la bd (a veces viene nulo y peta la vista)
     user_info = db.messages.find_one({"message.chat.id": chat_id})
     name = "Usuario Desconocido"
     if user_info and 'message' in user_info and 'chat' in user_info['message']:
@@ -74,5 +75,6 @@ def login():
 @web_bp.route("/logout")
 @login_required
 def logout():
+    # adios
     logout_user()
     return redirect(url_for('web.login'))

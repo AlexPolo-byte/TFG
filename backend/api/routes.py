@@ -44,7 +44,7 @@ def api_stats():
     today_cnt = messages_collection.count_documents({"message.date": {"$gte": today_ts}})
     err_cnt = messages_collection.count_documents({"status": {"$nin": ["procesado_ia", "procesado_cloud", None]}})
 
-    # Gráfica
+    # construimos los datos del dashboard poco a poco
     labels = []; vals = []
     start_8h = now.timestamp() - 28800
     cursor = messages_collection.find({"message.date": {"$gte": start_8h}})
@@ -59,13 +59,11 @@ def api_stats():
         except: pass
     vals = [data_map[l] for l in labels]
 
-    # Sentimiento
     sent_data = list(messages_collection.aggregate([{"$group": {"_id": "$sentiment", "count": {"$sum": 1}}}]))
     s_map = {"POSITIVO":0, "NEUTRO":0, "NEGATIVO":0}
     for s in sent_data: 
         if s['_id'] in s_map: s_map[s['_id']] = s['count']
     
-    # Mensajes Live
     msgs = []
     for m in messages_collection.find().sort("message.date", -1).limit(10):
         try:
@@ -74,7 +72,7 @@ def api_stats():
             msgs.append({"time": t_str, "user": m['message']['chat'].get('first_name','Anon'), "text": txt[:40], "sentiment": m.get('sentiment','NEUTRO'), "status": m.get('status','unk'), "type": m.get('type','text')})
         except: pass
 
-    # Obtener URLs de Ngrok
+    # urls de ngrok y servicios locales
     ngrok_url = "No disponible"
     local_ip = get_local_ip()
     ngrok_grafana = f"http://{local_ip}:3000"
@@ -171,9 +169,10 @@ def api_logs():
         logs = c.logs(tail=100).decode('utf-8', errors='ignore')
         return jsonify({"logs": logs})
     except docker.errors.NotFound:
-        return jsonify({"logs": f"❌ Contenedor '{container}' no encontrado."})
+        return jsonify({"logs": logs})
     except Exception as e:
-        return jsonify({"logs": f"❌ Error: {str(e)}"})
+        # TODO: afinar esta excepcion si da la tabarra
+        return jsonify({"logs": f"Error pillando logs: {str(e)}"})
 
 @api_bp.route("/web/send", methods=['POST'])
 def web_send():
@@ -194,10 +193,10 @@ def web_send():
         
         if mq_client.publish({"message": message, "source": "web"}):
             return jsonify({"status": "sent", "message_id": message["message_id"]})
-        return jsonify({"error": "Error RabbitMQ"}), 500
+        return jsonify({"error": "Fallo en RabbitMQ"}), 500
     except Exception as e:
-        logger.error(f"Error en /api/web/send: {e}")
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Peto el envio web: {e}")
+        return jsonify({"error": "Server error"}), 500
 
 @api_bp.route("/web/poll")
 def web_poll():
