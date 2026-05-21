@@ -92,39 +92,37 @@ def process_message(ch, method, properties, body):
         if msg_type == 'text':
             user_text = message.get('text', '').strip()
             
+            # === VALIDACIÓN DE EDAD ===
+            if user.get('age') is None and not user_text.startswith('/edad') and user_text != '/start':
+                response_text = "¡Espera! 🛑 Antes de seguir, necesito saber tu edad para poder explicarte las cosas a tu nivel.\n\nPor favor, responde con `/edad <tu_edad>` (ejemplo: `/edad 25`)."
+                sentiment = "NEUTRO"
+            
             # === VALIDACIÓN DE ENTRADA ===
-            valid, error = input_validator.validate_command_input(user_text)
-            if not valid:
-                response_text = f"❌ {error}"
-                sentiment = "NEGATIVO"
-            
-            # Detectar URLs sospechosas
-            elif user_text.startswith('http'):
-                suspicious = input_validator.extract_and_validate_urls(user_text)
-                if suspicious:
-                    response_text = f"⚠️ URL sospechosa detectada. No puedo procesar este mensaje."
+            else:
+                valid, error = input_validator.validate_command_input(user_text)
+                if not valid:
+                    response_text = f"❌ {error}"
                     sentiment = "NEGATIVO"
-            
-            # Comandos
-            elif user_text == "/start":
-                response_text, sentiment = commands.handle_start()
-            elif user_text == "/help":
-                response_text, sentiment = commands.handle_help()
-            elif user_text.startswith("/register"):
-                response_text, sentiment = commands.handle_register(chat_id, user_text, first_name)
-            elif user_text.startswith("/modo"):
-                response_text, sentiment = commands.handle_mode(chat_id, user_text, user)
-            elif user_text == "/stats":
-                response_text, sentiment = commands.handle_stats(chat_id)
-            elif user_text == "/favoritos":
-                response_text, sentiment = commands.handle_favorites(chat_id)
-            elif user_text == "/guardar":
-                response_text, sentiment = commands.handle_save_favorite(chat_id)
-            elif user_text.startswith("/codigo"):
-                response_text, sentiment = commands.handle_code(chat_id, user_text)
-            
-            # Pregunta normal a la IA
-            elif ai.model:
+                
+                # Detectar URLs sospechosas
+                elif user_text.startswith('http'):
+                    suspicious = input_validator.extract_and_validate_urls(user_text)
+                    if suspicious:
+                        response_text = f"⚠️ URL sospechosa detectada. No puedo procesar este mensaje."
+                        sentiment = "NEGATIVO"
+                
+                # Comandos
+                elif user_text == "/start":
+                    response_text, sentiment = commands.handle_start(chat_id, first_name)
+                elif user_text == "/help":
+                    response_text, sentiment = commands.handle_help()
+                elif user_text == "/stats":
+                    response_text, sentiment = commands.handle_stats(chat_id)
+                elif user_text.startswith("/edad"):
+                    response_text, sentiment = commands.handle_edad(chat_id, user_text)
+                
+                # Pregunta normal a la IA
+                elif ai.model:
                 try:
                     # Verificar caché
                     cache_key = f"ai:{hash(user_text)}"
@@ -136,11 +134,11 @@ def process_message(ch, method, properties, body):
                         sentiment = cached['sentiment']
                     else:
                         # Generar respuesta
-                        mode = user.get('mode', 'simple')
-                        history = get_chat_context(chat_id)
-                        prompt = f"HISTORIAL:\n{history}\n\nUSUARIO:\n{user_text}"
+                        age_info = user.get('age', 'Desconocida (asume adulto joven)')
+                        history = get_chat_context(chat_id) if source != 'web' else ""
+                        prompt = f"EDAD DEL USUARIO: {age_info}\n\nHISTORIAL:\n{history}\n\nUSUARIO:\n{user_text}"
                         
-                        raw = ai.generate_response(prompt, mode)
+                        raw = ai.generate_response(prompt, 'simple')
                         
                         if raw:
                             # Analizar sentimiento para métricas (pero no mostrar al usuario)
@@ -205,21 +203,27 @@ def process_message(ch, method, properties, body):
         else:
             response_text = "Solo entiendo texto y fotos por ahora."
         
-        # Guardar en MongoDB
-        logger.info(f"💾 Guardando respuesta para chat_id={chat_id}, message_id={message_id}")
-        db.messages.update_one(
-            {"message.message_id": message_id},
-            {"$set": {
-                "message": message,  # Guardar el mensaje completo para que el polling lo encuentre
-                "status": "procesado_ia",
-                "processed_at": time.time(),
-                "ai_response": response_text,
-                "type": msg_type,
-                "sentiment": sentiment,
-                "user_mode": user.get('mode', 'simple')
-            }},
-            upsert=True
-        )
+        if source == 'web':
+            # Solo guardamos en caché para que la web lo lea mediante polling
+            logger.info(f"⚡ Guardando respuesta en caché para web (session_id={chat_id})")
+            cache_key = f"web:{chat_id}"
+            cache.set(cache_key, {"text": response_text, "timestamp": time.time()}, ttl=60)
+        else:
+            # Guardar en MongoDB (persistente para Telegram)
+            logger.info(f"💾 Guardando respuesta para chat_id={chat_id}, message_id={message_id}")
+            db.messages.update_one(
+                {"message.message_id": message_id},
+                {"$set": {
+                    "message": message,
+                    "status": "procesado_ia",
+                    "processed_at": time.time(),
+                    "ai_response": response_text,
+                    "type": msg_type,
+                    "sentiment": sentiment,
+                    "user_age": user.get('age')
+                }},
+                upsert=True
+            )
         
         # Responder
         if source != 'web':

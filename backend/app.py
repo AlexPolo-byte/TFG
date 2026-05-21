@@ -272,67 +272,30 @@ def web_send():
 
 @app.route("/api/web/poll")
 def web_poll():
-    """Polling para obtener respuestas del bot"""
+    """Polling para obtener respuestas del bot desde Caché efímera"""
     try:
         session_id = request.args.get('session_id', 'web_unknown')
         last_check = float(request.args.get('last_check', 0))
         
-        logger.info(f"🔍 Polling: session_id={session_id}, last_check={last_check}")
-        
-        # Buscar mensajes nuevos para esta sesión
-        messages = list(messages_collection.find({
-            "message.chat.id": session_id,
-            "processed_at": {"$gt": last_check},
-            "ai_response": {"$exists": True}
-        }).sort("processed_at", 1).limit(10))
-        
-        logger.info(f"📨 Encontrados {len(messages)} mensajes para session_id={session_id}")
+        # Buscar mensaje en caché
+        from core.cache import cache
+        cached = cache.get(f"web:{session_id}")
         
         responses = []
-        for msg in messages:
+        if cached and cached.get('timestamp', 0) > last_check:
             responses.append({
-                "text": msg.get("ai_response", ""),
-                "timestamp": msg.get("processed_at", time.time())
+                "text": cached['text'],
+                "timestamp": cached['timestamp']
             })
-        
+            # Limpiamos la caché para no reenviar lo mismo si no cambia
+            cache.delete(f"web:{session_id}")
+            
         return jsonify({"messages": responses})
     except Exception as e:
         logger.error(f"Error en /api/web/poll: {e}")
         return jsonify({"messages": []})
 
-@app.route("/api/web/history")
-def web_history():
-    """Recuperar historial completo para persistencia (F5)"""
-    try:
-        session_id = request.args.get('session_id', 'web_unknown')
-        
-        # Buscar todos los mensajes de esta sesión ordenados por fecha
-        messages = list(messages_collection.find({
-            "message.chat.id": session_id
-        }).sort("message.date", 1))
-        
-        history = []
-        for m in messages:
-            # Mensaje del usuario
-            if "message" in m and "text" in m["message"]:
-                history.append({
-                    "text": m["message"]["text"],
-                    "from_user": True,
-                    "timestamp": m["message"]["date"]
-                })
-            
-            # Respuesta del bot (si existe)
-            if "ai_response" in m:
-                history.append({
-                    "text": m["ai_response"],
-                    "from_user": False,
-                    "timestamp": m.get("processed_at", 0)
-                })
-                
-        return jsonify({"history": history})
-    except Exception as e:
-        logger.error(f"Error en /api/web/history: {e}")
-        return jsonify({"history": []})
+
 
 # --- VISTAS ---
 @app.route("/")

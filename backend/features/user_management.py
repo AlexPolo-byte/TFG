@@ -18,21 +18,18 @@ class UserManager:
                 "chat_id": chat_id,
                 "first_name": first_name,
                 "registered_at": datetime.now(),
-                "mode": "simple",  # simple o expert
-                "language": "es",
-                "favorites_count": 0,
-                "voice_mode": False
+                "age": None
             }
             db.users.insert_one(user)
         
         return user
     
     @staticmethod
-    def update_mode(chat_id, mode):
-        """Actualiza el modo del usuario (simple/expert)"""
+    def update_age(chat_id, age):
+        """Actualiza la edad del usuario"""
         db.users.update_one(
             {"chat_id": chat_id},
-            {"$set": {"mode": mode}}
+            {"$set": {"age": age}}
         )
     
     @staticmethod
@@ -53,8 +50,7 @@ class UserManager:
         return {
             "total_messages": total_messages,
             "user_messages": user_messages,
-            "favorites_count": user.get('favorites_count', 0) if user else 0,
-            "mode": user.get('mode', 'simple') if user else 'simple'
+            "age": user.get('age', 'Desconocida') if user else 'Desconocida'
         }
 
 # Instancia global

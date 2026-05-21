@@ -112,8 +112,7 @@
     </div>
 
     <div class="chat-area" id="box">
-        <div class="msg msg-bot">¡Ey! 👋 Soy Alex, tu colega de tecnología. Pregúntame lo que quieras sobre ordenadores,
-            apps, internet... ¡lo que sea tech! 💻🚀</div>
+        <div class="msg msg-bot">¡Hola! 👋 Soy Alex, tu asistente de tecnología.<br><br>Me adapto a ti para explicarte la tecnología de la forma más fácil y clara posible.<br><br>Para empezar y poder personalizar mis respuestas, ¿cuántos años tienes?<br>Escribe <b>/edad &lt;tu_edad&gt;</b> (por ejemplo: <b>/edad 25</b>).</div>
     </div>
 
     <div class="input-area">
@@ -151,9 +150,7 @@
         if (!username) {
             document.getElementById('id-modal').style.display = 'flex';
         } else {
-            // Si ya hay username, ocultar modal y cargar historial
             document.getElementById('id-modal').style.display = 'none';
-            loadHistory();
         }
 
         function saveUser() {
@@ -162,8 +159,6 @@
                 username = u;
                 localStorage.setItem('chat_username', username);
                 document.getElementById('id-modal').style.display = 'none';
-                // Cargar historial después de identificarse
-                loadHistory();
             }
         }
 
@@ -192,32 +187,7 @@
         document.getElementById('in').addEventListener('keypress', e => { if (e.key === 'Enter') s() });
         document.getElementById('username-in').addEventListener('keypress', e => { if (e.key === 'Enter') saveUser() });
 
-        // Cargar historial al iniciar
-        function loadHistory() {
-            fetch(`/api/web/history?session_id=${sid}`, {
-                headers: { 'ngrok-skip-browser-warning': 'true' }
-            }).then(r => r.json())
-                .then(d => {
-                    if (d.history && d.history.length > 0) {
-                        // Limpiar chat actual (menos el saludo inicial)
-                        const box = document.getElementById('box');
-                        // Mantener solo el primer mensaje (saludo)
-                        const greeting = box.firstElementChild;
-                        box.innerHTML = '';
-                        if (greeting) box.appendChild(greeting);
-
-                        d.history.forEach(msg => {
-                            add(msg.text, msg.from_user);
-                        });
-                        // Actualizar último timestamp para no duplicar en polling
-                        if (d.history.length > 0) {
-                            const lastMsg = d.history[d.history.length - 1];
-                            last = Math.max(last, lastMsg.timestamp);
-                        }
-                    }
-                })
-                .catch(() => { });
-        }
+        // Sin persistencia de historial.
 
         // Iniciar polling (el historial se carga después de identificarse)
         setInterval(() => {
