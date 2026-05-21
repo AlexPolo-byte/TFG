@@ -31,7 +31,7 @@ from features.input_validator import input_validator
 from features.rate_limiter import rate_limiter
 
 # Import command handlers
-from worker.command_handlers import CommandHandlers
+from handlers.command_handlers import CommandHandlers
 commands = CommandHandlers()
 
 # Métricas
