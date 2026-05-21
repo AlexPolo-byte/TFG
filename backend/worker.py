@@ -126,8 +126,13 @@ def process_message(ch, method, properties, body):
                 # Pregunta normal a la IA
                 elif ai.model:
                     try:
-                        # Verificar caché
-                        cache_key = f"ai:{hash(user_text)}"
+                        # Generar el prompt completo con contexto y edad ANTES de buscar en caché
+                        age_info = user.get('age', 'Desconocida (asume adulto joven)')
+                        history = get_chat_context(chat_id) if source != 'web' else ""
+                        prompt = f"EDAD DEL USUARIO: {age_info}\n\nHISTORIAL:\n{history}\n\nUSUARIO:\n{user_text}"
+                        
+                        # Verificar caché usando el hash del prompt exacto
+                        cache_key = f"ai:{hash(prompt)}"
                         cached = cache.get(cache_key)
                         
                         if cached:
@@ -136,10 +141,6 @@ def process_message(ch, method, properties, body):
                             sentiment = cached['sentiment']
                         else:
                             # Generar respuesta
-                            age_info = user.get('age', 'Desconocida (asume adulto joven)')
-                            history = get_chat_context(chat_id) if source != 'web' else ""
-                            prompt = f"EDAD DEL USUARIO: {age_info}\n\nHISTORIAL:\n{history}\n\nUSUARIO:\n{user_text}"
-                            
                             raw = ai.generate_response(prompt)
                             
                             if raw:
