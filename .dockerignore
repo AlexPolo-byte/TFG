@@ -1,0 +1,9 @@
+.git
+.gitignore
+*.md
+docker-compose.yml
+ngrok.yml
+prometheus.yml
+promtail-config.yml
+grafana_data/
+loki/

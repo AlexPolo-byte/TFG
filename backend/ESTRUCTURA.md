@@ -1,65 +1,50 @@
-# Backend Reestructurado - Documentación
+# TFG - Arquitectura Completa del Proyecto
 
-## 📁 Nueva Estructura
+## 📁 Estructura Principal
 
 ```
-backend/
-├── config/
-│   └── settings.py          # ⚙️ Configuración centralizada
-├── core/
-│   ├── database.py          # 🗄️ Gestión de MongoDB
-│   └── cache.py             # 💾 Gestión de Redis
-├── services/
-│   ├── telegram_service.py  # 📱 Comunicación con Telegram
-│   └── ai_service.py        # 🧠 Servicio de IA (Gemini)
-├── features/
-│   ├── user_management.py   # 👤 Gestión de usuarios
-│   ├── favorites.py         # ⭐ Sistema de favoritos
-│   ├── code_generator.py    # 💻 Generación segura de código
-│   └── reminders.py         # ⏰ Recordatorios programados
-├── worker/
-│   └── command_handlers.py  # 🎮 Handlers de comandos
-├── api/
-│   └── (próximamente)       # 🌐 Endpoints REST
-├── app.py                   # 🚀 Aplicación Flask principal
-├── worker.py                # ⚙️ Worker de procesamiento
-└── requirements.txt         # 📦 Dependencias
+TFG/
+├── frontend/                 # 🎨 Vistas y UI (HTML/CSS)
+│   ├── templates/            # Plantillas Jinja2 (base, chat, login, dashboard, etc.)
+│   └── static/               # Archivos estáticos (imágenes, CSS externo)
+├── backend/                  # ⚙️ Lógica de servidor y procesos Python
+│   ├── app.py                # 🚀 Entrypoint web (Flask + Blueprints)
+│   ├── worker.py             # 👷 Worker asíncrono (RabbitMQ consumer)
+│   ├── api/                  # 🌐 Endpoints JSON (API REST)
+│   │   └── routes.py
+│   ├── web/                  # 🖥️ Controladores de vistas HTML
+│   │   └── routes.py
+│   ├── core/                 # 🗄️ Infraestructura y conexiones base
+│   │   ├── database.py       # Conexión a MongoDB
+│   │   ├── cache.py          # Conexión a Redis
+│   │   └── queue.py          # Conexión a RabbitMQ
+│   ├── features/             # 🧠 Casos de uso específicos
+│   │   ├── user_management.py
+│   │   ├── favorites.py
+│   │   ├── code_generator.py
+│   │   └── reminders.py
+│   ├── handlers/             # 🎮 Procesadores de comandos de Telegram
+│   │   └── command_handlers.py
+│   ├── services/             # 📞 Integraciones con APIs externas
+│   │   ├── telegram_service.py
+│   │   └── ai_service.py
+│   ├── config/               # ⚙️ Configuraciones globales
+│   │   └── settings.py
+│   └── Dockerfile            # 🐳 Imagen Docker del entorno Python
+├── infra/                    # (Próximamente infra separada)
+├── docker-compose.yml        # 🐳 Orquestador de contenedores
+├── ngrok.yml                 # Configuración del túnel
+├── prometheus.yml            # Configuración de métricas
+└── promtail-config.yml       # Configuración de logs
 ```
 
-## 🎯 Responsabilidades por Módulo
+## 🎯 Responsabilidades (Clean Architecture)
 
-### Config
-- **settings.py**: Variables de entorno, constantes, prompts de IA, validación
-
-### Core
-- **database.py**: Singleton de MongoDB con acceso a colecciones
-- **cache.py**: Gestión de Redis con get/set/delete
-
-### Services
-- **telegram_service.py**: Envío de mensajes, voz, descarga de fotos
-- **ai_service.py**: Configuración de Gemini, generación de respuestas, análisis de imágenes
-
-### Features
-- **user_management.py**: CRUD de usuarios, estadísticas
-- **favorites.py**: Guardar/recuperar favoritos con límites
-- **code_generator.py**: Generación segura con sanitización
-- **reminders.py**: Programación de tareas con APScheduler
-
-### Worker
-- **command_handlers.py**: Lógica de todos los comandos del bot
-
-## ✅ Ventajas de esta Estructura
-
-1. **Separación de responsabilidades** - Cada archivo tiene un propósito claro
-2. **Nombres descriptivos** - Se entiende qué hace cada módulo
-3. **Fácil de mantener** - Cambios localizados en archivos específicos
-4. **Testeable** - Cada módulo se puede testear independientemente
-5. **Escalable** - Fácil añadir nuevas features sin tocar código existente
-6. **Profesional** - Sigue mejores prácticas de arquitectura
-
-## 🔄 Próximos Pasos
-
-1. Actualizar `worker.py` para usar los nuevos módulos
-2. Actualizar `app.py` para usar los nuevos módulos
-3. Validar sintaxis de todos los archivos
-4. Ejecutar tests
+- **Frontend**: Exclusivamente archivos visuales. Flask los carga usando `template_folder='../frontend/templates'`.
+- **Backend / app.py**: Ultra-ligero. Solo arranca Flask, conecta a base de datos y registra los Blueprints de API y Web.
+- **Backend / api**: Devuelve `json()`. Utilizado por dashboards y scripts asíncronos.
+- **Backend / web**: Devuelve `render_template()`.
+- **Backend / core**: Define las herramientas (BD, Cache, Colas) pero NO la lógica de negocio.
+- **Backend / services**: Conectores para servicios externos (Gemini, Telegram API).
+- **Backend / features**: Funcionalidades puras del TFG (código de Python limpio).
+- **Backend / worker.py**: El motor en segundo plano que saca mensajes de la cola y los manda a los *handlers*.

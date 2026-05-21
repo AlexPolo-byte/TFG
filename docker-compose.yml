@@ -24,7 +24,9 @@ services:
   # 2. BACKEND (Recibe mensajes y los manda a la nube)
   # ----------------------------------------------------
   backend_telegram:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: backend_telegram
     restart: unless-stopped
     env_file: .env  # Lee las variables del archivo .env automáticamente
@@ -50,7 +52,9 @@ services:
   # 3. WORKER (Lee de la nube y procesa)
   # ----------------------------------------------------
   worker:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: worker
     restart: unless-stopped
     env_file: .env
