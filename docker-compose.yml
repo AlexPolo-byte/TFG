@@ -70,7 +70,28 @@ services:
       - tfg_network
 
   # ----------------------------------------------------
-  # 4. REDIS (Caché para respuestas IA)
+  # 4. RABBITMQ (Cola de mensajes asíncrona)
+  # ----------------------------------------------------
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"    # Puerto de comunicación
+      - "15672:15672"  # Panel de administración web
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - tfg_network
+
+  # ----------------------------------------------------
+  # 5. REDIS (Caché para respuestas IA)
   # ----------------------------------------------------
   redis:
     image: redis:7-alpine
