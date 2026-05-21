@@ -179,6 +179,8 @@ def process_message(ch, method, properties, body):
                 try:
                     photo_data = telegram.download_photo(message['photo'][-1]['file_id'])
                     if photo_data:
+                        import base64
+                        image_data_b64 = base64.b64encode(photo_data).decode('utf-8')
                         img = Image.open(io.BytesIO(photo_data))
                         raw = ai.analyze_image(img, "Describe esta imagen técnica en detalle. Formato: [SENTIMIENTO]\n\nDescripción")
                         
@@ -214,17 +216,21 @@ def process_message(ch, method, properties, body):
         else:
             # Guardar en MongoDB (persistente para Telegram)
             logger.info(f"💾 Guardando respuesta para chat_id={chat_id}, message_id={message_id}")
+            update_data = {
+                "message": message,
+                "status": "procesado_ia",
+                "processed_at": time.time(),
+                "ai_response": response_text,
+                "type": msg_type,
+                "sentiment": sentiment,
+                "user_age": user.get('age')
+            }
+            if msg_type == 'photo' and 'image_data_b64' in locals():
+                update_data['image_data'] = image_data_b64
+                
             db.messages.update_one(
                 {"message.message_id": message_id},
-                {"$set": {
-                    "message": message,
-                    "status": "procesado_ia",
-                    "processed_at": time.time(),
-                    "ai_response": response_text,
-                    "type": msg_type,
-                    "sentiment": sentiment,
-                    "user_age": user.get('age')
-                }},
+                {"$set": update_data},
                 upsert=True
             )
         

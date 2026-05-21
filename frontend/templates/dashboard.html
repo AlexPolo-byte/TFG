@@ -32,18 +32,18 @@
             <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">MongoDB</span>
         </div>
     </a>
-    <a href="https://customer.cloudamqp.com" target="_blank" style="text-decoration: none;">
+    <a href="#" onclick="window.open('http://' + window.location.hostname + ':15672', '_blank'); return false;" style="text-decoration: none;">
         <div class="card-std"
             style="padding: 15px; display: flex; align-items: center; gap: 10px;">
             <i class="bi bi-envelope-fill" style="color: #FF6600; font-size: 1.2rem;"></i>
             <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">RabbitMQ</span>
         </div>
     </a>
-    <a href="http://192.168.1.150:3000" target="_blank" style="text-decoration: none;">
+    <a href="#" onclick="window.open('http://' + window.location.hostname + ':3000', '_blank'); return false;" style="text-decoration: none;">
         <div class="card-std"
             style="padding: 15px; display: flex; align-items: center; gap: 10px;">
             <i class="bi bi-graph-up-arrow" style="color: #F46800; font-size: 1.2rem;"></i>
-            <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">Grafana</span>
+            <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">Grafana / Loki</span>
         </div>
     </a>
 </div>
@@ -172,9 +172,9 @@
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <select id="log-selector"
                     style="flex: 1; padding: 6px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; background: rgba(255,255,255,0.05); color: var(--text-main); outline: none;">
-                    <option value="worker">CONTAINER: WORKER</option>
-                    <option value="backend_telegram">CONTAINER: BACKEND</option>
-                    <option value="cloudflare_tunnel">CONTAINER: NETWORK</option>
+                    <option style="background-color: #1C1C1E; color: white;" value="worker">CONTAINER: WORKER</option>
+                    <option style="background-color: #1C1C1E; color: white;" value="backend_telegram">CONTAINER: BACKEND</option>
+                    <option style="background-color: #1C1C1E; color: white;" value="ngrok">CONTAINER: NGROK</option>
                 </select>
 
                 <div style="display: flex; gap: 4px;">
