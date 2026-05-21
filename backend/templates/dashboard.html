@@ -18,23 +18,23 @@
     class="fade-in">
     <a href="https://cloud.mongodb.com" target="_blank" style="text-decoration: none;">
         <div class="card-std"
-            style="padding: 15px; display: flex; align-items: center; gap: 10px; transition: transform 0.2s;">
+            style="padding: 15px; display: flex; align-items: center; gap: 10px;">
             <i class="bi bi-database-fill" style="color: #00ED64; font-size: 1.2rem;"></i>
-            <span style="color: #1D1D1F; font-weight: 600; font-size: 0.9rem;">MongoDB</span>
+            <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">MongoDB</span>
         </div>
     </a>
     <a href="https://customer.cloudamqp.com" target="_blank" style="text-decoration: none;">
         <div class="card-std"
-            style="padding: 15px; display: flex; align-items: center; gap: 10px; transition: transform 0.2s;">
+            style="padding: 15px; display: flex; align-items: center; gap: 10px;">
             <i class="bi bi-envelope-fill" style="color: #FF6600; font-size: 1.2rem;"></i>
-            <span style="color: #1D1D1F; font-weight: 600; font-size: 0.9rem;">RabbitMQ</span>
+            <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">RabbitMQ</span>
         </div>
     </a>
     <a href="http://192.168.1.150:3000" target="_blank" style="text-decoration: none;">
         <div class="card-std"
-            style="padding: 15px; display: flex; align-items: center; gap: 10px; transition: transform 0.2s;">
+            style="padding: 15px; display: flex; align-items: center; gap: 10px;">
             <i class="bi bi-graph-up-arrow" style="color: #F46800; font-size: 1.2rem;"></i>
-            <span style="color: #1D1D1F; font-weight: 600; font-size: 0.9rem;">Grafana</span>
+            <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">Grafana</span>
         </div>
     </a>
 </div>
@@ -123,8 +123,8 @@
     <div class="card-std"
         style="padding: 0; overflow: hidden; height: 400px; display: flex; flex-direction: column; grid-column: span 2;">
         <div
-            style="padding: 15px 20px; border-bottom: 1px solid var(--border); background: #fafafa; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin: 0;">INTERACCIONES
+            style="padding: 15px 20px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin: 0; letter-spacing: 1px;">INTERACCIONES
                 RECIENTES</h3>
             <i class="bi bi-arrow-repeat" style="color: var(--text-muted);"></i>
         </div>
@@ -155,14 +155,14 @@
 
         <div style="padding: 15px; border-bottom: 1px solid var(--border);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h3 style="font-size: 0.9rem; font-weight: 600; margin: 0;">SYSTEM LOGS</h3>
+                <h3 style="font-size: 0.9rem; font-weight: 600; margin: 0; letter-spacing: 1px;">SYSTEM LOGS</h3>
                 <i class="bi bi-arrow-clockwise" id="refresh-logs" style="cursor: pointer; color: var(--primary);"
                     onclick="fetchLogs()"></i>
             </div>
 
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <select id="log-selector"
-                    style="flex: 1; padding: 6px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; background: #fff; outline: none;">
+                    style="flex: 1; padding: 6px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; background: rgba(255,255,255,0.05); color: var(--text-main); outline: none;">
                     <option value="worker">CONTAINER: WORKER</option>
                     <option value="backend_telegram">CONTAINER: BACKEND</option>
                     <option value="cloudflare_tunnel">CONTAINER: NETWORK</option>
@@ -170,20 +170,20 @@
 
                 <div style="display: flex; gap: 4px;">
                     <button onclick="setFilter('ALL', this)" class="badge-soft active-filter"
-                        style="border: 1px solid var(--border); cursor: pointer; background: #1C1C1E; color: white;">ALL</button>
+                        style="border: 1px solid var(--primary); cursor: pointer; background: rgba(10, 132, 255, 0.2); color: var(--primary);">ALL</button>
                     <button onclick="setFilter('INFO', this)" class="badge-soft"
-                        style="border: 1px solid var(--border); cursor: pointer; background: white;">INFO</button>
+                        style="border: 1px solid var(--border); cursor: pointer; background: transparent; color: var(--text-muted);">INFO</button>
                     <button onclick="setFilter('WARN', this)" class="badge-soft"
-                        style="border: 1px solid var(--border); cursor: pointer; background: white;">WARN</button>
+                        style="border: 1px solid var(--border); cursor: pointer; background: transparent; color: var(--text-muted);">WARN</button>
                     <button onclick="setFilter('ERROR', this)" class="badge-soft"
-                        style="border: 1px solid var(--border); cursor: pointer; background: white;">ERR</button>
+                        style="border: 1px solid var(--border); cursor: pointer; background: transparent; color: var(--text-muted);">ERR</button>
                 </div>
             </div>
         </div>
 
         <div id="logs-container"
-            style="flex: 1; overflow-y: auto; background: #1C1C1E; color: #E5E5EA; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.75rem; line-height: 1.5;">
-            <div style="text-align: center; color: #636366; margin-top: 50px;">Conectando a Docker Socket...</div>
+            style="flex: 1; overflow-y: auto; background: rgba(0,0,0,0.3); color: var(--text-main); padding: 15px; font-family: 'Courier New', monospace; font-size: 0.75rem; line-height: 1.5;">
+            <div style="text-align: center; color: var(--text-muted); margin-top: 50px;">Conectando a Docker Socket...</div>
         </div>
     </div>
 </div>
@@ -203,8 +203,8 @@
 
     const activityChart = new Chart(ctxLine, {
         type: 'line',
-        data: { labels: [], datasets: [{ label: 'Msgs', data: [], borderColor: '#007AFF', borderWidth: 2, tension: 0.4, fill: true, backgroundColor: gradientLine, pointRadius: 0, pointHoverRadius: 4 }] },
-        options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { borderDash: [5, 5], color: '#E5E5EA' } } }, plugins: { legend: { display: false } } }
+        data: { labels: [], datasets: [{ label: 'Msgs', data: [], borderColor: '#0A84FF', borderWidth: 2, tension: 0.4, fill: true, backgroundColor: gradientLine, pointRadius: 0, pointHoverRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { borderDash: [5, 5], color: 'rgba(255,255,255,0.1)' } } }, plugins: { legend: { display: false } } }
     });
 
     // Sentiment Donut Chart
@@ -258,12 +258,12 @@
                     let statusBadge = `<span class="badge-soft" style="background:#E5E5EA; color:#8E8E93">${msg.status}</span>`;
                     if (msg.status === 'procesado_ia') statusBadge = '<span class="badge-soft" style="background:#D1FAE5; color:#059669">Completado</span>';
 
-                    let textDisplay = msg.type === 'photo' ? '<span style="color:#FF9500"><i class="bi bi-camera-fill"></i> Imagen</span>' : `<span style="color:#1C1C1E">${msg.text.substring(0, 40)}${msg.text.length > 40 ? '...' : ''}</span>`;
+                    let textDisplay = msg.type === 'photo' ? '<span style="color:#FF9500"><i class="bi bi-camera-fill"></i> Imagen</span>' : `<span style="color:var(--text-main)">${msg.text.substring(0, 40)}${msg.text.length > 40 ? '...' : ''}</span>`;
 
                     tbody.innerHTML += `
-                        <tr style="border-bottom: 1px solid #F2F2F7;">
-                            <td style="padding: 12px 20px; color: #8E8E93;">${msg.time}</td>
-                            <td style="padding: 12px 20px; font-weight: 500;">${msg.user}</td>
+                        <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                            <td style="padding: 12px 20px; color: var(--text-muted);">${msg.time}</td>
+                            <td style="padding: 12px 20px; font-weight: 500; color: var(--text-main);">${msg.user}</td>
                             <td style="padding: 12px 20px;">${textDisplay}</td>
                             <td style="padding: 12px 20px; text-align: center;">${moodIcon}</td>
                             <td style="padding: 12px 20px; text-align: right;">${statusBadge}</td>
@@ -337,10 +337,10 @@
         currentFilter = filter;
         // Reset estilos botones
         document.querySelectorAll('button[onclick^="setFilter"]').forEach(b => {
-            b.style.background = 'white'; b.style.color = '#1C1C1E';
+            b.style.background = 'transparent'; b.style.color = 'var(--text-muted)'; b.style.border = '1px solid var(--border)';
         });
         // Activar botón pulsado
-        btn.style.background = '#1C1C1E'; btn.style.color = 'white';
+        btn.style.background = 'rgba(10, 132, 255, 0.2)'; btn.style.color = 'var(--primary)'; btn.style.border = '1px solid var(--primary)';
         renderLogs();
     }
 

@@ -5,7 +5,7 @@
 </div>
 
 {% for err in errors %}
-<div class="card-std" style="margin-bottom: 16px; border-left: 4px solid #FF3B30; padding: 20px;">
+<div class="card-std" style="margin-bottom: 16px; border-left: 4px solid #FF3B30; padding: 20px; animation: fadeUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;">
     <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
         <span style="font-weight: 600; color: #FF3B30;">{{ err.status | default('sin-status') }}</span>
         <span style="font-size: 0.8rem; color: var(--text-muted);">
@@ -13,7 +13,7 @@
         </span>
     </div>
 
-    <div style="margin-bottom: 10px;">
+    <div style="margin-bottom: 10px; color: var(--text-main);">
         <span style="font-weight: 600;">
             {{ err.get('message', {}).get('chat', {}).get('first_name', 'Anónimo') }}
         </span>:
@@ -25,21 +25,21 @@
     </div>
 
     {% if err.get('ai_response') %}
-    <div style="background: #FFF1F0; border: 1px solid #FECACA; padding: 10px; border-radius: 8px; font-size: 0.8rem; color: #991B1B; margin-bottom: 10px;">
+    <div style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); padding: 10px; border-radius: 8px; font-size: 0.8rem; color: #FF453A; margin-bottom: 10px;">
         <strong>Respuesta IA:</strong> {{ err.ai_response }}
     </div>
     {% endif %}
 
-    <div style="background: #F2F2F7; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 0.75rem; color: var(--text-main); overflow-x: auto;">
+    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 0.75rem; color: var(--text-muted); overflow-x: auto;">
         {{ err | tojson(indent=2) }}
     </div>
 </div>
 {% else %}
 <div style="text-align: center; padding: 50px;">
-    <div style="width: 60px; height: 60px; background: #D1FAE5; color: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+    <div style="width: 60px; height: 60px; background: rgba(48, 209, 88, 0.15); color: #30D158; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
         <i class="bi bi-check-lg" style="font-size: 1.5rem;"></i>
     </div>
-    <h3 style="font-size: 1.1rem; font-weight: 600;">Todo Correcto</h3>
+    <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--text-main);">Todo Correcto</h3>
     <p style="color: var(--text-muted);">No hay errores en el registro.</p>
 </div>
 {% endfor %}

@@ -1,43 +1,43 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="page-header fade-in">
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in" style="display: flex; justify-content: space-between; margin-bottom: 24px;">
     <div>
-        <h1 class="page-title">Usuarios</h1>
-        <p class="page-subtitle">Base de datos de interacciones</p>
+        <h1 style="font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--text-main);">Usuarios</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Base de datos de interacciones</p>
     </div>
     <div style="position: relative;">
         <i class="bi bi-search"
             style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
         <input type="text" id="userSearch" placeholder="Buscar usuario..."
-            style="padding: 10px 10px 10px 36px; border: 1px solid var(--border); border-radius: 10px; outline: none; width: 200px; font-family: inherit;">
+            style="padding: 10px 10px 10px 36px; border: 1px solid var(--border); border-radius: 10px; outline: none; width: 200px; font-family: inherit; background: rgba(0,0,0,0.3); color: white; transition: 0.3s;">
     </div>
 </div>
 
 <div class="card-std" style="padding: 0; overflow: hidden;" id="usersContainer">
     {% for user in users %}
     <div class="user-row" data-name="{{ user.first_name or 'Anónimo' }}"
-        style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; transition: background 0.2s;">
+        style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
         <div style="display: flex; align-items: center; gap: 15px;">
             <div
-                style="width: 40px; height: 40px; background: #E4F2FF; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                style="width: 40px; height: 40px; background: rgba(10, 132, 255, 0.15); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600;">
                 {{ (user.first_name or 'A')[:1] }}
             </div>
             <div>
-                <div style="font-weight: 600; font-size: 1rem;">{{ user.first_name or 'Anónimo' }}</div>
+                <div style="font-weight: 600; font-size: 1rem; color: var(--text-main);">{{ user.first_name or 'Anónimo' }}</div>
                 <div style="font-size: 0.8rem; color: var(--text-muted);">ID: {{ user._id }} &bull; {{
                     user.last_msg_date | human_time }}</div>
             </div>
         </div>
 
         <div style="display: flex; align-items: center; gap: 10px;">
-            <span class="badge-soft" style="background: #F2F2F7; color: var(--text-muted);">{{ user.msg_count }}
+            <span class="badge-soft" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">{{ user.msg_count }}
                 msgs</span>
             <a href="/user/{{ user._id }}" class="btn btn-sm"
-                style="text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--bg-body); color: var(--primary);">
+                style="text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(0,0,0,0.5); color: var(--primary); transition: 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
                 <i class="bi bi-chat-dots-fill"></i>
             </a>
             <a href="/user/{{ user._id }}/gallery" class="btn btn-sm"
-                style="text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #FFF4E5; color: #FF9500;">
+                style="text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255, 149, 0, 0.15); color: #FF9500; transition: 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
                 <i class="bi bi-images"></i>
             </a>
         </div>
