@@ -3,3 +3,4 @@ tunnels:
   backend:
     addr: backend_telegram:5000
     proto: http
+    domain: chronometrically-unbreaking-kyrie.ngrok-free.dev
