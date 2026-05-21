@@ -3,7 +3,7 @@ Servicio de Inteligencia Artificial
 Configuración y uso de Google Gemini
 """
 import google.generativeai as genai
-from config.settings import GOOGLE_API_KEY, SIMPLE_PROMPT, EXPERT_PROMPT, logger
+from config.settings import GOOGLE_API_KEY, SYSTEM_PROMPT, logger
 
 class AIService:
     """Gestiona la IA de Google Gemini"""
@@ -43,7 +43,7 @@ class AIService:
                 logger.info(f"✅ MODELO SELECCIONADO: {target}")
                 self.model = genai.GenerativeModel(
                     model_name=target,
-                    system_instruction=SIMPLE_PROMPT,
+                    system_instruction=SYSTEM_PROMPT,
                     generation_config=genai.types.GenerationConfig(
                         candidate_count=1,
                         max_output_tokens=2048,  # Respuestas completas
@@ -57,17 +57,16 @@ class AIService:
         except Exception as e:
             logger.error(f"❌ Error configurando IA: {e}")
     
-    def generate_response(self, prompt, mode='simple'):
+    def generate_response(self, prompt):
         """Genera respuesta de la IA"""
         if not self.model:
             return None
         
         try:
             # Crear modelo temporal con prompt correcto
-            system_prompt = EXPERT_PROMPT if mode == 'expert' else SIMPLE_PROMPT
             temp_model = genai.GenerativeModel(
                 model_name=self.model._model_name,
-                system_instruction=system_prompt,
+                system_instruction=SYSTEM_PROMPT,
                 generation_config=self.model._generation_config
             )
             

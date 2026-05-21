@@ -138,7 +138,7 @@ def process_message(ch, method, properties, body):
                             history = get_chat_context(chat_id) if source != 'web' else ""
                             prompt = f"EDAD DEL USUARIO: {age_info}\n\nHISTORIAL:\n{history}\n\nUSUARIO:\n{user_text}"
                             
-                            raw = ai.generate_response(prompt, 'simple')
+                            raw = ai.generate_response(prompt)
                             
                             if raw:
                                 # Analizar sentimiento para métricas (pero no mostrar al usuario)
