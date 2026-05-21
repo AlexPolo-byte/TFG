@@ -127,40 +127,40 @@ def process_message(ch, method, properties, body):
                         # Verificar caché
                         cache_key = f"ai:{hash(user_text)}"
                         cached = cache.get(cache_key)
-                    
-                    if cached:
-                        logger.info("⚡ Respuesta desde caché")
-                        response_text = cached['text']
-                        sentiment = cached['sentiment']
-                    else:
-                        # Generar respuesta
-                        age_info = user.get('age', 'Desconocida (asume adulto joven)')
-                        history = get_chat_context(chat_id) if source != 'web' else ""
-                        prompt = f"EDAD DEL USUARIO: {age_info}\n\nHISTORIAL:\n{history}\n\nUSUARIO:\n{user_text}"
                         
-                        raw = ai.generate_response(prompt, 'simple')
-                        
-                        if raw:
-                            # Analizar sentimiento para métricas (pero no mostrar al usuario)
-                            if "[POSITIVO]" in raw:
-                                sentiment = "POSITIVO"
-                                response_text = raw.replace("[POSITIVO]", "").strip()
-                            elif "[NEGATIVO]" in raw:
-                                sentiment = "NEGATIVO"
-                                response_text = raw.replace("[NEGATIVO]", "").strip()
-                            elif "[NEUTRO]" in raw:
-                                sentiment = "NEUTRO"
-                                response_text = raw.replace("[NEUTRO]", "").strip()
-                            else:
-                                # Si no hay etiqueta, asumimos neutro
-                                sentiment = "NEUTRO"
-                                response_text = raw.strip()
-                            
-                            # Guardar en caché
-                            cache.set(cache_key, {'text': response_text, 'sentiment': sentiment})
+                        if cached:
+                            logger.info("⚡ Respuesta desde caché")
+                            response_text = cached['text']
+                            sentiment = cached['sentiment']
                         else:
-                            response_text = "Error generando respuesta."
-                
+                            # Generar respuesta
+                            age_info = user.get('age', 'Desconocida (asume adulto joven)')
+                            history = get_chat_context(chat_id) if source != 'web' else ""
+                            prompt = f"EDAD DEL USUARIO: {age_info}\n\nHISTORIAL:\n{history}\n\nUSUARIO:\n{user_text}"
+                            
+                            raw = ai.generate_response(prompt, 'simple')
+                            
+                            if raw:
+                                # Analizar sentimiento para métricas (pero no mostrar al usuario)
+                                if "[POSITIVO]" in raw:
+                                    sentiment = "POSITIVO"
+                                    response_text = raw.replace("[POSITIVO]", "").strip()
+                                elif "[NEGATIVO]" in raw:
+                                    sentiment = "NEGATIVO"
+                                    response_text = raw.replace("[NEGATIVO]", "").strip()
+                                elif "[NEUTRO]" in raw:
+                                    sentiment = "NEUTRO"
+                                    response_text = raw.replace("[NEUTRO]", "").strip()
+                                else:
+                                    # Si no hay etiqueta, asumimos neutro
+                                    sentiment = "NEUTRO"
+                                    response_text = raw.strip()
+                                
+                                # Guardar en caché
+                                cache.set(cache_key, {'text': response_text, 'sentiment': sentiment})
+                            else:
+                                response_text = "Error generando respuesta."
+                    
                     except Exception as e:
                         logger.error(f"IA Error: {e}")
                         response_text = "Estoy saturado, dame un momento."
