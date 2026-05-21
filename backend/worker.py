@@ -123,10 +123,10 @@ def process_message(ch, method, properties, body):
                 
                 # Pregunta normal a la IA
                 elif ai.model:
-                try:
-                    # Verificar caché
-                    cache_key = f"ai:{hash(user_text)}"
-                    cached = cache.get(cache_key)
+                    try:
+                        # Verificar caché
+                        cache_key = f"ai:{hash(user_text)}"
+                        cached = cache.get(cache_key)
                     
                     if cached:
                         logger.info("⚡ Respuesta desde caché")
@@ -161,11 +161,11 @@ def process_message(ch, method, properties, body):
                         else:
                             response_text = "Error generando respuesta."
                 
-                except Exception as e:
-                    logger.error(f"IA Error: {e}")
-                    response_text = "Estoy saturado, dame un momento."
-            else:
-                response_text = "IA no disponible."
+                    except Exception as e:
+                        logger.error(f"IA Error: {e}")
+                        response_text = "Estoy saturado, dame un momento."
+                else:
+                    response_text = "IA no disponible."
         
         # === PROCESAR FOTO ===
         elif msg_type == 'photo':
