@@ -258,7 +258,7 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=<URL>/webhook/<TOKEN>"
 
 ## 📊 Arquitectura del Sistema
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │                  RASPBERRY PI                       │
 │                                                     │
@@ -279,10 +279,16 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=<URL>/webhook/<TOKEN>"
 │                                                     │
 │  ┌──────────────┐      ┌──────────────┐           │
 │  │  Prometheus  │◄────►│   Grafana    │           │
-│  └──────────────┘      └──────────────┘           │
-│                                                     │
-│  ┌──────────────┐                                  │
-│  │     ngrok    │ ◄── Túnel Público               │
+│  │ (+ Hardware) │      │  (Dashboard) │           │
+│  └──────────────┘      └──────┬───────┘           │
+│                               │                     │
+│  ┌──────────────┐      ┌──────▼───────┐           │
+│  │     Loki     │◄────►│    Nginx     │           │
+│  │   (Logs)     │      │   (Proxy)    │           │
+│  └──────────────┘      └──────┬───────┘           │
+│                               │                     │
+│  ┌──────────────┐             │                     │
+│  │     ngrok    │ ◄───────────┘                     │
 │  │    Tunnel    │                                  │
 │  └──────┬───────┘                                  │
 └─────────┼──────────────────────────────────────────┘
