@@ -130,16 +130,48 @@ services:
       - tfg_network
 
   # ----------------------------------------------------
-  # 5. MONITORIZACIÓN (Logs y Métricas)
+  # 5. MONITORIZACIÓN (Logs, Métricas y Hardware)
   # ----------------------------------------------------
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     restart: always
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
       - "9090:9090"
+    networks:
+      - tfg_network
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - tfg_network
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: cadvisor
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
     networks:
       - tfg_network
 
@@ -154,9 +186,12 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana/
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/grafana_dashboards/main_dashboard.json
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./grafana_datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana_datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./grafana_dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./grafana_dashboards:/etc/grafana/provisioning/dashboards/grafana_dashboards:ro
     networks:
       - tfg_network
 

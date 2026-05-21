@@ -1,0 +1,51 @@
+{
+  "title": "TFG Observabilidad Total",
+  "uid": "tfg-main-001",
+  "timezone": "browser",
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total Mensajes Procesados",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+      "targets": [{"expr": "sum(worker_messages_total)", "refId": "A", "datasource": "Prometheus"}],
+      "options": {"colorMode": "value", "graphMode": "area"}
+    },
+    {
+      "type": "gauge",
+      "title": "Uso CPU Raspberry",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+      "targets": [{"expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode='idle'}[5m])) * 100)", "refId": "A", "datasource": "Prometheus"}],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "min": 0, "max": 100}
+    },
+    {
+      "type": "stat",
+      "title": "Consumo de RAM",
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+      "targets": [{"expr": "100 * (1 - ((node_memory_MemFree_bytes + node_memory_Cached_bytes + node_memory_Buffers_bytes) / node_memory_MemTotal_bytes))", "refId": "A", "datasource": "Prometheus"}],
+      "options": {"colorMode": "value", "graphMode": "area"}
+    },
+    {
+      "type": "timeseries",
+      "title": "Latencia del Worker (Segundos)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "targets": [{"expr": "rate(worker_processing_seconds_sum[1m]) / rate(worker_processing_seconds_count[1m])", "refId": "A", "datasource": "Prometheus"}],
+      "options": {"tooltip": {"mode": "multi"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Peticiones HTTP a Flask (Rate)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+      "targets": [{"expr": "sum(rate(flask_http_requests_total[1m]))", "refId": "A", "datasource": "Prometheus"}],
+      "options": {"tooltip": {"mode": "single"}}
+    },
+    {
+      "type": "logs",
+      "title": "Consola de Logs en Vivo (Contenedores)",
+      "gridPos": {"h": 12, "w": 24, "x": 0, "y": 14},
+      "targets": [{"expr": "{container=~\".+\"}", "refId": "A", "datasource": "Loki"}],
+      "options": {"showLabels": true, "showTime": true, "wrapLogMessage": true, "sortOrder": "Descending"}
+    }
+  ]
+}
