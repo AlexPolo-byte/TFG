@@ -61,19 +61,23 @@ def api_stats():
             msgs.append({"time": t_str, "user": m['message']['chat'].get('first_name','Anon'), "text": txt[:40], "sentiment": m.get('sentiment','NEUTRO'), "status": m.get('status','unk'), "type": m.get('type','text')})
         except: pass
 
-    # Obtener URL de Ngrok
+    # Obtener URLs de Ngrok
     ngrok_url = "No disponible"
+    ngrok_grafana = "http://localhost:3000"
+    ngrok_rabbitmq = "http://localhost:15672"
     try:
         import urllib.request
         import json
-        # El nombre del servicio en docker-compose es 'ngrok'
         req = urllib.request.Request("http://ngrok:4040/api/tunnels")
         with urllib.request.urlopen(req, timeout=2) as response:
             tunnels_data = json.loads(response.read().decode())
-            if "tunnels" in tunnels_data and len(tunnels_data["tunnels"]) > 0:
-                ngrok_url = tunnels_data["tunnels"][0]["public_url"]
+            if "tunnels" in tunnels_data:
+                for t in tunnels_data["tunnels"]:
+                    if t["name"] == "backend": ngrok_url = t["public_url"]
+                    elif t["name"] == "grafana": ngrok_grafana = t["public_url"]
+                    elif t["name"] == "rabbitmq": ngrok_rabbitmq = t["public_url"]
     except Exception as e:
-        logger.warning(f"Ngrok no disponible (puede que estés en local): {e}")
+        logger.warning(f"Ngrok no disponible: {e}")
 
     return jsonify({
         "total": total, "today": today_cnt, "errors": err_cnt,
@@ -81,7 +85,9 @@ def api_stats():
         "sentiment_data": [s_map["POSITIVO"], s_map["NEUTRO"], s_map["NEGATIVO"]],
         "system": {"cpu": psutil.cpu_percent(), "ram": psutil.virtual_memory().percent},
         "messages": msgs, "last_updated": now.strftime('%H:%M:%S'),
-        "ngrok_url": ngrok_url
+        "ngrok_url": ngrok_url,
+        "ngrok_grafana": ngrok_grafana,
+        "ngrok_rabbitmq": ngrok_rabbitmq
     })
 
 @api_bp.route("/users")

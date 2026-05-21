@@ -32,14 +32,14 @@
             <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">MongoDB</span>
         </div>
     </a>
-    <a href="#" onclick="window.open('http://' + window.location.hostname + ':15672', '_blank'); return false;" style="text-decoration: none;">
+    <a href="#" id="btn-rabbitmq" target="_blank" style="text-decoration: none;">
         <div class="card-std"
             style="padding: 15px; display: flex; align-items: center; gap: 10px;">
             <i class="bi bi-envelope-fill" style="color: #FF6600; font-size: 1.2rem;"></i>
             <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">RabbitMQ</span>
         </div>
     </a>
-    <a href="#" onclick="window.open('http://' + window.location.hostname + ':3000', '_blank'); return false;" style="text-decoration: none;">
+    <a href="#" id="btn-grafana" target="_blank" style="text-decoration: none;">
         <div class="card-std"
             style="padding: 15px; display: flex; align-items: center; gap: 10px;">
             <i class="bi bi-graph-up-arrow" style="color: #F46800; font-size: 1.2rem;"></i>
@@ -245,7 +245,7 @@
             document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
             document.getElementById('last-update').innerText = data.last_updated;
 
-            // Actualizar URL de Ngrok
+            // Actualizar URLs
             const ngrokLink = document.getElementById('ngrok-link');
             if(data.ngrok_url && data.ngrok_url !== "No disponible") {
                 ngrokLink.innerText = data.ngrok_url;
@@ -253,6 +253,17 @@
             } else {
                 ngrokLink.innerText = "No disponible";
                 ngrokLink.removeAttribute('href');
+            }
+            
+            if(data.ngrok_rabbitmq) {
+                let url = data.ngrok_rabbitmq;
+                if(url.includes('localhost')) url = 'http://' + window.location.hostname + ':15672';
+                document.getElementById('btn-rabbitmq').href = url;
+            }
+            if(data.ngrok_grafana) {
+                let url = data.ngrok_grafana;
+                if(url.includes('localhost')) url = 'http://' + window.location.hostname + ':3000';
+                document.getElementById('btn-grafana').href = url;
             }
 
             // Actualizar Charts
