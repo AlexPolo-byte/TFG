@@ -1,0 +1,14 @@
+\section{Conclusiones y Trabajo Futuro}
+\label{sec:conclusiones}
+
+\subsection{Consecución de Objetivos}
+Se ha logrado desplegar con éxito una arquitectura de microservicios sobre hardware de bajo coste (Raspberry Pi), resolviendo el desafío de mantener la escalabilidad y resiliencia ante picos de peticiones. La integración del modelo fundacional Gemini 1.5 Pro ha dotado al sistema de capacidades de comprensión lectora, visión artificial y análisis de sentimiento, demostrando que es viable construir sistemas de IA interactivos y autónomos sin necesidad de servidores costosos.
+El uso de patrones como colas asíncronas (RabbitMQ) y túneles (Ngrok) ha demostrado ser crítico para la viabilidad de infraestructuras domésticas expuestas a Internet.
+
+\subsection{Líneas de Trabajo Futuro}
+A pesar del éxito de la implementación actual, la arquitectura modular diseñada invita a futuras mejoras:
+\begin{itemize}
+    \item \textbf{Migración a Kubernetes (K3s):} Evolucionar de Docker Compose a K3s para añadir autoescalado horizontal (HPA) al contenedor del \textit{worker}.
+    \item \textbf{Fine-Tuning de Modelos Locales:} Aprovechar aceleradores como Google Coral TPU para ejecutar modelos LLM destilados (como Llama 3 8B o Gemma) directamente en la Raspberry Pi de forma offline, reduciendo la dependencia de APIs externas.
+    \item \textbf{Soporte Multimedia Avanzado:} Procesamiento de notas de voz de Telegram transcribiéndolas a texto usando el modelo Whisper antes de pasarlas a Gemini.
+\end{itemize}

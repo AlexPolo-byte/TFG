@@ -1,0 +1,21 @@
+\section{Introducción}
+\label{sec:introduccion}
+
+\subsection{Motivación}
+El auge de la Inteligencia Artificial Generativa y la ubicuidad de las aplicaciones de mensajería como Telegram plantean una oportunidad única para democratizar el acceso a la IA interactiva.
+Actualmente existen muchos bots, pero carecen de memoria a largo plazo, entendimiento contextual multimedia (fotos) y arquitecturas resilientes.
+Además, la ejecución de estos sistemas en dispositivos de bajo consumo y coste, como una Raspberry Pi, presenta un desafío arquitectónico interesante.
+
+\subsection{Objetivos}
+El objetivo principal de este TFG es diseñar, implementar y desplegar una arquitectura de microservicios orientada a eventos en una Raspberry Pi que soporte un bot de Telegram con IA integrada (Google Gemini).
+Objetivos específicos:
+\begin{itemize}
+    \item Implementar un backend en Python (Flask) para la recepción de webhooks de Telegram.
+    \item Desacoplar el procesamiento intensivo de IA mediante una cola de mensajes (RabbitMQ).
+    \item Persistir el contexto de las conversaciones en una base de datos NoSQL (MongoDB Atlas).
+    \item Implementar un sistema de observabilidad Cloud Native (Prometheus, Loki, Grafana, cAdvisor).
+    \item Exponer los servicios de manera segura al exterior utilizando un túnel (Ngrok) y un Proxy Inverso (Nginx).
+\end{itemize}
+
+\subsection{Alcance}
+El proyecto cubre desde el diseño conceptual hasta el despliegue en producción sobre Docker en la Raspberry Pi. No incluye el entrenamiento de un modelo de IA propio, sino la integración mediante API de un modelo de vanguardia existente (LLM).

@@ -1,0 +1,22 @@
+\section{Desarrollo e Implementación}
+\label{sec:implementacion}
+
+\subsection{Desarrollo del Backend API Web (Flask)}
+El backend se ha programado siguiendo los principios de Clean Architecture en Python 3.10. 
+El punto de entrada (\texttt{app.py}) inicializa la aplicación Flask, la conexión a la base de datos y expone el endpoint \texttt{/webhook/<TOKEN>} protegido mediante el propio token de Telegram como ruta estocástica.
+Para el panel de administración, se emplearon \textit{Blueprints} (\texttt{web/routes.py} y \texttt{api/routes.py}) separando la lógica de renderizado HTML de los endpoints JSON asíncronos. La seguridad del dashboard se gestiona mediante \texttt{Flask-Login}.
+
+\subsection{Desarrollo del Motor de Inteligencia Artificial (Worker)}
+El \texttt{worker.py} es el corazón lógico del sistema. Su ciclo de vida es:
+\begin{enumerate}
+    \item Recibe el mensaje de RabbitMQ.
+    \item \textbf{Control de Tasa (Rate Limiting):} Verifica en Redis si el usuario ha superado su límite de peticiones.
+    \item \textbf{Validación:} Se aplica un filtro de edad y detección de URLs maliciosas.
+    \item \textbf{Recuperación de Contexto:} Consulta MongoDB para obtener los últimos 5 mensajes del usuario e inyectarlos en el \textit{Prompt} como historial, dotando al LLM de "memoria".
+    \item \textbf{Caché Semántica:} Antes de llamar a Gemini, se comprueba si una respuesta para ese exacto historial y texto ya existe en Redis para ahorrar costes de API.
+    \item \textbf{Inferencia (Google Gemini):} Se realiza la llamada multimodal (texto o imagen codificada en Base64) a la API. El LLM devuelve el texto y, de forma oculta en el prompt, una etiqueta de sentimiento (POSITIVO, NEGATIVO, NEUTRO).
+    \item \textbf{Persistencia y Envío:} Se guarda la respuesta y los metadatos en MongoDB y se llama a la API de Telegram para enviar el mensaje final al usuario.
+\end{enumerate}
+
+\subsection{Capa de Base de Datos}
+Se optó por MongoDB (NoSQL) al encajar perfectamente con la estructura basada en JSON asimétrico que devuelve la API de Telegram. Cada actualización (\textit{update}) se guarda íntegramente, permitiendo escalabilidad en los esquemas sin migraciones pesadas. Redis actúa como almacén clave-valor efímero de acceso ultrarrápido.

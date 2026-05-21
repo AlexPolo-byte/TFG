@@ -1,0 +1,19 @@
+\section{Pruebas y Monitorización}
+\label{sec:monitorizacion}
+
+\subsection{Estrategia de Observabilidad Cloud Native}
+Para asegurar la estabilidad del sistema en la Raspberry Pi, se implementó una estrategia de observabilidad integral (Fase 5 del proyecto) que evita el tradicional registro local en ficheros de texto en favor de una recolección centralizada de métricas y eventos.
+
+\subsection{Métricas de Infraestructura y Aplicación (Prometheus)}
+El servicio de \textbf{Prometheus} actúa como recolector (scraper) consultando puertos HTTP expuestos por el resto de contenedores cada 15 segundos:
+\begin{itemize}
+    \item \textbf{Métricas de Hardware:} Se usa \texttt{node-exporter} para medir la temperatura, CPU, RAM libre y uso de disco de la placa física de la Raspberry Pi.
+    \item \textbf{Métricas de Contenedores:} \texttt{cAdvisor} provee los recursos consumidos individualmente por cada microservicio.
+    \item \textbf{Métricas de Aplicación:} Tanto el backend (\texttt{app.py}) como el worker implementan un servidor HTTP interno usando la librería \texttt{prometheus\_client}. Exportan métricas clave de negocio como: \texttt{flask\_http\_requests\_total} (tráfico web), \texttt{worker\_messages\_total} (cantidad de mensajes procesados segmentados por tipo: texto/foto) y \texttt{worker\_processing\_seconds} (histograma de latencia de la IA).
+\end{itemize}
+
+\subsection{Agregación de Logs (Loki y Promtail)}
+La trazabilidad de errores se centraliza usando la dupla Grafana Loki. El agente \textbf{Promtail} está montado sobre el socket de Docker (\texttt{/var/run/docker.sock}), lo que le permite "escuchar" e interceptar la salida estándar (stdout/stderr) de todos los contenedores en tiempo real, parsearla y enviarla a Loki de manera ultra-comprimida.
+
+\subsection{Visualización (Grafana Dashboards as Code)}
+Se configuró Grafana mediante la técnica de "Dashboard as Code" empleando ficheros YAML de aprovisionamiento. Al arrancar, Grafana lee automáticamente \texttt{grafana\_datasources.yml} y carga un \texttt{main\_dashboard.json} maestro. Este cuadro de mandos corporativo permite visualizar la salud del clúster y la terminal de logs en una misma pantalla sin requerir configuraciones manuales.

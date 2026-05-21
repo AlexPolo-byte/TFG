@@ -1,0 +1,25 @@
+\section{Arquitectura del Sistema}
+\label{sec:arquitectura}
+
+\subsection{Visión General}
+La arquitectura diseñada se basa en microservicios dockerizados ejecutados en una Raspberry Pi. El sistema está dividido en cinco bloques funcionales principales: Entrada/Salida (Proxy), API Gateway (Backend Flask), Motor de Procesamiento (Worker), Capa de Datos (MongoDB y Redis) y Capa de Observabilidad (Tridente de Prometheus, Loki y Grafana).
+
+\subsection{Exposición Pública y Proxy Inverso}
+Para recibir los Webhooks de Telegram de forma segura sin abrir puertos en el router, se ha integrado \textbf{Ngrok}, que levanta un túnel TCP cifrado. 
+El tráfico entrante es recibido por un contenedor \textbf{Nginx} (puerto 8080) configurado como Reverse Proxy.
+El archivo \texttt{nginx.conf} rutea el tráfico basándose en subrutas:
+\begin{itemize}
+    \item \texttt{/}: Redirige al backend de Flask.
+    \item \texttt{/grafana/}: Redirige al panel de Grafana (puerto 3000). Se emplea la directiva \texttt{proxy\_redirect} para interceptar re-escrituras locales generadas por el propio Grafana y adaptarlas al contexto del túnel público.
+    \item \texttt{/rabbitmq/}: Redirige a la interfaz de administración de RabbitMQ (puerto 15672). Se inyecta la cabecera \texttt{Authorization: Basic} en tiempo de vuelo para realizar un auto-login seguro (Zero Trust interno).
+\end{itemize}
+
+\subsection{Desacoplamiento con RabbitMQ}
+Dado que el bot puede recibir un pico repentino de mensajes o fotos pesadas, y la API de Gemini tiene tiempos de respuesta de hasta varios segundos, procesar la IA sincrónicamente colapsaría el servidor web.
+Por ello, el backend en Flask (Productor) actúa únicamente como pasarela. Cuando recibe un JSON de Telegram, lo publica inmediatamente en una cola gestionada por RabbitMQ en la nube (CloudAMQP) y devuelve un código HTTP 200 a Telegram.
+El script \texttt{worker.py} (Consumidor) está subscrito a dicha cola de manera asíncrona, consumiendo los mensajes de uno en uno (estrategia Prefetch Count 1) garantizando la estabilidad del sistema por mucho que aumente el tráfico.
+
+\subsection{Arquitectura de Contenedores (Docker Compose)}
+La infraestructura se levanta de manera declarativa con un \texttt{docker-compose.yml} compuesto por 9 servicios conectados en una red puente privada (\texttt{tfg\_network}):
+\texttt{ngrok, nginx, backend\_telegram, worker, rabbitmq, redis, prometheus, grafana, loki, promtail, node-exporter, cadvisor}.
+Todos los contenedores tienen configuradas políticas de reinicio (\texttt{restart: unless-stopped}) asegurando alta disponibilidad tras cortes de luz en la Raspberry Pi.

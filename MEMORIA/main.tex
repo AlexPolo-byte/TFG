@@ -1,0 +1,41 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{a4paper, margin=2.5cm}
+
+% Configuración para bloques de código
+\lstset{
+    backgroundcolor=\color{lightgray!20},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    captionpos=b,
+    frame=single,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+}
+
+\title{Memoria del Trabajo de Fin de Grado \\ \large Arquitectura de Microservicios con IA en Raspberry Pi}
+\author{Tu Nombre Aquí}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\input{01_Introduccion}
+\input{02_EstadoArte}
+\input{03_Arquitectura}
+\input{04_Implementacion}
+\input{05_Monitorizacion}
+\input{06_Conclusiones}
+
+\end{document}

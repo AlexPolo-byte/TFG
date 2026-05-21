@@ -1,0 +1,19 @@
+\section{Estado del Arte}
+\label{sec:estado_arte}
+
+\subsection{Arquitecturas de Microservicios}
+A diferencia de las arquitecturas monolíticas, los microservicios dividen una aplicación en componentes independientes que se comunican a través de red. Esto permite el escalado individual y mejora la resiliencia. En este proyecto se justifica su uso para separar la recepción rápida de mensajes (Flask) del procesamiento lento de inferencia de IA.
+
+\subsection{Colas de Mensajería y RabbitMQ}
+En arquitecturas distribuidas, el patrón Productor-Consumidor es vital. Herramientas como RabbitMQ o Apache Kafka permiten almacenar eventos temporalmente si los consumidores están caídos o saturados. RabbitMQ implementa el protocolo AMQP y es ligero, ideal para entornos como la Raspberry Pi.
+
+\subsection{Inteligencia Artificial Generativa y Modelos de Lenguaje (LLMs)}
+La evolución desde modelos predictivos básicos hasta Transformers ha permitido el nacimiento de modelos fundacionales como GPT-4 o Google Gemini. Estos modelos pueden procesar texto y visión por computador de forma nativa. Para el TFG, se seleccionó Gemini 1.5 Pro debido a su enorme ventana de contexto y su capacidad multimodal nativa.
+
+\subsection{Observabilidad Cloud Native}
+El paradigma de "Observabilidad" trasciende a la monitorización clásica. Se basa en tres pilares: Métricas, Logs y Trazas.
+\begin{itemize}
+    \item \textbf{Métricas:} Prometheus se ha convertido en el estándar de la industria.
+    \item \textbf{Logs:} Loki, junto con Promtail, ofrece agregación de logs sin el coste de indexación de alternativas como ElasticSearch.
+    \item \textbf{Visualización:} Grafana se emplea para unificar estas fuentes de datos en cuadros de mando interactivos.
+\end{itemize}
