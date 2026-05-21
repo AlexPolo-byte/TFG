@@ -21,6 +21,21 @@ services:
       - tfg_network
 
   # ----------------------------------------------------
+  # 1.5 PROXY INVERSO (Nginx)
+  # ----------------------------------------------------
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:8080" # Expuesto localmente
+    networks:
+      - tfg_network
+
+
+  # ----------------------------------------------------
   # 2. BACKEND (Recibe mensajes y los manda a la nube)
   # ----------------------------------------------------
   backend_telegram:
@@ -86,6 +101,8 @@ services:
     ports:
       - "5672:5672"    # Puerto de comunicación
       - "15672:15672"  # Panel de administración web
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
@@ -135,6 +152,8 @@ services:
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
     volumes:
       - grafana_data:/var/lib/grafana
     networks:

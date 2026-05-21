@@ -1,6 +1,6 @@
 version: "2"
 tunnels:
   backend:
-    addr: backend_telegram:5000
+    addr: nginx:8080
     proto: http
     domain: chronometrically-unbreaking-kyrie.ngrok-free.dev
