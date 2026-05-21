@@ -256,14 +256,10 @@
             }
             
             if(data.ngrok_rabbitmq) {
-                let url = data.ngrok_rabbitmq;
-                if(url.includes('localhost')) url = 'http://' + window.location.hostname + ':15672';
-                document.getElementById('btn-rabbitmq').href = url;
+                document.getElementById('btn-rabbitmq').href = data.ngrok_rabbitmq;
             }
             if(data.ngrok_grafana) {
-                let url = data.ngrok_grafana;
-                if(url.includes('localhost')) url = 'http://' + window.location.hostname + ':3000';
-                document.getElementById('btn-grafana').href = url;
+                document.getElementById('btn-grafana').href = data.ngrok_grafana;
             }
 
             // Actualizar Charts

@@ -3,6 +3,7 @@ import time
 import pytz
 import psutil
 import docker
+import socket
 import logging
 from flask import Blueprint, jsonify, request
 from flask_login import login_required
@@ -12,6 +13,18 @@ from core.queue import mq_client
 
 logger = logging.getLogger(__name__)
 MADRID_TZ = pytz.timezone('Europe/Madrid')
+
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -63,8 +76,10 @@ def api_stats():
 
     # Obtener URLs de Ngrok
     ngrok_url = "No disponible"
-    ngrok_grafana = "http://localhost:3000"
-    ngrok_rabbitmq = "http://localhost:15672"
+    local_ip = get_local_ip()
+    ngrok_grafana = f"http://{local_ip}:3000"
+    ngrok_rabbitmq = f"http://{local_ip}:15672"
+    
     try:
         import urllib.request
         import json
@@ -74,8 +89,6 @@ def api_stats():
             if "tunnels" in tunnels_data:
                 for t in tunnels_data["tunnels"]:
                     if t["name"] == "backend": ngrok_url = t["public_url"]
-                    elif t["name"] == "grafana": ngrok_grafana = t["public_url"]
-                    elif t["name"] == "rabbitmq": ngrok_rabbitmq = t["public_url"]
     except Exception as e:
         logger.warning(f"Ngrok no disponible: {e}")
 
