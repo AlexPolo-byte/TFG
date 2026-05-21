@@ -118,6 +118,8 @@ def process_message(ch, method, properties, body):
                     response_text, sentiment = commands.handle_help()
                 elif user_text == "/stats":
                     response_text, sentiment = commands.handle_stats(chat_id)
+                elif user_text == "/reset":
+                    response_text, sentiment = commands.handle_reset(chat_id)
                 elif user_text.startswith("/edad"):
                     response_text, sentiment = commands.handle_edad(chat_id, user_text)
                 

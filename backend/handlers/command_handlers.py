@@ -23,6 +23,7 @@ class CommandHandlers:
         """Comando /help"""
         response = "📚 COMANDOS DISPONIBLES:\n\n"
         response += "/edad [numero] - Cambiar tu edad para adaptar mis respuestas\n"
+        response += "/reset - Borrar tu historial de mensajes y empezar de cero\n"
         response += "/stats - Ver tus estadísticas básicas\n\n"
         response += "💡 ¡Simplemente envíame un mensaje con cualquier duda de tecnología!"
         return response, "NEUTRO"
@@ -53,6 +54,13 @@ class CommandHandlers:
         response += f"🎂 Edad configurada: {stats['age']}\n\n"
         response += f"🤖 Sistema OK"
         return response, "POSITIVO"
+
+    @staticmethod
+    def handle_reset(chat_id):
+        """Comando /reset"""
+        user_manager.reset_history(chat_id)
+        response = "🗑️ **Historial borrado con éxito**.\n\nHe olvidado todo de lo que hemos hablado y también he borrado tu edad. Escribe /start o dime tu nueva /edad para empezar una nueva conversación desde cero."
+        return response, "NEUTRO"
 
 # Instancia global
 commands = CommandHandlers()

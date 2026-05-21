@@ -41,6 +41,12 @@ class UserManager:
         )
     
     @staticmethod
+    def reset_history(chat_id):
+        """Elimina todos los mensajes del usuario y resetea su perfil"""
+        db.messages.delete_many({"message.chat.id": chat_id})
+        db.users.update_one({"chat_id": chat_id}, {"$set": {"age": None}})
+
+    @staticmethod
     def get_stats(chat_id):
         """Obtiene estadísticas del usuario"""
         user = db.users.find_one({"chat_id": chat_id})
