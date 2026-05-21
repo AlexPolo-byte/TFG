@@ -61,12 +61,27 @@ def api_stats():
             msgs.append({"time": t_str, "user": m['message']['chat'].get('first_name','Anon'), "text": txt[:40], "sentiment": m.get('sentiment','NEUTRO'), "status": m.get('status','unk'), "type": m.get('type','text')})
         except: pass
 
+    # Obtener URL de Ngrok
+    ngrok_url = "No disponible"
+    try:
+        import urllib.request
+        import json
+        # El nombre del servicio en docker-compose es 'ngrok'
+        req = urllib.request.Request("http://ngrok:4040/api/tunnels")
+        with urllib.request.urlopen(req, timeout=2) as response:
+            tunnels_data = json.loads(response.read().decode())
+            if "tunnels" in tunnels_data and len(tunnels_data["tunnels"]) > 0:
+                ngrok_url = tunnels_data["tunnels"][0]["public_url"]
+    except Exception as e:
+        logger.warning(f"Ngrok no disponible (puede que estés en local): {e}")
+
     return jsonify({
         "total": total, "today": today_cnt, "errors": err_cnt,
         "chart_line": {"labels": labels, "data": vals},
         "sentiment_data": [s_map["POSITIVO"], s_map["NEUTRO"], s_map["NEGATIVO"]],
         "system": {"cpu": psutil.cpu_percent(), "ram": psutil.virtual_memory().percent},
-        "messages": msgs, "last_updated": now.strftime('%H:%M:%S')
+        "messages": msgs, "last_updated": now.strftime('%H:%M:%S'),
+        "ngrok_url": ngrok_url
     })
 
 @api_bp.route("/users")

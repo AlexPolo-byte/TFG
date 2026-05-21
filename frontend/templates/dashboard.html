@@ -14,6 +14,15 @@
     </div>
 </div>
 
+<div class="card-std mb-4 fade-in" style="margin-bottom: 24px; padding: 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(0, 122, 255, 0.1); border: 1px solid rgba(0, 122, 255, 0.3);">
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <i class="bi bi-globe" style="color: #0A84FF; font-size: 1.2rem;"></i>
+        <span style="color: var(--text-main); font-weight: 600; font-size: 0.95rem;">Túnel Público (Ngrok):</span>
+        <a href="#" id="ngrok-link" target="_blank" style="color: #0A84FF; text-decoration: none; font-family: monospace; font-size: 0.9rem;">Cargando...</a>
+    </div>
+    <span class="badge-soft" style="background: rgba(48, 209, 88, 0.2); color: #30D158;">Online</span>
+</div>
+
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 24px;"
     class="fade-in">
     <a href="https://cloud.mongodb.com" target="_blank" style="text-decoration: none;">
@@ -235,6 +244,16 @@
             document.getElementById('cpu-val').innerText = data.system.cpu;
             document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
             document.getElementById('last-update').innerText = data.last_updated;
+
+            // Actualizar URL de Ngrok
+            const ngrokLink = document.getElementById('ngrok-link');
+            if(data.ngrok_url && data.ngrok_url !== "No disponible") {
+                ngrokLink.innerText = data.ngrok_url;
+                ngrokLink.href = data.ngrok_url;
+            } else {
+                ngrokLink.innerText = "No disponible";
+                ngrokLink.removeAttribute('href');
+            }
 
             // Actualizar Charts
             activityChart.data.labels = data.chart_line.labels;
