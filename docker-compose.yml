@@ -156,6 +156,7 @@ services:
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana_datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
     networks:
       - tfg_network
 
