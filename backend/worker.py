@@ -27,16 +27,12 @@ from core.cache import cache
 from services.telegram_service import telegram
 from services.ai_service import ai
 from features.user_management import user_manager
-from features.favorites import favorites_manager
 from features.input_validator import input_validator
 from features.rate_limiter import rate_limiter
 
-# Import command handlers desde el directorio worker
-import importlib.util
-spec = importlib.util.spec_from_file_location("command_handlers", os.path.join(os.path.dirname(__file__), "worker", "command_handlers.py"))
-command_handlers_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(command_handlers_module)
-commands = command_handlers_module.CommandHandlers()
+# Import command handlers
+from worker.command_handlers import CommandHandlers
+commands = CommandHandlers()
 
 # Métricas
 MESSAGES_PROCESSED = Counter('worker_messages_total', 'Mensajes procesados', ['type'])
