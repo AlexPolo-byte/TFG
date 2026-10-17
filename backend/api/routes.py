@@ -169,8 +169,33 @@ def api_stats():
     total_processed = messages_collection.count_documents({"status": "procesado_ia"})
     success_rate = round((total_processed / total * 100), 1) if total > 0 else 100.0
 
+    # Estadísticas de usuarios y desglose generacional
+    total_users = 0
+    demographics = {"kids": 0, "adults": 0, "seniors": 0, "unassigned": 0}
+    try:
+        total_users = db.users.count_documents({})
+        for u in db.users.find({}, {"age": 1}):
+            age = u.get("age")
+            if age is not None:
+                try:
+                    age_int = int(age)
+                    if age_int <= 12:
+                        demographics["kids"] += 1
+                    elif age_int >= 65:
+                        demographics["seniors"] += 1
+                    else:
+                        demographics["adults"] += 1
+                except (ValueError, TypeError):
+                    demographics["unassigned"] += 1
+            else:
+                demographics["unassigned"] += 1
+    except Exception as e:
+        logger.warning(f"Error obteniendo demografía de usuarios: {e}")
+
     return jsonify({
         "total": total, "today": today_cnt, "errors": err_cnt,
+        "total_users": total_users,
+        "demographics": demographics,
         "chart_line": {"labels": labels, "data": vals},
         "sentiment_data": [s_map["POSITIVO"], s_map["NEUTRO"], s_map["NEGATIVO"]],
         "system": {
