@@ -204,7 +204,7 @@ def process_message(ch, method, properties, body):
             # Solo guardamos en caché para que la web lo lea mediante polling
             logger.info(f"⚡ Guardando respuesta en caché para web (session_id={chat_id})")
             cache_key = f"web:{chat_id}"
-            cache.set(cache_key, {"text": response_text, "timestamp": time.time()}, ttl=60)
+            cache.set(cache_key, {"text": response_text, "timestamp": time.time()}, ttl=300)
         else:
             # Guardar en MongoDB (persistente para Telegram)
             logger.info(f"💾 Guardando respuesta para chat_id={chat_id}, message_id={message_id}")

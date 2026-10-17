@@ -442,8 +442,9 @@
                 <i class="bi bi-chat-heart-fill"></i>
             </div>
             <h2>¡Hola!</h2>
-            <p>Dinos cómo te llamas para que Alex pueda dirigirse a ti en la conversación.</p>
+            <p>Dinos tu nombre y edad para que Alex adapte sus explicaciones exactamente a ti:</p>
             <input type="text" id="username-in" placeholder="Tu nombre...">
+            <input type="number" id="age-in" placeholder="Tu edad (ej: 25)..." style="margin-top: 10px;" min="5" max="110">
             <button onclick="saveUser()">Comenzar a Chatear ✨</button>
         </div>
     </div>
@@ -462,7 +463,6 @@
         }
 
         let username = localStorage.getItem('chat_username');
-        let last = Date.now() / 1000;
 
         if (!username) {
             document.getElementById('id-modal').style.display = 'flex';
@@ -470,10 +470,21 @@
 
         function saveUser() {
             const u = document.getElementById('username-in').value.trim();
+            const a = document.getElementById('age-in').value.trim();
             if (u) {
                 username = u;
                 localStorage.setItem('chat_username', username);
                 document.getElementById('id-modal').style.display = 'none';
+                if (a) {
+                    fetch('/api/web/send', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'ngrok-skip-browser-warning': 'true'
+                        },
+                        body: JSON.stringify({ text: '/edad ' + a, session_id: sid, username: username })
+                    }).catch(() => {});
+                }
             }
         }
 
@@ -520,23 +531,29 @@
                     'ngrok-skip-browser-warning': 'true'
                 },
                 body: JSON.stringify({ text: t, session_id: sid, username: username || "Persona" })
-            }).catch(() => { 
+            }).then(r => {
+                if (!r.ok) {
+                    throw new Error('HTTP ' + r.status);
+                }
+            }).catch(err => { 
+                console.error('Error enviando mensaje:', err);
                 document.getElementById('typing').style.display = 'none';
+                add('⚠️ No se pudo enviar el mensaje. Comprueba la conexión.', false);
             });
         }
         
         document.getElementById('in').addEventListener('keypress', e => { if (e.key === 'Enter') s() });
         document.getElementById('username-in').addEventListener('keypress', e => { if (e.key === 'Enter') saveUser() });
+        document.getElementById('age-in').addEventListener('keypress', e => { if (e.key === 'Enter') saveUser() });
 
         // Polling para leer la respuesta de Alex
         setInterval(() => {
-            fetch(`/api/web/poll?session_id=${sid}&last_check=${last}`, {
+            fetch(`/api/web/poll?session_id=${sid}`, {
                 headers: { 'ngrok-skip-browser-warning': 'true' }
             }).then(r => r.json()).then(d => {
                 if (d.messages && d.messages.length > 0) {
                     d.messages.forEach(u => { 
                         add(u.text, false); 
-                        last = Math.max(last, u.timestamp); 
                     });
                 }
             }).catch(() => { });

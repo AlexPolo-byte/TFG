@@ -25,9 +25,23 @@ class TelegramService:
                 data['reply_to_message_id'] = reply_to
             
             response = requests.post(url, json=data, timeout=10)
-            return response.status_code == 200
+            if response.status_code == 200:
+                return True
+            
+            # Si falló por reply_to, reintentar sin reply_to
+            if reply_to:
+                logger.warning(f"⚠️ Telegram rechazó mensaje con reply_to ({response.status_code}): {response.text}. Reintentando directo...")
+                data.pop('reply_to_message_id', None)
+                retry_res = requests.post(url, json=data, timeout=10)
+                if retry_res.status_code == 200:
+                    return True
+                logger.error(f"❌ Telegram API error {retry_res.status_code}: {retry_res.text}")
+                return False
+            
+            logger.error(f"❌ Telegram API error {response.status_code}: {response.text}")
+            return False
         except Exception as e:
-            logger.error(f"❌ Error enviando mensaje: {e}")
+            logger.error(f"❌ Error enviando mensaje a Telegram: {e}")
             return False
     
     @staticmethod

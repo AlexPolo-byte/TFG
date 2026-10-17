@@ -277,7 +277,7 @@ def api_logs():
 @api_bp.route("/web/send", methods=['POST'])
 def web_send():
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True, force=True) or {}
         text = data.get('text', '').strip()
         session_id = data.get('session_id', 'web_unknown')
         username = data.get('username', 'Web User')
@@ -302,12 +302,14 @@ def web_send():
 def web_poll():
     try:
         session_id = request.args.get('session_id', 'web_unknown')
-        last_check = float(request.args.get('last_check', 0))
         from core.cache import cache
         cached = cache.get(f"web:{session_id}")
         responses = []
-        if cached and cached.get('timestamp', 0) > last_check:
-            responses.append({"text": cached['text'], "timestamp": cached['timestamp']})
+        if cached and isinstance(cached, dict) and 'text' in cached:
+            responses.append({
+                "text": cached['text'],
+                "timestamp": cached.get('timestamp', time.time())
+            })
             cache.delete(f"web:{session_id}")
         return jsonify({"messages": responses})
     except Exception as e:

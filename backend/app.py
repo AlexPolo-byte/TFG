@@ -53,7 +53,16 @@ app.register_blueprint(web_bp)
 def webhook():
     if request.method == "POST":
         REQUEST_COUNT.inc()
-        u = request.get_json()
+        u = request.get_json(silent=True, force=True)
+        if not u:
+            try:
+                import json
+                u = json.loads(request.data.decode('utf-8'))
+            except Exception:
+                u = {}
+        if not u or not isinstance(u, dict):
+            return jsonify({"error": "invalid payload"}), 400
+            
         try:
             u['received_at'] = datetime.datetime.now().timestamp()
             db.messages.insert_one(u)
