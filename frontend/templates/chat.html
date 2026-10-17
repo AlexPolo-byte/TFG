@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>Chat con Alex IA &bull; Asistente Adaptativo</title>
     
+    <!-- Logo Favicon SVG -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%234f46e5'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='28' fill='url(%23g)'/%3E%3Ccircle cx='50' cy='50' r='36' fill='none' stroke='rgba(255,255,255,0.25)' stroke-width='3' stroke-dasharray='6 6'/%3E%3Cpath d='M34 68 L50 28 L66 68 M39 57 L61 57' stroke='%23ffffff' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Ccircle cx='70' cy='30' r='5' fill='%2310b981'/%3E%3C/svg%3E">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -326,11 +329,20 @@
     <div class="chat-header">
         <a href="/" class="btn-back"><i class="bi bi-chevron-left"></i> Volver al Panel</a>
         <div class="header-title-box">
-            <div class="header-avatar">
-                <i class="bi bi-robot"></i>
+            <div class="header-avatar" style="position: relative; overflow: visible; width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, var(--primary) 0%, #06b6d4 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);">
+                <!-- Glowing Aura -->
+                <div style="position: absolute; inset: -3px; background: linear-gradient(135deg, #4f46e5, #06b6d4); border-radius: 16px; filter: blur(6px); opacity: 0.45; z-index: 0;"></div>
+                <svg width="26" height="26" viewBox="0 0 100 100" fill="none" style="position: relative; z-index: 1;">
+                    <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.35)" stroke-width="3.5" stroke-dasharray="8 6"/>
+                    <path d="M28 72 L50 24 L72 72 M34 58 L66 58" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="50" cy="24" r="6.5" fill="#38bdf8"/>
+                    <circle cx="74" cy="40" r="4" fill="#34d399"/>
+                </svg>
             </div>
             <div>
-                <div class="header-title">Alex IA</div>
+                <div class="header-title" style="display: flex; align-items: center; gap: 6px;">
+                    Alex <span style="background: linear-gradient(135deg, var(--primary), #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">IA</span>
+                </div>
                 <div style="font-size: 0.72rem; color: #10b981; font-weight: 600;">● En línea &bull; RPi 5</div>
             </div>
         </div>

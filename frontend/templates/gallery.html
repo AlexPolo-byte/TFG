@@ -7,8 +7,16 @@
             <i class="bi bi-arrow-left"></i>
         </a>
         <div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <h1 style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--text-title);">Fotos Enviadas por {{ name }}</h1>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--primary) 0%, #06b6d4 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); flex-shrink: 0;">
+                    <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.35)" stroke-width="3" stroke-dasharray="8 6"/>
+                        <path d="M28 72 L50 24 L72 72 M34 58 L66 58" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h1 style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--text-title); display: flex; align-items: center; gap: 6px;">
+                    Fotos de {{ name }} &bull; <span style="background: linear-gradient(135deg, var(--primary), #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Alex IA</span>
+                </h1>
                 <span class="friendly-pill friendly-pill-warning">{{ images|length }} IMÁGENES</span>
             </div>
             <p style="color: var(--text-muted); font-size: 0.85rem; margin: 2px 0 0 0;">Fotos de aparatos tecnológicos y dudas explicadas por Alex</p>
