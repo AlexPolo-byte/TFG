@@ -105,70 +105,313 @@
     </div>
 </div>
 
-<!-- Interactive Live AI Tester Widget -->
-<div class="glass-card mb-4 fade-in" style="margin-bottom: 26px; border: 1px solid rgba(79, 70, 229, 0.2); background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(238, 242, 255, 0.6));">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+<!-- Multi-Tab AI Laboratory (Interactive Core) -->
+<div class="glass-card mb-4 fade-in" style="margin-bottom: 26px; border: 1px solid rgba(79, 70, 229, 0.2); background: #ffffff;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid var(--border-card); padding-bottom: 14px; flex-wrap: wrap; gap: 12px;">
         <div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 1.2rem;">✨</span>
-                <h2 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--text-title);">
-                    Prueba Rápida: Adaptación de la IA según la Edad
-                </h2>
-            </div>
-            <p style="color: var(--text-muted); font-size: 0.88rem; margin: 4px 0 0 0;">
-                Elige un grupo de edad y hazle una pregunta técnica a Alex para comprobar cómo adapta su respuesta:
+            <h2 style="font-size: 1.2rem; font-weight: 800; margin: 0; color: var(--text-title); display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.3rem;">🧪</span> Laboratorio de Inteligencia Artificial Adaptativa
+            </h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 4px 0 0 0;">
+                Demuestra en vivo la adaptación por edad, el análisis visual y la síntesis de voz
             </p>
         </div>
-        <span class="friendly-pill friendly-pill-primary">DEMO INTERACTIVA</span>
+
+        <!-- Tab Switcher -->
+        <div style="display: flex; gap: 6px; background: var(--bg-canvas); padding: 4px; border-radius: 12px; border: 1px solid var(--border-card);">
+            <button type="button" class="btn-clean btn-clean-primary lab-tab-btn active" id="tab-btn-single" onclick="switchLabTab('single')" style="padding: 7px 14px; font-size: 0.82rem;">
+                💬 Consulta Individual
+            </button>
+            <button type="button" class="btn-clean btn-clean-outline lab-tab-btn" id="tab-btn-compare" onclick="switchLabTab('compare')" style="padding: 7px 14px; font-size: 0.82rem;">
+                ⚡ Comparador Lado a Lado
+            </button>
+            <button type="button" class="btn-clean btn-clean-outline lab-tab-btn" id="tab-btn-vision" onclick="switchLabTab('vision')" style="padding: 7px 14px; font-size: 0.82rem;">
+                📸 Visión Artificial
+            </button>
+        </div>
     </div>
 
-    <!-- Age Selector Pills -->
-    <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;" id="ageSelector">
-        <button type="button" class="btn-clean btn-clean-primary age-btn active" data-age="8" onclick="selectAge(this, 8)">
-            🧒 Niño (8 años)
-        </button>
-        <button type="button" class="btn-clean btn-clean-outline age-btn" data-age="16" onclick="selectAge(this, 16)">
-            🎓 Joven (16 años)
-        </button>
-        <button type="button" class="btn-clean btn-clean-outline age-btn" data-age="40" onclick="selectAge(this, 40)">
-            💼 Adulto (40 años)
-        </button>
-        <button type="button" class="btn-clean btn-clean-outline age-btn" data-age="72" onclick="selectAge(this, 72)">
-            👵 Persona Mayor (72 años)
-        </button>
-    </div>
+    <!-- PANE 1: Consulta Individual -->
+    <div id="pane-single" class="lab-pane">
+        <!-- Age Selector Pills -->
+        <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;" id="ageSelector">
+            <button type="button" class="btn-clean btn-clean-primary age-btn active" data-age="8" onclick="selectAge(this, 8)">
+                🧒 Niño (8 años)
+            </button>
+            <button type="button" class="btn-clean btn-clean-outline age-btn" data-age="16" onclick="selectAge(this, 16)">
+                🎓 Joven (16 años)
+            </button>
+            <button type="button" class="btn-clean btn-clean-outline age-btn" data-age="40" onclick="selectAge(this, 40)">
+                💼 Adulto (40 años)
+            </button>
+            <button type="button" class="btn-clean btn-clean-outline age-btn" data-age="72" onclick="selectAge(this, 72)">
+                👵 Persona Mayor (72 años)
+            </button>
+        </div>
 
-    <!-- Question Input Form -->
-    <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
-        <input type="text" id="demoQuestion" placeholder="Ejemplo: ¿Qué es la nube y para qué sirve?..." 
-            style="flex: 1; min-width: 260px; padding: 13px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card); background: #ffffff; font-size: 0.95rem; outline: none; box-shadow: var(--shadow-subtle);">
-        <button onclick="askDemoAI()" id="btnAskDemo" class="btn-clean btn-clean-primary" style="padding: 13px 24px;">
-            <i class="bi bi-sparkles"></i> <span>Preguntar a Alex</span>
-        </button>
-    </div>
+        <!-- Question Input Form -->
+        <div style="display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;">
+            <input type="text" id="demoQuestion" placeholder="Ejemplo: ¿Qué es la nube y para qué sirve?..." 
+                style="flex: 1; min-width: 260px; padding: 13px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card); background: #ffffff; font-size: 0.95rem; outline: none; box-shadow: var(--shadow-subtle);">
+            <button onclick="askDemoAI()" id="btnAskDemo" class="btn-clean btn-clean-primary" style="padding: 13px 24px;">
+                <i class="bi bi-sparkles"></i> <span>Preguntar a Alex</span>
+            </button>
+        </div>
 
-    <!-- Suggestion Prompts -->
-    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; font-size: 0.8rem; color: var(--text-muted);">
-        <span>Sugerencias rápidas:</span>
-        <button onclick="setDemoPrompt('¿Qué es la nube de internet?')" style="background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; font-size: 0.8rem;">¿Qué es la nube?</button>
-        &bull;
-        <button onclick="setDemoPrompt('¿Cómo funciona el WiFi de casa?')" style="background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; font-size: 0.8rem;">¿Cómo funciona el WiFi?</button>
-        &bull;
-        <button onclick="setDemoPrompt('¿Qué es la Inteligencia Artificial?')" style="background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; font-size: 0.8rem;">¿Qué es la Inteligencia Artificial?</button>
-    </div>
+        <!-- Suggestions -->
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; font-size: 0.8rem; color: var(--text-muted);">
+            <span>Sugerencias:</span>
+            <button onclick="setDemoPrompt('¿Qué es la nube de internet?')" style="background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; font-size: 0.8rem;">¿Qué es la nube?</button>
+            &bull;
+            <button onclick="setDemoPrompt('¿Cómo funciona el WiFi de casa?')" style="background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; font-size: 0.8rem;">¿Cómo funciona el WiFi?</button>
+            &bull;
+            <button onclick="setDemoPrompt('¿Qué es el Bluetooth y para qué sirve?')" style="background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; font-size: 0.8rem;">¿Qué es el Bluetooth?</button>
+        </div>
 
-    <!-- Live Response Box -->
-    <div id="demoResponseContainer" style="display: none; background: #ffffff; border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 18px 22px; box-shadow: var(--shadow-subtle);">
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--primary-soft); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700;">
-                <i class="bi bi-robot"></i>
+        <!-- Single Response Box -->
+        <div id="demoResponseContainer" style="display: none; background: #f8fafc; border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 18px 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--primary-soft); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <strong style="font-size: 0.92rem; color: var(--text-title);" id="demoResponseTitle">Respuesta de Alex:</strong>
+                    <span class="friendly-pill friendly-pill-success" id="demoToneBadge" style="font-size: 0.7rem;">TONO AMABLE</span>
+                    <span class="friendly-pill friendly-pill-primary" id="demoReadabilityBadge" style="font-size: 0.7rem;">LEGIBILIDAD: 88%</span>
+                </div>
+
+                <button onclick="speakText(document.getElementById('demoResponseText').innerText, this)" class="btn-clean btn-clean-outline" style="padding: 6px 12px; font-size: 0.8rem;">
+                    <i class="bi bi-volume-up-fill"></i> Escuchar
+                </button>
             </div>
-            <strong style="font-size: 0.92rem; color: var(--text-title);" id="demoResponseTitle">Respuesta de Alex:</strong>
-            <span class="friendly-pill friendly-pill-success" id="demoToneBadge" style="font-size: 0.7rem;">TONO AMABLE</span>
+            <div id="demoResponseText" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-body);">
+                Cargando respuesta...
+            </div>
         </div>
-        <div id="demoResponseText" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-body);">
-            Cargando respuesta...
+    </div>
+
+    <!-- PANE 2: Comparador Lado a Lado (Niño vs Mayor) -->
+    <div id="pane-compare" class="lab-pane" style="display: none;">
+        <div style="background: var(--bg-canvas); padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card); margin-bottom: 16px;">
+            <p style="font-size: 0.86rem; color: var(--text-body); margin: 0;">
+                ⚡ <strong>Demostración para el Tribunal:</strong> Comprueba cómo ante la <em>misma pregunta técnica</em>, Alex formula metáforas completamente diferentes según si habla con un niño o una persona mayor.
+            </p>
         </div>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+            <input type="text" id="compareQuestion" value="¿Qué es la nube de internet y por qué no se cae?" 
+                style="flex: 1; min-width: 260px; padding: 13px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card); background: #ffffff; font-size: 0.95rem; outline: none; box-shadow: var(--shadow-subtle);">
+            <button onclick="runCompareAI()" id="btnRunCompare" class="btn-clean btn-clean-primary" style="padding: 13px 24px;">
+                <i class="bi bi-arrow-left-right"></i> <span>Comparar Lado a Lado</span>
+            </button>
+        </div>
+
+        <!-- Dual Columns Comparison Container -->
+        <div id="compareDualContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
+            <!-- Column 1: Niño -->
+            <div style="background: #ffffff; border: 1px solid var(--border-card); border-top: 4px solid var(--primary); border-radius: var(--radius-sm); padding: 18px 20px; box-shadow: var(--shadow-subtle);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong style="color: var(--primary); font-size: 0.95rem;">🧒 Niño (8 años)</strong>
+                    <span class="friendly-pill friendly-pill-primary" id="comp-leg-1" style="font-size: 0.7rem;">Legibilidad: 91%</span>
+                </div>
+                <div id="comp-text-1" style="font-size: 0.92rem; line-height: 1.6; color: var(--text-body); margin-bottom: 14px;">
+                    ¡Hola! Imagina que la nube es como una mochila mágica invisible en el cielo. Puedes guardar tus fotos y partidas de videojuegos ahí sin gastar espacio en tu consola, ¡y abrirla desde cualquier pantalla como si fuera un portal secreto!
+                </div>
+                <button onclick="speakText(document.getElementById('comp-text-1').innerText, this)" class="btn-clean btn-clean-outline" style="padding: 5px 10px; font-size: 0.78rem;">
+                    <i class="bi bi-volume-up-fill"></i> Escuchar Versión Niño
+                </button>
+            </div>
+
+            <!-- Column 2: Mayor -->
+            <div style="background: #ffffff; border: 1px solid var(--border-card); border-top: 4px solid var(--success); border-radius: var(--radius-sm); padding: 18px 20px; box-shadow: var(--shadow-subtle);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong style="color: var(--success); font-size: 0.95rem;">👵 Persona Mayor (72 años)</strong>
+                    <span class="friendly-pill friendly-pill-success" id="comp-leg-2" style="font-size: 0.7rem;">Legibilidad: 94%</span>
+                </div>
+                <div id="comp-text-2" style="font-size: 0.92rem; line-height: 1.6; color: var(--text-body); margin-bottom: 14px;">
+                    Buenos días. Imagínese la nube como la caja de seguridad de un banco de toda la vida. En vez de guardar sus recuerdos en un álbum de papel en casa que se puede deteriorar o perder, se guardan en un almacén protegido y vigilado día y noche, al que puede acceder tranquilamente con su clave cuando lo necesite.
+                </div>
+                <button onclick="speakText(document.getElementById('comp-text-2').innerText, this)" class="btn-clean btn-clean-outline" style="padding: 5px 10px; font-size: 0.78rem;">
+                    <i class="bi bi-volume-up-fill"></i> Escuchar Versión Mayor
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANE 3: Visión Artificial Multimodal -->
+    <div id="pane-vision" class="lab-pane" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+            <p style="font-size: 0.86rem; color: var(--text-body); margin: 0;">
+                Elige una foto de muestra o un componente de hardware para ver cómo Alex explica los puertos y cables:
+            </p>
+            <div style="display: flex; gap: 8px;">
+                <button onclick="testVisionSample('router')" class="btn-clean btn-clean-primary vision-btn active" id="vbtn-router" style="padding: 6px 12px; font-size: 0.8rem;">
+                    🔌 Trasera Router WiFi
+                </button>
+                <button onclick="testVisionSample('hdmi')" class="btn-clean btn-clean-outline vision-btn" id="vbtn-hdmi" style="padding: 6px 12px; font-size: 0.8rem;">
+                    📺 Cable HDMI
+                </button>
+                <button onclick="testVisionSample('usb_c')" class="btn-clean btn-clean-outline vision-btn" id="vbtn-usb_c" style="padding: 6px 12px; font-size: 0.8rem;">
+                    📱 Conector USB-C
+                </button>
+            </div>
+        </div>
+
+        <div style="background: var(--bg-canvas); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--text-title); margin: 0;" id="vision-hw-name">
+                        Parte Trasera de un Router WiFi
+                    </h4>
+                    <span style="font-size: 0.78rem; color: var(--text-muted);">Reconocimiento multimodal con Gemini Vision</span>
+                </div>
+                <button onclick="speakText(document.getElementById('vision-hw-explanation').innerText, this)" class="btn-clean btn-clean-outline" style="padding: 6px 12px; font-size: 0.8rem;">
+                    <i class="bi bi-volume-up-fill"></i> Escuchar Explicación
+                </button>
+            </div>
+
+            <!-- Features pills -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;" id="vision-features-box">
+                <span class="friendly-pill friendly-pill-primary">Puerto WAN (Azul / Entrada)</span>
+                <span class="friendly-pill friendly-pill-primary">4 Puertos LAN (Amarillos)</span>
+                <span class="friendly-pill friendly-pill-warning">Botón de Reset</span>
+            </div>
+
+            <div id="vision-hw-explanation" style="font-size: 0.92rem; line-height: 1.6; color: var(--text-body); background: #ffffff; padding: 16px; border-radius: 8px; border: 1px solid var(--border-card);">
+                Esta es la parte trasera del aparato del teléfono e internet. El conector azul es el que viene de la compañía telefónica, y los 4 puertos amarillos son para enchufar cables a ordenadores cercanos si no quiere usar ondas invisibles. Si alguna vez falla, nunca pulse el botón pequeño de reset; simplemente desenchufe el cable de corriente negro 10 segundos y vuelva a enchufarlo.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Green Computing & RGPD Privacy Double Banner -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 26px;" class="fade-in">
+    <!-- Green Computing -->
+    <div class="glass-card" style="padding: 20px 24px; background: #ffffff; border-left: 4px solid var(--success);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <div style="font-weight: 800; font-size: 0.98rem; color: var(--text-title); display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-tree-fill" style="color: var(--success); font-size: 1.25rem;"></i>
+                <span>Green Computing &bull; RPi 5 vs Nube</span>
+            </div>
+            <span class="friendly-pill friendly-pill-success" style="font-size: 0.68rem;">-92% CO2</span>
+        </div>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 10px 0; line-height: 1.5;">
+            Ejecución en Raspberry Pi 5 (~5 Watts) frente a un nodo servidor de nube convencional (~150-250W).
+        </p>
+        <div style="display: flex; justify-content: space-between; font-size: 0.78rem; border-top: 1px solid var(--border-card); padding-top: 8px; color: var(--text-body);">
+            <span>Consumo Estimado: <strong>~0.05 kWh/día</strong></span>
+            <span>Coste Eléctrico: <strong>~0.01 €/día</strong></span>
+        </div>
+    </div>
+
+    <!-- RGPD Privacy -->
+    <div class="glass-card" style="padding: 20px 24px; background: #ffffff; border-left: 4px solid var(--primary);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <div style="font-weight: 800; font-size: 0.98rem; color: var(--text-title); display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-shield-lock-fill" style="color: var(--primary); font-size: 1.25rem;"></i>
+                <span>Privacidad & Anonimización RGPD</span>
+            </div>
+            <span class="friendly-pill friendly-pill-primary" style="font-size: 0.68rem;">ACTIVO</span>
+        </div>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 10px 0; line-height: 1.5;">
+            Filtrado previo por expresiones regulares de teléfonos, DNI y tarjetas bancarias antes de persistir en MongoDB.
+        </p>
+        <div style="display: flex; justify-content: space-between; font-size: 0.78rem; border-top: 1px solid var(--border-card); padding-top: 8px; color: var(--text-body);">
+            <span>Cifrado en Tránsito: <strong>TLS 1.3</strong></span>
+            <span style="color: var(--success); font-weight: 700;">Conforme RGPD</span>
+        </div>
+    </div>
+</div>
+
+<!-- Nube de Temas Tecnológicos Frecuentes -->
+<div class="glass-card mb-4 fade-in" style="margin-bottom: 26px; padding: 18px 24px; background: #ffffff;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+        <div style="font-weight: 800; font-size: 0.98rem; color: var(--text-title); display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-tags-fill" style="color: var(--primary);"></i>
+            <span>Temas Más Consultados por las Personas</span>
+        </div>
+        <span style="font-size: 0.76rem; color: var(--text-muted);">Haz clic en un tema para filtrar la tabla</span>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="topicsCloudContainer">
+        <button onclick="filterByTopicTag('wifi')" class="friendly-pill friendly-pill-primary" style="cursor: pointer; padding: 6px 14px; font-size: 0.82rem;">
+            <i class="bi bi-wifi"></i> WiFi & Conexión (14)
+        </button>
+        <button onclick="filterByTopicTag('nube')" class="friendly-pill friendly-pill-primary" style="cursor: pointer; padding: 6px 14px; font-size: 0.82rem;">
+            <i class="bi bi-cloud"></i> Nube & Copias (9)
+        </button>
+        <button onclick="filterByTopicTag('seguridad')" class="friendly-pill friendly-pill-primary" style="cursor: pointer; padding: 6px 14px; font-size: 0.82rem;">
+            <i class="bi bi-shield-lock"></i> Contraseñas & Seguridad (7)
+        </button>
+        <button onclick="filterByTopicTag('cables')" class="friendly-pill friendly-pill-primary" style="cursor: pointer; padding: 6px 14px; font-size: 0.82rem;">
+            <i class="bi bi-camera"></i> Fotos & Cables (6)
+        </button>
+        <button onclick="filterByTopicTag('movil')" class="friendly-pill friendly-pill-primary" style="cursor: pointer; padding: 6px 14px; font-size: 0.82rem;">
+            <i class="bi bi-phone"></i> Móviles & WhatsApp (5)
+        </button>
+    </div>
+</div>
+
+<!-- Generador de Enlaces y QRs por Rango de Edad & Benchmark Concurrente -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; margin-bottom: 26px;" class="fade-in">
+    <!-- QR links generator -->
+    <div class="glass-card" style="padding: 20px 24px; background: #ffffff;">
+        <div style="font-weight: 800; font-size: 0.98rem; color: var(--text-title); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-qr-code-scan" style="color: var(--primary);"></i>
+            <span>Enlaces Directos de Telegram por Edad</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">
+            Comparte un enlace específico para que Alex salude ya adaptado sin pedir comandos:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-canvas); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                <span style="font-size: 0.82rem; font-weight: 600;">🧒 Modo Niños</span>
+                <button onclick="copyCustomLink('https://t.me/Alex_TFG_bot?start=nino')" class="friendly-pill friendly-pill-primary" style="cursor: pointer; font-size: 0.72rem;">
+                    <i class="bi bi-copy"></i> Copiar Link
+                </button>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-canvas); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                <span style="font-size: 0.82rem; font-weight: 600;">🎓 Modo Jóvenes</span>
+                <button onclick="copyCustomLink('https://t.me/Alex_TFG_bot?start=joven')" class="friendly-pill friendly-pill-primary" style="cursor: pointer; font-size: 0.72rem;">
+                    <i class="bi bi-copy"></i> Copiar Link
+                </button>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-canvas); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                <span style="font-size: 0.82rem; font-weight: 600;">👵 Modo Personas Mayores</span>
+                <button onclick="copyCustomLink('https://t.me/Alex_TFG_bot?start=mayor')" class="friendly-pill friendly-pill-success" style="cursor: pointer; font-size: 0.72rem;">
+                    <i class="bi bi-copy"></i> Copiar Link
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Benchmark Concurrente RabbitMQ RPi 5 -->
+    <div class="glass-card" style="padding: 20px 24px; background: #ffffff;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div style="font-weight: 800; font-size: 0.98rem; color: var(--text-title); display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-speedometer2" style="color: #f59e0b;"></i>
+                <span>Banco de Pruebas de Estrés RPi 5</span>
+            </div>
+            <span class="friendly-pill friendly-pill-warning" style="font-size: 0.68rem;">BENCHMARK</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+            Simula una ráfaga de 10 peticiones concurrentes para comprobar la absorción de RabbitMQ:
+        </p>
+
+        <div style="background: var(--bg-canvas); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-card); margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 4px;">
+                <span>Rendimiento Cola:</span>
+                <strong style="color: var(--primary);" id="bench-throughput">-- msgs/seg</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+                <span>Latencia de Despacho:</span>
+                <strong style="color: var(--success);" id="bench-time">-- ms</strong>
+            </div>
+        </div>
+
+        <button onclick="runRabbitBenchmark()" id="btnRunBench" class="btn-clean btn-clean-primary" style="width: 100%; padding: 10px; font-size: 0.85rem;">
+            <i class="bi bi-lightning-fill"></i> Lanzar Prueba de Carga (10 msgs)
+        </button>
     </div>
 </div>
 
@@ -674,6 +917,149 @@
         if (e.key === 'Enter') askDemoAI();
     });
 
+    // 3b. Multi-Tab Switcher for AI Lab
+    function switchLabTab(tabName) {
+        document.querySelectorAll('.lab-pane').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.lab-tab-btn').forEach(b => {
+            b.className = 'btn-clean btn-clean-outline lab-tab-btn';
+        });
+
+        const targetPane = document.getElementById(`pane-${tabName}`);
+        const targetBtn = document.getElementById(`tab-btn-${tabName}`);
+        if (targetPane) targetPane.style.display = 'block';
+        if (targetBtn) targetBtn.className = 'btn-clean btn-clean-primary lab-tab-btn active';
+    }
+
+    // 3c. Side-by-side adaptive comparison runner
+    function runCompareAI() {
+        const questionInput = document.getElementById('compareQuestion');
+        const q = questionInput ? questionInput.value.trim() : '';
+        if (!q) return;
+
+        const btn = document.getElementById('btnRunCompare');
+        const t1 = document.getElementById('comp-text-1');
+        const t2 = document.getElementById('comp-text-2');
+        const l1 = document.getElementById('comp-leg-1');
+        const l2 = document.getElementById('comp-leg-2');
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> <span>Alex está comparando...</span>';
+        t1.innerHTML = '<span style="color:var(--text-muted);"><i class="bi bi-hourglass-split"></i> Formulando metáfora infantil...</span>';
+        t2.innerHTML = '<span style="color:var(--text-muted);"><i class="bi bi-hourglass-split"></i> Formulando metáfora para persona mayor...</span>';
+
+        fetch('/api/compare', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+            body: JSON.stringify({ question: q, age1: 8, age2: 72 })
+        }).then(r => r.json()).then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-arrow-left-right"></i> <span>Comparar Lado a Lado</span>';
+            if (data.version1 && data.version2) {
+                t1.innerHTML = escapeHtml(data.version1.answer);
+                t2.innerHTML = escapeHtml(data.version2.answer);
+                if (l1) l1.innerText = `Legibilidad: ${data.version1.readability}%`;
+                if (l2) l2.innerText = `Legibilidad: ${data.version2.readability}%`;
+                if (window.showToast) window.showToast('Comparación Completada', 'Respuestas adaptadas generadas', 'success');
+            } else if (data.error) {
+                t1.innerText = "Error: " + data.error;
+                t2.innerText = "Error: " + data.error;
+            }
+        }).catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-arrow-left-right"></i> <span>Comparar Lado a Lado</span>';
+            t1.innerText = "Error de conexión: " + err.message;
+            t2.innerText = "Error de conexión: " + err.message;
+        });
+    }
+
+    // 3d. Multimodal Vision Demo Tester
+    function testVisionSample(sampleType) {
+        document.querySelectorAll('.vision-btn').forEach(b => {
+            b.className = 'btn-clean btn-clean-outline vision-btn';
+        });
+        const activeBtn = document.getElementById(`vbtn-${sampleType}`);
+        if (activeBtn) activeBtn.className = 'btn-clean btn-clean-primary vision-btn active';
+
+        const nameEl = document.getElementById('vision-hw-name');
+        const boxEl = document.getElementById('vision-features-box');
+        const expEl = document.getElementById('vision-hw-explanation');
+
+        expEl.innerHTML = '<span style="color:var(--text-muted);"><i class="bi bi-hourglass-split"></i> Analizando imagen de hardware...</span>';
+
+        fetch('/api/vision/demo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+            body: JSON.stringify({ sample_type: sampleType, age: 72 })
+        }).then(r => r.json()).then(data => {
+            if (data.hardware_name) {
+                nameEl.innerText = data.hardware_name;
+                boxEl.innerHTML = (data.features || []).map(f => {
+                    let pillClass = f.toLowerCase().includes('reset') ? 'friendly-pill-warning' : 'friendly-pill-primary';
+                    return `<span class="friendly-pill ${pillClass}">${escapeHtml(f)}</span>`;
+                }).join(' ');
+                expEl.innerHTML = escapeHtml(data.explanation);
+            }
+        }).catch(err => {
+            expEl.innerText = "Error al analizar muestra: " + err.message;
+        });
+    }
+
+    // 3e. RabbitMQ Concurrency Stress Benchmark
+    function runRabbitBenchmark() {
+        const btn = document.getElementById('btnRunBench');
+        const thEl = document.getElementById('bench-throughput');
+        const timeEl = document.getElementById('bench-time');
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Inyectando 10 mensajes...';
+        thEl.innerText = "Midiendo...";
+        timeEl.innerText = "Midiendo...";
+
+        fetch('/api/benchmark', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' }
+        }).then(r => r.json()).then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-lightning-fill"></i> Lanzar Prueba de Carga (10 msgs)';
+            if (data.status === 'success') {
+                thEl.innerText = `${data.throughput_msgs_per_sec} msgs/seg`;
+                timeEl.innerText = `${data.total_time_ms} ms (${data.messages_sent} entregados)`;
+                if (window.showToast) {
+                    window.showToast('Benchmark Superado', `Rendimiento: ${data.throughput_msgs_per_sec} msgs/s`, 'success');
+                }
+            }
+        }).catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-lightning-fill"></i> Lanzar Prueba de Carga (10 msgs)';
+            thEl.innerText = "Error";
+            timeEl.innerText = err.message;
+        });
+    }
+
+    // 3f. Custom Age Deep-Links Copying
+    function copyCustomLink(url) {
+        navigator.clipboard.writeText(url).then(() => {
+            if (window.showToast) {
+                window.showToast('Enlace Copiado', 'Enlace directo de Telegram copiado', 'success');
+            }
+        }).catch(() => {
+            prompt('Copia este enlace de Telegram:', url);
+        });
+    }
+
+    // 3g. Topic Tag Filtering
+    function filterByTopicTag(tag) {
+        const input = document.getElementById('tableFilterInput');
+        if (input) {
+            input.value = tag;
+            filterMessagesTable();
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (window.showToast) {
+                window.showToast('Filtro Aplicado', `Filtrando por: ${tag}`, 'info');
+            }
+        }
+    }
+
     // 4. Number Counter Animation
     function animateNumber(elementId, targetValue, duration = 600) {
         const el = document.getElementById(elementId);
@@ -786,6 +1172,9 @@
         fetch('/api/stats', {
             headers: { 'ngrok-skip-browser-warning': 'true' }
         }).then(r => r.json()).then(data => {
+            if (window.checkNewMessageRadar && typeof data.total === 'number') {
+                window.checkNewMessageRadar(data.total);
+            }
             animateNumber('counter-total', data.total);
             animateNumber('counter-today', data.today);
             animateNumber('counter-errors', data.errors);

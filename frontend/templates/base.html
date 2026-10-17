@@ -64,6 +64,37 @@
             --transition-smooth: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        /* Theme: Dark Mode */
+        body.theme-dark {
+            --bg-canvas: #090d16;
+            --bg-card: rgba(17, 24, 39, 0.85);
+            --bg-card-solid: #111827;
+            --bg-surface-soft: #1f2937;
+            --bg-sidebar: rgba(15, 23, 42, 0.95);
+            --border-card: #374151;
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --text-title: #f8fafc;
+            --text-body: #cbd5e1;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+        }
+
+        /* Theme: High Contrast */
+        body.theme-contrast {
+            --bg-canvas: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-solid: #ffffff;
+            --bg-surface-soft: #f1f5f9;
+            --bg-sidebar: #ffffff;
+            --border-card: #000000;
+            --border-glass: #000000;
+            --text-title: #000000;
+            --text-body: #000000;
+            --text-muted: #111111;
+            --text-dim: #333333;
+            font-size: 104%;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -553,6 +584,33 @@
             </li>
         </ul>
 
+        <div class="nav-section-label" style="display:flex; justify-content:space-between; align-items:center; margin-top: 14px;">
+            <span>Herramientas TFG</span>
+        </div>
+        <ul class="nav-list" style="flex: initial; margin-bottom: 14px;">
+            <li class="nav-item">
+                <a href="#" onclick="openDemoTourModal(); return false;" style="color: var(--primary);">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    <span>Modo Demo TFG</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" onclick="openReportModal(); return false;">
+                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                    <span>Exportar Informe</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="nav-section-label" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>Accesibilidad Visual</span>
+        </div>
+        <div style="display: flex; gap: 6px; margin-bottom: 14px; padding: 0 4px;">
+            <button onclick="setTheme('light')" class="friendly-pill theme-btn" id="theme-btn-light" style="flex:1; justify-content:center; padding:5px 0; cursor:pointer;" title="Modo Claro">☀️ Claro</button>
+            <button onclick="setTheme('dark')" class="friendly-pill theme-btn" id="theme-btn-dark" style="flex:1; justify-content:center; padding:5px 0; cursor:pointer;" title="Modo Noche">🌙 Noche</button>
+            <button onclick="setTheme('contrast')" class="friendly-pill theme-btn" id="theme-btn-contrast" style="flex:1; justify-content:center; padding:5px 0; cursor:pointer;" title="Alto Contraste">👁️ Alto</button>
+        </div>
+
         <div class="nav-footer">
             <div class="hw-status-card">
                 <div class="hw-status-info">
@@ -673,7 +731,199 @@
                 setTimeout(() => toast.remove(), 300);
             }, 3500);
         };
+
+        // --- ACCESIBILIDAD Y TEMAS ---
+        function setTheme(theme) {
+            document.body.className = (theme === 'light') ? '' : `theme-${theme}`;
+            localStorage.setItem('alex_theme', theme);
+            document.querySelectorAll('.theme-btn').forEach(b => {
+                b.style.borderColor = 'var(--border-card)';
+                b.style.background = 'var(--bg-surface-soft)';
+            });
+            const activeBtn = document.getElementById(`theme-btn-${theme}`);
+            if (activeBtn) {
+                activeBtn.style.background = 'var(--primary-soft)';
+                activeBtn.style.borderColor = 'var(--primary)';
+            }
+        }
+        // Cargar tema guardado
+        const savedTheme = localStorage.getItem('alex_theme') || 'light';
+        setTheme(savedTheme);
+
+        // --- SÍNTESIS DE VOZ (Text-To-Speech) ---
+        window.speakText = function(text, btn = null) {
+            if (!('speechSynthesis' in window)) {
+                alert('Tu navegador no soporta síntesis de voz.');
+                return;
+            }
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                if (btn) btn.innerHTML = '<i class="bi bi-volume-up-fill"></i> Escuchar';
+                return;
+            }
+            const clean = text.replace(/<[^>]*>/g, '').replace(/\[(POSITIVO|NEUTRO|NEGATIVO)\]/g, '').trim();
+            const utter = new SpeechSynthesisUtterance(clean);
+            utter.lang = 'es-ES';
+            utter.rate = 0.95; // Ritmo pausado y accesible
+            if (btn) {
+                btn.innerHTML = '<i class="bi bi-stop-circle-fill"></i> Detener Voz';
+                utter.onend = () => { btn.innerHTML = '<i class="bi bi-volume-up-fill"></i> Escuchar'; };
+                utter.onerror = () => { btn.innerHTML = '<i class="bi bi-volume-up-fill"></i> Escuchar'; };
+            }
+            window.speechSynthesis.speak(utter);
+        };
+
+        // --- RADAR DE NUEVAS CONSULTAS Y CAMPANILLA ---
+        let lastMsgCount = -1;
+        window.checkNewMessageRadar = function(totalCount) {
+            if (lastMsgCount !== -1 && totalCount > lastMsgCount) {
+                playChimeSound(880, 0.2);
+                if (window.showToast) {
+                    window.showToast('¡Nueva Consulta en Telegram!', 'Un usuario acaba de enviar una pregunta a Alex', 'success');
+                }
+            }
+            lastMsgCount = totalCount;
+        };
+
+        function playChimeSound(freq = 660, duration = 0.15) {
+            try {
+                const aCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = aCtx.createOscillator();
+                const gain = aCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, aCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(freq * 1.5, aCtx.currentTime + duration);
+                gain.gain.setValueAtTime(0.08, aCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, aCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(aCtx.destination);
+                osc.start();
+                osc.stop(aCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        // --- MODAL MODO DEMO TFG (TRIBUNAL TOUR) ---
+        window.openDemoTourModal = function() {
+            document.getElementById('demoTourModal').style.display = 'flex';
+        };
+        window.closeDemoTourModal = function() {
+            document.getElementById('demoTourModal').style.display = 'none';
+        };
+
+        // --- MODAL EXPORTAR INFORME TFG ---
+        window.openReportModal = function() {
+            document.getElementById('reportModal').style.display = 'flex';
+        };
+        window.closeReportModal = function() {
+            document.getElementById('reportModal').style.display = 'none';
+        };
     </script>
+
+    <!-- Modal Modo Demo TFG (Guion para la defensa oral) -->
+    <div id="demoTourModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center;">
+        <div class="glass-card" style="background: var(--bg-card-solid); max-width: 580px; width: 92%; padding: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 38px; height: 38px; border-radius: 10px; background: var(--primary-soft); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <h3 style="font-size: 1.25rem; font-weight: 800; margin: 0; color: var(--text-title);">Guion de Presentación TFG</h3>
+                </div>
+                <button onclick="closeDemoTourModal()" style="background: none; border: none; font-size: 1.3rem; color: var(--text-muted); cursor: pointer;">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 20px;">
+                Sigue estos 4 pasos durante tu defensa oral de 10 minutos para mostrar al tribunal todas las fortalezas técnicas de tu proyecto:
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;">
+                <div style="background: var(--bg-canvas); padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+                    <strong style="color: var(--primary); font-size: 0.9rem;">1. Arquitectura Local en Raspberry Pi 5</strong>
+                    <div style="font-size: 0.82rem; color: var(--text-body); margin-top: 4px;">
+                        Muestra la barra superior de sensores de hardware (temperatura 49°C, RAM y uptime) y la matriz de los 4 microservicios (RabbitMQ, Redis, MongoDB y Gemini).
+                    </div>
+                </div>
+
+                <div style="background: var(--bg-canvas); padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+                    <strong style="color: var(--primary); font-size: 0.9rem;">2. Demostración Adaptativa Lado a Lado</strong>
+                    <div style="font-size: 0.82rem; color: var(--text-body); margin-top: 4px;">
+                        Usa la pestaña <em>"Comparar Niño vs Mayor"</em> con una pregunta como <em>"¿Qué es la nube?"</em> para evidenciar cómo el vocabulario y las metáforas cambian radicalmente.
+                    </div>
+                </div>
+
+                <div style="background: var(--bg-canvas); padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+                    <strong style="color: var(--primary); font-size: 0.9rem;">3. Análisis Multimodal de Hardware (Fotos)</strong>
+                    <div style="font-size: 0.82rem; color: var(--text-body); margin-top: 4px;">
+                        Demuestra la visión artificial con Gemini Vision explicando un conector HDMI o la trasera de un router para personas mayores.
+                    </div>
+                </div>
+
+                <div style="background: var(--bg-canvas); padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+                    <strong style="color: var(--primary); font-size: 0.9rem;">4. Accesibilidad y Green Computing</strong>
+                    <div style="font-size: 0.82rem; color: var(--text-body); margin-top: 4px;">
+                        Reproduce el audio en voz alta con el botón <em>🔊 Escuchar</em> y muestra la métrica de sostenibilidad energética (-92% CO2 frente a AWS).
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeDemoTourModal()" class="btn-clean btn-clean-primary" style="width: 100%; padding: 12px;">
+                <span>¡Entendido! Comenzar Demostración</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Exportar Informe TFG (Resumen Imprimible) -->
+    <div id="reportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center;">
+        <div class="glass-card" style="background: #ffffff; max-width: 620px; width: 92%; padding: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="bi bi-file-earmark-check-fill" style="color: var(--primary); font-size: 1.4rem;"></i>
+                    <h3 style="font-size: 1.25rem; font-weight: 800; margin: 0; color: #0f172a;">Informe Ejecutivo del Asistente</h3>
+                </div>
+                <button onclick="closeReportModal()" style="background: none; border: none; font-size: 1.3rem; color: #64748b; cursor: pointer;">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div id="printableReport" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.86rem; color: #334155; margin-bottom: 20px; line-height: 1.6;">
+                <div style="border-bottom: 2px solid #4f46e5; padding-bottom: 8px; margin-bottom: 14px;">
+                    <strong style="font-size: 1.05rem; color: #0f172a;">ALEX IA &bull; TRABAJO DE FIN DE GRADO 2026/2027</strong>
+                    <div style="font-size: 0.78rem; color: #64748b;">Nodo de Despliegue: Raspberry Pi 5 ARM64 &bull; Madrid</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                    <div><strong>Estado Sistema:</strong> <span style="color:#10b981;">100% Operativo</span></div>
+                    <div><strong>Modelo IA:</strong> Gemini 2.5 Flash</div>
+                    <div><strong>Broker Mensajería:</strong> RabbitMQ AMQP</div>
+                    <div><strong>Acelerador RAM:</strong> Redis Cache (TTL 2h)</div>
+                    <div><strong>Base de Datos:</strong> MongoDB Atlas Cluster</div>
+                    <div><strong>Consumo Energético:</strong> ~5W (Green IT)</div>
+                </div>
+
+                <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <strong style="color: #0f172a;">Cumplimiento de Objetivos TFG:</strong>
+                    <ul style="margin: 6px 0 0 18px; padding: 0;">
+                        <li>Adaptación generacional de vocabulario y metáforas según edad.</li>
+                        <li>Soporte multimodal para análisis de hardware y fotos de cables.</li>
+                        <li>Canal dual accesible: Telegram Bot (`@Alex_TFG_bot`) y Web Chat.</li>
+                        <li>Desacoplamiento asíncrono con tolerancia a picos de tráfico.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button onclick="window.print()" class="btn-clean btn-clean-primary" style="flex: 1; padding: 12px;">
+                    <i class="bi bi-printer-fill"></i> Imprimir / Guardar en PDF
+                </button>
+                <button onclick="closeReportModal()" class="btn-clean btn-clean-outline" style="padding: 12px 20px;">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
     {% block scripts %}{% endblock %}
 </body>
 

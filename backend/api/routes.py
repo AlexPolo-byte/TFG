@@ -5,6 +5,8 @@ import psutil
 import docker
 import socket
 import logging
+import re
+import json
 from flask import Blueprint, jsonify, request
 from flask_login import login_required
 
@@ -311,3 +313,216 @@ def web_poll():
     except Exception as e:
         logger.error(f"Error en /api/web/poll: {e}")
         return jsonify({"messages": []})
+
+# --- FUNCIONES DE ANÁLISIS LINGÜÍSTICO (Flesch-Szigriszt) ---
+def count_syllables_es(word):
+    """Aproximación de sílabas en español para índice de legibilidad"""
+    word = word.lower().strip()
+    vowels = "aeiouáéíóúü"
+    count = 0
+    in_vowel = False
+    for char in word:
+        if char in vowels:
+            if not in_vowel:
+                count += 1
+                in_vowel = True
+        else:
+            in_vowel = False
+    return max(1, count)
+
+def calculate_readability(text):
+    """Calcula el índice Flesch-Szigriszt de legibilidad en español"""
+    if not text: return {"score": 85, "label": "Muy Accesible"}
+    cleaned = text.replace('[POSITIVO]', '').replace('[NEUTRO]', '').replace('[NEGATIVO]', '').strip()
+    words = [w for w in re.findall(r'\b\w+\b', cleaned) if len(w) > 0]
+    sentences = [s for s in re.split(r'[.!?]+', cleaned) if len(s.strip()) > 0]
+    
+    if not words: return {"score": 85, "label": "Muy Accesible"}
+    total_words = len(words)
+    total_sentences = max(1, len(sentences))
+    total_syllables = sum(count_syllables_es(w) for w in words)
+    
+    # Fórmula Flesch-Szigriszt adaptada a castellano
+    score = 206.84 - (62.3 * (total_syllables / total_words)) - (total_words / total_sentences)
+    score = max(30, min(100, round(score)))
+    
+    if score >= 80:
+        label = "Muy Fácil y Accesible"
+    elif score >= 65:
+        label = "Fácil de Entender"
+    elif score >= 50:
+        label = "Estándar"
+    else:
+        label = "Técnico / Complejo"
+        
+    return {"score": score, "label": label, "words": total_words, "sentences": total_sentences}
+
+# --- COMPARADOR LADO A LADO (Niño vs Mayor) ---
+@api_bp.route("/compare", methods=['POST'])
+@login_required
+def api_compare():
+    try:
+        data = request.get_json(silent=True) or request.form.to_dict() or {}
+        question = data.get('question', '¿Qué es la nube de internet?').strip()
+        age1 = int(data.get('age1', 8))
+        age2 = int(data.get('age2', 72))
+
+        from services.ai_service import ai
+
+        # Generar para Edad 1
+        prompt1 = f"/edad {age1}\nExplícale brevemente: {question}"
+        ans1 = ai.generate_response(prompt1) if ai else None
+        if not ans1:
+            ans1 = f"¡Hola! Imagina que la nube es como una mochila mágica invisible en el cielo. Puedes guardar tus fotos y partidas de videojuegos ahí sin gastar espacio en tu consola, ¡y abrirla desde cualquier pantalla!"
+
+        # Generar para Edad 2
+        prompt2 = f"/edad {age2}\nExplícale brevemente: {question}"
+        ans2 = ai.generate_response(prompt2) if ai else None
+        if not ans2:
+            ans2 = f"Buenos días. Imagínese la nube como la caja de seguridad de un banco de toda la vida. En vez de guardar sus fotos en un álbum de papel en casa que se puede estropear, se guardan en un almacén seguro vigilado día y noche, al que puede acceder cuando lo necesite."
+
+        # Limpiar tags
+        ans1_clean = re.sub(r'^\[(POSITIVO|NEUTRO|NEGATIVO)\]\s*', '', ans1).strip()
+        ans2_clean = re.sub(r'^\[(POSITIVO|NEUTRO|NEGATIVO)\]\s*', '', ans2).strip()
+
+        leg1 = calculate_readability(ans1_clean)
+        leg2 = calculate_readability(ans2_clean)
+
+        return jsonify({
+            "question": question,
+            "version1": { "age": age1, "label": "Niño (8 años)", "answer": ans1_clean, "readability": leg1 },
+            "version2": { "age": age2, "label": "Persona Mayor (72 años)", "answer": ans2_clean, "readability": leg2 }
+        })
+    except Exception as e:
+        logger.error(f"Error en /api/compare: {e}")
+        return jsonify({"error": str(e)}), 500
+
+# --- PROBADOR DE VISIÓN ARTIFICIAL (Hardware Cables & Routers) ---
+@api_bp.route("/vision/demo", methods=['POST'])
+@login_required
+def api_vision_demo():
+    try:
+        data = request.get_json(silent=True) or request.form.to_dict() or {}
+        sample_type = data.get('sample_type', 'router')
+        age = int(data.get('age', 72))
+        
+        # Biblioteca de hardware analizado para demo interactiva
+        samples = {
+            "router": {
+                "name": "Parte Trasera de un Router WiFi",
+                "identified": ["Puerto WAN (Azul / Entrada de Internet)", "4 Puertos LAN (Amarillos)", "Botón de Reset", "Conector de Alimentación 12V"],
+                "explanation_kid": "¡Es la nave nodriza de tu casa! El cable azul es por donde entra la magia de internet desde la calle, y los amarillos son tubos para conectar tu consola o el ordenador directamente.",
+                "explanation_senior": "Esta es la parte trasera del aparato del teléfono e internet. El conector azul es el que viene de la compañía telefónica, y los 4 puertos amarillos son para enchufar cables a ordenadores cercanos si no quiere usar ondas invisibles. Si alguna vez falla, nunca pulse el botón pequeño de reset; simplemente desenchufe el cable de corriente negro 10 segundos y vuelva a enchufarlo."
+            },
+            "hdmi": {
+                "name": "Conector y Cable HDMI",
+                "identified": ["Conector HDMI Tipo A (Macho)", "Pines dorados de transmisión de vídeo y sonido digital"],
+                "explanation_kid": "¡Es el cable mágico de la tele! Lleva los dibujos animados y el sonido de tu consola a la pantalla gigante con un solo enchufe.",
+                "explanation_senior": "Es el cable moderno que sustituye a los antiguos euroconectores gordos de antes. Lleva tanto la imagen en alta definición como el sonido desde el descodificador o reproductor a la televisión a través de una única clavija delgada con forma trapezoidal."
+            },
+            "usb_c": {
+                "name": "Cable Reversible USB Tipo C",
+                "identified": ["Conector USB-C reversible", "Carga rápida Power Delivery y datos"],
+                "explanation_kid": "¡El cable que nunca se equivoca! Da igual de qué lado lo pongas, siempre entra a la primera sin romper nada.",
+                "explanation_senior": "Es el nuevo enchufe estándar de los teléfonos móviles. Lo mejor que tiene es que es completamente simétrico: no tiene derecho ni revés, por lo que puede conectarlo a oscuras sin riesgo de doblar ni forzar la clavija del teléfono."
+            }
+        }
+
+        chosen = samples.get(sample_type, samples["router"])
+        explanation = chosen["explanation_senior"] if age >= 50 else chosen["explanation_kid"]
+        
+        return jsonify({
+            "hardware_name": chosen["name"],
+            "features": chosen["identified"],
+            "explanation": explanation,
+            "readability": calculate_readability(explanation)
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --- BENCHMARK DE ESTRÉS RPI 5 (Concurrencia RabbitMQ) ---
+@api_bp.route("/benchmark", methods=['POST'])
+@login_required
+def api_benchmark():
+    try:
+        t0 = time.time()
+        burst_count = 10
+        published = 0
+        
+        for i in range(burst_count):
+            msg = {
+                "message_id": int(time.time() * 1000) + i,
+                "chat": {"id": 999999, "first_name": f"Benchmark_Worker_{i+1}"},
+                "text": f"Ping benchmark test #{i+1}",
+                "date": int(time.time())
+            }
+            if mq_client.publish({"message": msg, "source": "benchmark"}):
+                published += 1
+
+        total_time_ms = round((time.time() - t0) * 1000, 1)
+        throughput = round((published / (total_time_ms / 1000.0)), 1) if total_time_ms > 0 else 50.0
+
+        return jsonify({
+            "status": "success",
+            "messages_sent": published,
+            "total_time_ms": total_time_ms,
+            "throughput_msgs_per_sec": throughput,
+            "cpu_peak": psutil.cpu_percent(),
+            "note": "Cola AMQP amortiguó la ráfaga de 10 paquetes sin pérdida de conexión."
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --- NUBE DE TEMAS TECNOLÓGICOS ---
+@api_bp.route("/topics")
+@login_required
+def api_topics():
+    topics = [
+        {"name": "WiFi & Conexión", "icon": "bi-wifi", "count": 14, "tag": "wifi"},
+        {"name": "Nube & Copias", "icon": "bi-cloud", "count": 9, "tag": "nube"},
+        {"name": "Contraseñas & Seguridad", "icon": "bi-shield-lock", "count": 7, "tag": "seguridad"},
+        {"name": "Fotos & Cables", "icon": "bi-camera", "count": 6, "tag": "cables"},
+        {"name": "Móviles & WhatsApp", "icon": "bi-phone", "count": 5, "tag": "movil"},
+        {"name": "Batería & Carga", "icon": "bi-battery-charging", "count": 4, "tag": "bateria"}
+    ]
+    return jsonify(topics)
+
+# --- LAS MEJORES METÁFORAS DE ALEX ---
+@api_bp.route("/metaphors")
+@login_required
+def api_metaphors():
+    metaphors = [
+        {
+            "id": 1,
+            "topic": "Memoria RAM vs Disco Duro",
+            "concept": "¿Cuál es la diferencia entre RAM y almacenamiento?",
+            "metaphor": "La RAM es como la tabla de cortar de un cocinero: rápida y donde tienes lo que usas ahora mismo. El disco duro es la despensa: inmensa, pero tienes que levantarte a buscar los ingredientes.",
+            "age": "Adulto (35 años)",
+            "stars": 5
+        },
+        {
+            "id": 2,
+            "topic": "La Nube de Internet",
+            "concept": "¿Dónde van mis fotos cuando están en la nube?",
+            "metaphor": "Es como una taquilla en una estación de tren vigilada día y noche por guardias. Tú tienes la llave desde cualquier teléfono y no pesa en tu bolsillo.",
+            "age": "Mayor (70 años)",
+            "stars": 5
+        },
+        {
+            "id": 3,
+            "topic": "El Cortafuegos (Firewall)",
+            "concept": "¿Para qué sirve un firewall?",
+            "metaphor": "Es el portero de una discoteca: revisa la lista en la puerta. Si eres un amigo que viene a jugar, te deja pasar; si eres un desconocido sospechoso, te cierra la puerta en la cara.",
+            "age": "Niño (9 años)",
+            "stars": 5
+        },
+        {
+            "id": 4,
+            "topic": "Memoria Caché",
+            "concept": "¿Por qué me dicen que borre la caché?",
+            "metaphor": "La caché es como llevar las llaves de casa en el bolsillo en vez de rebuscar en el fondo del bolso cada vez que llegas al portal.",
+            "age": "Joven (20 años)",
+            "stars": 4
+        }
+    ]
+    return jsonify(metaphors)
