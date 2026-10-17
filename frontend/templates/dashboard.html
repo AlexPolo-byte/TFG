@@ -85,9 +85,9 @@
             <div style="min-width: 0; flex: 1;">
                 <div style="font-weight: 700; font-size: 0.98rem; color: var(--text-title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Enlace Público Seguro</div>
                 <div style="font-size: 0.88rem; color: var(--primary); font-family: 'JetBrains Mono', monospace; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="ngrok-link-text">
-                    https://da.gd/alex-tfg
+                    https://spoo.me/alex-tfg
                 </div>
-                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Enlace limpio &bull; Redirige a Raspberry Pi 5</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Redirección directa inmediata &bull; Raspberry Pi 5</div>
             </div>
         </div>
         <div style="width: 100%;">
@@ -821,10 +821,10 @@
 
     // 2. Copy Tunnel URL with Toast Feedback
     function copyTunnelUrl() {
-        const cleanUrl = "https://da.gd/alex-tfg";
+        const cleanUrl = "https://spoo.me/alex-tfg";
         navigator.clipboard.writeText(cleanUrl).then(() => {
             if (window.showToast) {
-                window.showToast('Enlace Copiado', 'https://da.gd/alex-tfg copiado al portapapeles', 'success');
+                window.showToast('Enlace Copiado', 'https://spoo.me/alex-tfg copiado al portapapeles', 'success');
             }
         }).catch(() => {
             alert(cleanUrl);
@@ -1241,11 +1241,11 @@
                 if (slaEl) slaEl.innerText = `${data.sla.avg_latency}s`;
             }
 
-            // Link Ngrok / Acceso Limpio
-            currentNgrokUrl = "https://da.gd/alex-tfg";
+            // Link Ngrok / Acceso Limpio Directo
+            currentNgrokUrl = "https://spoo.me/alex-tfg";
             const ngrokLinkText = document.getElementById('ngrok-link-text');
             if (ngrokLinkText) {
-                ngrokLinkText.innerText = "https://da.gd/alex-tfg";
+                ngrokLinkText.innerText = "https://spoo.me/alex-tfg";
             }
 
             // Charts
