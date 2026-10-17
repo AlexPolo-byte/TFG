@@ -1,271 +1,367 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!-- Top Header Bar with Live Network Ping -->
+<!-- Top Header Bar -->
 <div class="d-flex justify-content-between align-items-center mb-4 fade-in"
-    style="display: flex; justify-content: space-between; margin-bottom: 28px; align-items: center; flex-wrap: wrap; gap: 16px;">
+    style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center; flex-wrap: wrap; gap: 16px;">
     <div>
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
-            <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.85rem; font-weight: 700; letter-spacing: -0.5px; margin: 0; background: linear-gradient(135deg, #ffffff 30%, var(--primary) 70%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                Mission Control
+            <h1 style="font-size: 1.85rem; font-weight: 800; letter-spacing: -0.5px; margin: 0; color: var(--text-title);">
+                Panel de Supervisión de Alex
             </h1>
-            <span class="tech-pill tech-pill-primary" style="animation: pulseWave 3s infinite;">
-                <i class="bi bi-broadcast"></i> TELEMETRY ACTIVE
+            <span class="friendly-pill friendly-pill-success" style="font-size: 0.76rem;">
+                <span class="live-dot pulse"></span>
+                ASISTENTE ACTIVO
             </span>
         </div>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
-            Centro de Operaciones Inteligente &bull; Nodo Madrid (RPi 5 ARM64)
+        <p style="color: var(--text-muted); font-size: 0.92rem; margin: 0;">
+            Explicaciones tecnológicas adaptadas a la edad de cada persona &bull; Servidor Raspberry Pi 5
         </p>
     </div>
     
-    <div style="display: flex; align-items: center; gap: 14px;">
-        <!-- Audio Chime Toggle -->
-        <button id="soundToggleBtn" onclick="toggleAudio()" class="tech-pill" style="cursor: pointer; background: rgba(0, 240, 255, 0.08); border-color: rgba(0, 240, 255, 0.3); color: var(--primary);" title="Efectos de sonido de telemetría">
-            <i class="bi bi-volume-up-fill" id="soundIcon"></i>
-            <span id="soundText">SFX ON</span>
-        </button>
-
-        <div style="text-align: right;">
-            <span style="font-size: 0.65rem; color: var(--text-dim); display: block; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.8px;">ÚLTIMA SINCRONIZACIÓN</span>
-            <span class="tech-pill" style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #ffffff;" id="last-update">Sincronizando...</span>
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="text-align: right; background: #ffffff; padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-card); box-shadow: var(--shadow-subtle);">
+            <span style="font-size: 0.68rem; color: var(--text-dim); display: block; font-weight: 700; text-transform: uppercase;">ÚLTIMA ACTUALIZACIÓN</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; color: var(--primary);" id="last-update">Sincronizando...</span>
         </div>
     </div>
 </div>
 
-<!-- Public Tunnel Card (Ngrok) with 3D Tilt -->
-<div class="glass-card tilt-card mb-4 fade-in" style="margin-bottom: 26px; padding: 20px 26px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(0, 240, 255, 0.08), rgba(99, 102, 241, 0.12)); border: 1px solid rgba(0, 240, 255, 0.35); cursor: pointer;" onclick="copyTunnelUrl()">
-    <div style="display: flex; align-items: center; gap: 16px;">
-        <div style="width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(99, 102, 241, 0.25)); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.35rem; box-shadow: 0 0 20px rgba(0, 240, 255, 0.3); border: 1px solid rgba(0, 240, 255, 0.4);">
-            <i class="bi bi-shield-lock-fill"></i>
-        </div>
-        <div>
-            <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 8px;">
-                <span>TÚNEL PÚBLICO CIFRADO (TLS 1.3 / HTTPS)</span>
-                <span class="tech-pill" style="font-size: 0.62rem; padding: 2px 8px;">CLICK TO COPY</span>
+<!-- Quick Access & Sharing Banner -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 26px;" class="fade-in">
+    
+    <!-- Card 1: Telegram Bot Access + QR Modal -->
+    <div class="glass-card" style="padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid #229ED9;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(34, 158, 217, 0.12); display: flex; align-items: center; justify-content: center; color: #229ED9; font-size: 1.5rem;">
+                <i class="bi bi-telegram"></i>
             </div>
-            <a href="#" id="ngrok-link" target="_blank" onclick="event.stopPropagation();" style="color: var(--primary); text-decoration: none; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; margin-top: 2px;">
-                Cargando túnel...
+            <div>
+                <div style="font-weight: 700; font-size: 0.98rem; color: var(--text-title);">Habla con Alex en Telegram</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Usuario: <strong>@Alex_TFG_bot</strong></div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <a href="https://t.me/Alex_TFG_bot" target="_blank" class="btn-clean btn-clean-primary" style="padding: 8px 14px; font-size: 0.82rem; background: #229ED9;">
+                <i class="bi bi-box-arrow-up-right"></i> Abrir
             </a>
+            <button onclick="toggleQRModal()" class="btn-clean btn-clean-outline" style="padding: 8px 12px; font-size: 0.82rem;" title="Ver código QR para móvil">
+                <i class="bi bi-qr-code"></i> QR
+            </button>
         </div>
     </div>
-    <div style="display: flex; align-items: center; gap: 12px;">
-        <span class="tech-pill tech-pill-success" style="padding: 6px 14px; font-size: 0.8rem;">
-            <span class="live-dot" style="width: 7px; height: 7px;"></span>
-            GATEWAY ONLINE
+
+    <!-- Card 2: Interactive Web Chat Access -->
+    <div class="glass-card" style="padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--primary);">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 48px; height: 48px; border-radius: 14px; background: var(--primary-soft); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.5rem;">
+                <i class="bi bi-chat-dots-fill"></i>
+            </div>
+            <div>
+                <div style="font-weight: 700; font-size: 0.98rem; color: var(--text-title);">Simulador en Web</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Prueba el chat desde este navegador</div>
+            </div>
+        </div>
+        <a href="/chat" class="btn-clean btn-clean-primary" style="padding: 8px 14px; font-size: 0.82rem;">
+            <span>Chatear</span> <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
+    <!-- Card 3: One-Click Public Link Sharing -->
+    <div class="glass-card" style="padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--success); cursor: pointer;" onclick="copyTunnelUrl()">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 48px; height: 48px; border-radius: 14px; background: var(--success-soft); display: flex; align-items: center; justify-content: center; color: var(--success); font-size: 1.5rem;">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div>
+                <div style="font-weight: 700; font-size: 0.98rem; color: var(--text-title);">Enlace Público Seguro</div>
+                <div style="font-size: 0.78rem; color: var(--primary); font-family: 'JetBrains Mono', monospace;" id="ngrok-link-text">
+                    Cargando enlace...
+                </div>
+            </div>
+        </div>
+        <span class="friendly-pill friendly-pill-primary" style="font-size: 0.72rem;">
+            <i class="bi bi-copy"></i> COPIAR
         </span>
     </div>
 </div>
 
-<!-- Quick External Access Stack with 3D Tilt -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; margin-bottom: 28px;" class="fade-in">
-    <a href="https://cloud.mongodb.com" target="_blank" style="text-decoration: none;" onclick="playChime(580)">
-        <div class="glass-card tilt-card" style="padding: 18px 22px; display: flex; align-items: center; gap: 16px; border-color: rgba(16, 185, 129, 0.25);">
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16, 185, 129, 0.16); display: flex; align-items: center; justify-content: center; color: #10b981; font-size: 1.35rem; box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);">
-                <i class="bi bi-database-fill"></i>
-            </div>
-            <div>
-                <div style="color: var(--text-main); font-weight: 700; font-size: 1rem; font-family: 'Space Grotesk', sans-serif;">MongoDB</div>
-                <div style="color: var(--text-dim); font-size: 0.74rem; font-family: 'JetBrains Mono', monospace;">Atlas Cluster M0</div>
-            </div>
+<!-- QR Code Modal (Hidden by default) -->
+<div id="qrModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(6px); z-index: 10000; align-items: center; justify-content: center;">
+    <div class="glass-card" style="background: #ffffff; max-width: 360px; width: 90%; text-align: center; padding: 32px 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--text-title);">Escanear con el Móvil</h3>
+            <button onclick="toggleQRModal()" style="background: none; border: none; font-size: 1.3rem; color: var(--text-muted); cursor: pointer;">
+                <i class="bi bi-x-lg"></i>
+            </button>
         </div>
-    </a>
-
-    <a href="/rabbitmq/" target="_blank" style="text-decoration: none;" onclick="playChime(640)">
-        <div class="glass-card tilt-card" style="padding: 18px 22px; display: flex; align-items: center; gap: 16px; border-color: rgba(245, 158, 11, 0.25);">
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245, 158, 11, 0.16); display: flex; align-items: center; justify-content: center; color: #f59e0b; font-size: 1.35rem; box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);">
-                <i class="bi bi-inboxes-fill"></i>
-            </div>
-            <div>
-                <div style="color: var(--text-main); font-weight: 700; font-size: 1rem; font-family: 'Space Grotesk', sans-serif;">RabbitMQ</div>
-                <div style="color: var(--text-dim); font-size: 0.74rem; font-family: 'JetBrains Mono', monospace;">Broker AMQP</div>
-            </div>
+        <p style="font-size: 0.86rem; color: var(--text-muted); margin-bottom: 20px;">
+            Apunta con la cámara de tu teléfono para abrir el bot directamente en Telegram y empezar a hablar con Alex.
+        </p>
+        <div style="background: #f8fafc; padding: 16px; border-radius: 16px; display: inline-block; border: 1px solid var(--border-card); margin-bottom: 18px;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://t.me/Alex_TFG_bot&color=4f46e5" alt="QR Code Alex Telegram" style="width: 180px; height: 180px; display: block; border-radius: 8px;">
         </div>
-    </a>
-
-    <a href="/grafana/" target="_blank" style="text-decoration: none;" onclick="playChime(720)">
-        <div class="glass-card tilt-card" style="padding: 18px 22px; display: flex; align-items: center; gap: 16px; border-color: rgba(239, 68, 68, 0.25);">
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(239, 68, 68, 0.16); display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 1.35rem; box-shadow: 0 0 20px rgba(239, 68, 68, 0.25);">
-                <i class="bi bi-graph-up-arrow"></i>
-            </div>
-            <div>
-                <div style="color: var(--text-main); font-weight: 700; font-size: 1rem; font-family: 'Space Grotesk', sans-serif;">Grafana / Loki</div>
-                <div style="color: var(--text-dim); font-size: 0.74rem; font-family: 'JetBrains Mono', monospace;">Observabilidad 360°</div>
-            </div>
-        </div>
-    </a>
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">@Alex_TFG_bot</div>
+    </div>
 </div>
 
-<!-- 4 Key System Metrics -->
+<!-- Interactive Live AI Tester Widget -->
+<div class="glass-card mb-4 fade-in" style="margin-bottom: 26px; border: 1px solid rgba(79, 70, 229, 0.2); background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(238, 242, 255, 0.6));">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.2rem;">✨</span>
+                <h2 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--text-title);">
+                    Prueba Rápida: Adaptación de la IA según la Edad
+                </h2>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin: 4px 0 0 0;">
+                Elige un grupo de edad y hazle una pregunta técnica a Alex para comprobar cómo adapta su respuesta:
+            </p>
+        </div>
+        <span class="friendly-pill friendly-pill-primary">DEMO INTERACTIVA</span>
+    </div>
+
+    <!-- Age Selector Pills -->
+    <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;" id="ageSelector">
+        <button type="button" class="btn-clean btn-clean-primary age-btn active" data-age="8" onclick="selectAge(this, 8)">
+            🧒 Niño (8 años)
+        </button>
+        <button type="button" class="btn-clean btn-clean-outline age-btn" data-age="16" onclick="selectAge(this, 16)">
+            🎓 Joven (16 años)
+        </button>
+        <button type="button" class="btn-clean btn-clean-outline age-btn" data-age="40" onclick="selectAge(this, 40)">
+            💼 Adulto (40 años)
+        </button>
+        <button type="button" class="btn-clean btn-clean-outline age-btn" data-age="72" onclick="selectAge(this, 72)">
+            👵 Persona Mayor (72 años)
+        </button>
+    </div>
+
+    <!-- Question Input Form -->
+    <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+        <input type="text" id="demoQuestion" placeholder="Ejemplo: ¿Qué es la nube y para qué sirve?..." 
+            style="flex: 1; min-width: 260px; padding: 13px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card); background: #ffffff; font-size: 0.95rem; outline: none; box-shadow: var(--shadow-subtle);">
+        <button onclick="askDemoAI()" id="btnAskDemo" class="btn-clean btn-clean-primary" style="padding: 13px 24px;">
+            <i class="bi bi-sparkles"></i> <span>Preguntar a Alex</span>
+        </button>
+    </div>
+
+    <!-- Suggestion Prompts -->
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; font-size: 0.8rem; color: var(--text-muted);">
+        <span>Sugerencias rápidas:</span>
+        <button onclick="setDemoPrompt('¿Qué es la nube de internet?')" style="background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; font-size: 0.8rem;">¿Qué es la nube?</button>
+        &bull;
+        <button onclick="setDemoPrompt('¿Cómo funciona el WiFi de casa?')" style="background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; font-size: 0.8rem;">¿Cómo funciona el WiFi?</button>
+        &bull;
+        <button onclick="setDemoPrompt('¿Qué es la Inteligencia Artificial?')" style="background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; font-size: 0.8rem;">¿Qué es la Inteligencia Artificial?</button>
+    </div>
+
+    <!-- Live Response Box -->
+    <div id="demoResponseContainer" style="display: none; background: #ffffff; border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 18px 22px; box-shadow: var(--shadow-subtle);">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--primary-soft); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                <i class="bi bi-robot"></i>
+            </div>
+            <strong style="font-size: 0.92rem; color: var(--text-title);" id="demoResponseTitle">Respuesta de Alex:</strong>
+            <span class="friendly-pill friendly-pill-success" id="demoToneBadge" style="font-size: 0.7rem;">TONO AMABLE</span>
+        </div>
+        <div id="demoResponseText" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-body);">
+            Cargando respuesta...
+        </div>
+    </div>
+</div>
+
+<!-- 4 Clear Key Metrics -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; margin-bottom: 26px;">
-    <!-- Metrica 1: Total -->
+    <!-- Metrica 1: Total Consultas -->
     <div class="glass-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <span style="color: var(--text-muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'JetBrains Mono', monospace;">TOTAL MENSAJES</span>
-            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(0, 240, 255, 0.12); display: flex; align-items: center; justify-content: center; color: var(--primary);">
-                <i class="bi bi-chat-left-text-fill"></i>
+            <span style="color: var(--text-muted); font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">CONSULTAS TOTALES</span>
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--primary-soft); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                <i class="bi bi-chat-heart-fill"></i>
             </div>
         </div>
-        <div style="font-size: 2.1rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #ffffff;" id="counter-total">0</div>
-        <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Persistidos en MongoDB</div>
+        <div style="font-size: 2.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text-title);" id="counter-total">0</div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Preguntas atendidas con éxito</div>
     </div>
 
     <!-- Metrica 2: Hoy -->
     <div class="glass-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <span style="color: var(--text-muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'JetBrains Mono', monospace;">VENTANA 24 HORAS</span>
-            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(16, 185, 129, 0.12); display: flex; align-items: center; justify-content: center; color: var(--success);">
-                <i class="bi bi-activity"></i>
+            <span style="color: var(--text-muted); font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">ACTIVIDAD HOY</span>
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--success-soft); display: flex; align-items: center; justify-content: center; color: var(--success);">
+                <i class="bi bi-lightning-charge-fill"></i>
             </div>
         </div>
-        <div style="font-size: 2.1rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--success);" id="counter-today">0</div>
-        <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Actividad de la sesión</div>
+        <div style="font-size: 2.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--success);" id="counter-today">0</div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Interacciones en las últimas 24h</div>
     </div>
 
-    <!-- Metrica 3: CPU RPi -->
+    <!-- Metrica 3: Servidor RPi -->
     <div class="glass-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <span style="color: var(--text-muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'JetBrains Mono', monospace;">CARGA CPU RPI 5</span>
-            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(245, 158, 11, 0.12); display: flex; align-items: center; justify-content: center; color: var(--warning);">
+            <span style="color: var(--text-muted); font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">CARGA DEL SERVIDOR</span>
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--warning-soft); display: flex; align-items: center; justify-content: center; color: #d97706;">
                 <i class="bi bi-cpu-fill"></i>
             </div>
         </div>
         <div style="display: flex; align-items: baseline; gap: 4px;">
-            <div style="font-size: 2.1rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--warning);" id="cpu-val">0</div>
+            <div style="font-size: 2.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text-title);" id="cpu-val">0</div>
             <span style="font-size: 1.1rem; font-weight: 600; color: var(--text-muted);">%</span>
         </div>
-        <div style="width: 100%; height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: var(--radius-pill); margin-top: 10px; overflow: hidden;">
-            <div id="cpu-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #f59e0b, #ef4444); border-radius: var(--radius-pill); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);"></div>
+        <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: var(--radius-pill); margin-top: 10px; overflow: hidden;">
+            <div id="cpu-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #f59e0b); border-radius: var(--radius-pill); transition: width 0.5s ease;"></div>
         </div>
     </div>
 
-    <!-- Metrica 4: Errores -->
+    <!-- Metrica 4: Tono Positivo / Incidencias -->
     <div class="glass-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <span style="color: var(--text-muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'JetBrains Mono', monospace;">INCIDENCIAS CRÍTICAS</span>
-            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(239, 68, 68, 0.12); display: flex; align-items: center; justify-content: center; color: var(--danger);">
-                <i class="bi bi-shield-x"></i>
+            <span style="color: var(--text-muted); font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">AVISOS O REINTENTOS</span>
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--danger-soft); display: flex; align-items: center; justify-content: center; color: var(--danger);">
+                <i class="bi bi-shield-check"></i>
             </div>
         </div>
-        <div style="font-size: 2.1rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--danger);" id="counter-errors">0</div>
-        <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Filtro de tasa &bull; Rate Limit</div>
+        <div style="font-size: 2.2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text-title);" id="counter-errors">0</div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Consultas con aviso o reintento</div>
     </div>
 </div>
 
 <!-- Charts Section -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 26px;">
-    <!-- Flujo de Actividad -->
+    <!-- Grafica: Ritmo de Consultas -->
     <div class="glass-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
             <div>
-                <h3 style="font-size: 1rem; font-weight: 700; margin: 0; color: #ffffff;">Flujo de Actividad</h3>
-                <span style="font-size: 0.75rem; color: var(--text-muted);">Mensajes procesados por minuto</span>
+                <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0; color: var(--text-title);">Ritmo de Consultas</h3>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Preguntas procesadas por hora</span>
             </div>
-            <span class="tech-pill tech-pill-primary">REAL-TIME</span>
+            <span class="friendly-pill friendly-pill-primary">TIEMPO REAL</span>
         </div>
         <div style="height: 220px; width: 100%;">
             <canvas id="activityChart"></canvas>
         </div>
     </div>
 
-    <!-- Sentimiento IA -->
+    <!-- Grafica: Sentimiento y Tono -->
     <div class="glass-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
             <div>
-                <h3 style="font-size: 1rem; font-weight: 700; margin: 0; color: #ffffff;">Análisis de Sentimiento IA</h3>
-                <span style="font-size: 0.75rem; color: var(--text-muted);">Clasificación del modelo Gemini</span>
+                <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0; color: var(--text-title);">Tono de las Respuestas</h3>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Evaluación de empatía y claridad</span>
             </div>
-            <span class="tech-pill tech-pill-success">NLP ENGINE</span>
+            <span class="friendly-pill friendly-pill-success">ANÁLISIS DE TONO</span>
         </div>
         <div style="height: 180px; width: 100%; position: relative;">
             <canvas id="sentimentChart"></canvas>
             <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
-                <div style="font-weight: 800; font-size: 1.6rem; color: var(--text-main); font-family: 'JetBrains Mono', monospace;">AI</div>
-                <div style="font-size: 0.65rem; color: var(--primary); font-weight: 700; letter-spacing: 1px;">CORE</div>
+                <div style="font-weight: 800; font-size: 1.5rem; color: var(--text-title);">Alex</div>
+                <div style="font-size: 0.68rem; color: var(--primary); font-weight: 700; letter-spacing: 0.5px;">EMPATÍA</div>
             </div>
         </div>
-        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 18px; font-size: 0.8rem; font-family: 'JetBrains Mono', monospace;">
-            <span style="display: flex; align-items: center; gap: 6px; color: var(--text-muted);">
-                <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span> Positivo
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 18px; font-size: 0.82rem;">
+            <span style="display: flex; align-items: center; gap: 6px; color: var(--text-body);">
+                <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981;"></span> Positivo / Cercano
             </span>
-            <span style="display: flex; align-items: center; gap: 6px; color: var(--text-muted);">
-                <span style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8;"></span> Neutro
+            <span style="display: flex; align-items: center; gap: 6px; color: var(--text-body);">
+                <span style="width: 10px; height: 10px; border-radius: 50%; background: #6366f1;"></span> Informativo / Neutro
             </span>
-            <span style="display: flex; align-items: center; gap: 6px; color: var(--text-muted);">
-                <span style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px #ef4444;"></span> Negativo
+            <span style="display: flex; align-items: center; gap: 6px; color: var(--text-body);">
+                <span style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b;"></span> Advertencia
             </span>
         </div>
     </div>
 </div>
 
-<!-- Table & Terminal Logs Row -->
-<div style="display: grid; grid-template-columns: 1fr; gap: 26px;">
-    <!-- Interacciones Recientes -->
-    <div class="glass-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-        <div style="padding: 18px 24px; border-bottom: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.02); display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <i class="bi bi-chat-square-dots-fill" style="color: var(--primary);"></i>
-                <h3 style="font-size: 0.95rem; font-weight: 700; color: #ffffff; margin: 0; letter-spacing: 0.5px;">FEED DE INTERACCIONES EN VIVO</h3>
+<!-- Friendly Guide: How Alex works -->
+<div class="glass-card mb-4 fade-in" style="margin-bottom: 26px; background: #ffffff;">
+    <div style="margin-bottom: 16px;">
+        <h3 style="font-size: 1.1rem; font-weight: 800; margin: 0; color: var(--text-title);">¿Cómo ayuda Alex a las personas?</h3>
+        <p style="color: var(--text-muted); font-size: 0.86rem; margin: 4px 0 0 0;">
+            El objetivo del proyecto es eliminar la frustración y la brecha digital con explicaciones a medida:
+        </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px;">
+        <div style="background: var(--bg-canvas); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+            <div style="font-size: 1.4rem; margin-bottom: 8px;">🧒 Para Niños (5-12)</div>
+            <div style="font-size: 0.85rem; color: var(--text-body); line-height: 1.5;">
+                Usa metáforas de videojuegos, magia y animales. Ejemplos visuales y explicaciones cortas y divertidas.
             </div>
-            <span class="tech-pill" style="font-size: 0.72rem;">TELEGRAM GATEWAY</span>
         </div>
-        <div style="overflow-x: auto; flex: 1;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
-                <thead>
-                    <tr style="text-align: left; color: var(--text-dim); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'JetBrains Mono', monospace; border-bottom: 1px solid var(--border-glass);">
-                        <th style="padding: 14px 24px; font-weight: 600;">Hora</th>
-                        <th style="padding: 14px 24px; font-weight: 600;">Usuario</th>
-                        <th style="padding: 14px 24px; font-weight: 600;">Contenido Mensaje</th>
-                        <th style="padding: 14px 24px; font-weight: 600; text-align: center;">Sentimiento</th>
-                        <th style="padding: 14px 24px; font-weight: 600; text-align: right;">Estado</th>
-                    </tr>
-                </thead>
-                <tbody id="messages-body">
-                    <tr>
-                        <td colspan="5" style="padding: 28px; text-align: center; color: var(--text-muted);">
-                            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                                <div class="live-dot" style="background: var(--primary); box-shadow: 0 0 10px var(--primary);"></div>
-                                <span>Sincronizando feed de eventos...</span>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+
+        <div style="background: var(--bg-canvas); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+            <div style="font-size: 1.4rem; margin-bottom: 8px;">🎓 Para Jóvenes (13-35)</div>
+            <div style="font-size: 0.85rem; color: var(--text-body); line-height: 1.5;">
+                Tono moderno y directo. Conexión con redes sociales, streaming, trabajo y utilidad real práctica.
+            </div>
+        </div>
+
+        <div style="background: var(--bg-canvas); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+            <div style="font-size: 1.4rem; margin-bottom: 8px;">👵 Para Mayores (56+)</div>
+            <div style="font-size: 0.85rem; color: var(--text-body); line-height: 1.5;">
+                Paciencia infinita, paso a paso y sin tecnicismos. Comparaciones con cartas, enciclopedias y buzones analógicos.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Table: Recent Consultations Feed -->
+<div class="glass-card" style="padding: 0; overflow: hidden; margin-bottom: 26px;">
+    <div style="padding: 18px 24px; border-bottom: 1px solid var(--border-card); background: #ffffff; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="bi bi-chat-quote-fill" style="color: var(--primary); font-size: 1.1rem;"></i>
+            <h3 style="font-size: 1rem; font-weight: 800; color: var(--text-title); margin: 0;">Consultas Recientes Recibidas</h3>
+        </div>
+        <span class="friendly-pill friendly-pill-primary">TELEGRAM & WEB</span>
+    </div>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <thead>
+                <tr style="text-align: left; color: var(--text-muted); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border-card); background: #f8fafc;">
+                    <th style="padding: 14px 24px; font-weight: 700;">Hora</th>
+                    <th style="padding: 14px 24px; font-weight: 700;">Persona</th>
+                    <th style="padding: 14px 24px; font-weight: 700;">Pregunta / Foto</th>
+                    <th style="padding: 14px 24px; font-weight: 700; text-align: center;">Tono Detectado</th>
+                    <th style="padding: 14px 24px; font-weight: 700; text-align: right;">Estado</th>
+                </tr>
+            </thead>
+            <tbody id="messages-body">
+                <tr>
+                    <td colspan="5" style="padding: 28px; text-align: center; color: var(--text-muted);">
+                        Sincronizando feed de eventos...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Internal Activity / System Logs -->
+<div class="glass-card" style="padding: 0; overflow: hidden; height: 360px; display: flex; flex-direction: column;">
+    <div style="padding: 14px 20px; border-bottom: 1px solid var(--border-card); background: #f8fafc; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-activity" style="color: var(--primary);"></i>
+            <h3 style="font-size: 0.92rem; font-weight: 800; margin: 0; color: var(--text-title);">Registro Técnico del Servidor</h3>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <select id="log-selector" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-card); font-size: 0.8rem; background: #ffffff; color: var(--text-title); outline: none;">
+                <option value="backend_telegram">Servicio: Alex Backend</option>
+                <option value="worker">Servicio: Trabajador IA (Worker)</option>
+                <option value="ngrok">Servicio: Túnel Seguro</option>
+            </select>
+
+            <button onclick="fetchLogs()" id="refresh-logs" class="btn-clean btn-clean-outline" style="padding: 6px 10px; font-size: 0.8rem;">
+                <i class="bi bi-arrow-clockwise"></i> Actualizar
+            </button>
         </div>
     </div>
 
-    <!-- Terminal System Logs -->
-    <div class="glass-card" style="padding: 0; overflow: hidden; height: 420px; display: flex; flex-direction: column;">
-        <div style="padding: 16px 22px; border-bottom: 1px solid var(--border-glass); background: rgba(10, 15, 30, 0.7); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <i class="bi bi-terminal-fill" style="color: var(--primary);"></i>
-                <h3 style="font-size: 0.95rem; font-weight: 700; margin: 0; color: #ffffff; letter-spacing: 0.5px;">CONSOLE LOGS</h3>
-            </div>
-
-            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                <select id="log-selector" style="padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-glass-bright); font-size: 0.8rem; background: rgba(15, 23, 42, 0.9); color: #ffffff; outline: none; font-family: 'JetBrains Mono', monospace;">
-                    <option value="worker">CONTAINER: WORKER</option>
-                    <option value="backend_telegram">CONTAINER: BACKEND</option>
-                    <option value="ngrok">CONTAINER: NGROK</option>
-                </select>
-
-                <div style="display: flex; gap: 6px;">
-                    <button onclick="setFilter('ALL', this)" class="tech-pill tech-pill-primary" style="cursor: pointer;">ALL</button>
-                    <button onclick="setFilter('INFO', this)" class="tech-pill" style="cursor: pointer;">INFO</button>
-                    <button onclick="setFilter('WARN', this)" class="tech-pill" style="cursor: pointer;">WARN</button>
-                    <button onclick="setFilter('ERROR', this)" class="tech-pill" style="cursor: pointer;">ERR</button>
-                </div>
-
-                <button onclick="fetchLogs()" id="refresh-logs" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: var(--primary); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s ease;">
-                    <i class="bi bi-arrow-clockwise"></i>
-                </button>
-            </div>
-        </div>
-
-        <div id="logs-container" style="flex: 1; overflow-y: auto; background: rgba(5, 8, 18, 0.75); color: #e2e8f0; padding: 18px 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; line-height: 1.6;">
-            <div style="text-align: center; color: var(--text-dim); margin-top: 60px;">
-                <i class="bi bi-terminal" style="font-size: 1.8rem; opacity: 0.4; display: block; margin-bottom: 8px;"></i>
-                Capturando logs en tiempo real vía Docker Socket...
-            </div>
+    <div id="logs-container" style="flex: 1; overflow-y: auto; background: #ffffff; color: #475569; padding: 16px 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.6;">
+        <div style="text-align: center; color: var(--text-dim); margin-top: 40px;">
+            Cargando registros del servidor en la Raspberry Pi...
         </div>
     </div>
 </div>
@@ -273,79 +369,126 @@
 
 {% block scripts %}
 <script>
-    // --- 0. AUDIO TELEMETRY (Synthesizer via Web Audio API) ---
-    let audioCtx = null;
-    let sfxEnabled = true;
+    let currentNgrokUrl = "No disponible";
 
-    function initAudio() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
+    // 1. QR Modal Toggle
+    function toggleQRModal() {
+        const modal = document.getElementById('qrModal');
+        modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
     }
 
-    function toggleAudio() {
-        sfxEnabled = !sfxEnabled;
-        const icon = document.getElementById('soundIcon');
-        const text = document.getElementById('soundText');
-        const btn = document.getElementById('soundToggleBtn');
-        if (sfxEnabled) {
-            icon.className = 'bi bi-volume-up-fill';
-            text.innerText = 'SFX ON';
-            btn.style.color = 'var(--primary)';
-            btn.style.borderColor = 'rgba(0, 240, 255, 0.3)';
-            playChime(880, 'sine', 0.12);
-        } else {
-            icon.className = 'bi bi-volume-mute-fill';
-            text.innerText = 'SFX OFF';
-            btn.style.color = 'var(--text-muted)';
-            btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-        }
-    }
-
-    function playChime(freq = 660, type = 'sine', duration = 0.15) {
-        if (!sfxEnabled) return;
-        try {
-            initAudio();
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(freq * 1.4, audioCtx.currentTime + duration);
-            
-            gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
-        } catch (e) {}
-    }
-
-    // --- COPY TUNNEL URL WITH TOAST FEEDBACK ---
+    // 2. Copy Tunnel URL with Toast Feedback
     function copyTunnelUrl() {
-        const link = document.getElementById('ngrok-link');
-        const textToCopy = link.getAttribute('href') || link.innerText;
-        if (textToCopy && textToCopy !== '#' && textToCopy !== 'No disponible' && !textToCopy.includes('Cargando')) {
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                playChime(1040, 'triangle', 0.18);
+        if (currentNgrokUrl && currentNgrokUrl !== "No disponible") {
+            navigator.clipboard.writeText(currentNgrokUrl).then(() => {
                 if (window.showToast) {
-                    window.showToast('Gateway Copiado', 'Enlace TLS cifrado copiado al portapapeles', 'success');
+                    window.showToast('Enlace Copiado', 'Enlace público copiado al portapapeles', 'success');
                 }
             }).catch(() => {
-                if (window.showToast) {
-                    window.showToast('Aviso', textToCopy, 'info');
-                }
+                alert(currentNgrokUrl);
             });
+        } else {
+            if (window.showToast) {
+                window.showToast('Aviso', 'El túnel aún se está iniciando', 'warning');
+            }
         }
     }
 
-    // Number easing animation
-    function animateNumber(elementId, targetValue, duration = 800) {
+    // 3. Interactive Live AI Demo Widget
+    let selectedAge = 8;
+    function selectAge(btn, age) {
+        selectedAge = age;
+        document.querySelectorAll('.age-btn').forEach(b => {
+            b.className = 'btn-clean btn-clean-outline age-btn';
+        });
+        btn.className = 'btn-clean btn-clean-primary age-btn active';
+    }
+
+    function setDemoPrompt(text) {
+        document.getElementById('demoQuestion').value = text;
+        askDemoAI();
+    }
+
+    let demoSessionId = 'demo_' + Date.now();
+    let demoPollInterval = null;
+
+    function askDemoAI() {
+        const input = document.getElementById('demoQuestion');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const container = document.getElementById('demoResponseContainer');
+        const responseText = document.getElementById('demoResponseText');
+        const btn = document.getElementById('btnAskDemo');
+        const toneBadge = document.getElementById('demoToneBadge');
+
+        container.style.display = 'block';
+        responseText.innerHTML = '<span style="color:var(--text-muted);"><i class="bi bi-hourglass-split"></i> Alex está pensando la mejor forma de explicarlo...</span>';
+        btn.disabled = true;
+
+        // Mandamos mensaje a RabbitMQ a traves del endpoint web
+        const payloadText = `/edad ${selectedAge}\n${text}`;
+        
+        fetch('/api/web/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+            body: JSON.stringify({
+                text: payloadText,
+                session_id: demoSessionId,
+                username: `Supervisor (${selectedAge} años)`
+            })
+        }).then(r => r.json()).then(data => {
+            let attempts = 0;
+            if (demoPollInterval) clearInterval(demoPollInterval);
+            
+            demoPollInterval = setInterval(() => {
+                attempts++;
+                fetch(`/api/web/poll?session_id=${demoSessionId}&last_check=0`, {
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                }).then(r => r.json()).then(pollData => {
+                    if (pollData.messages && pollData.messages.length > 0) {
+                        clearInterval(demoPollInterval);
+                        btn.disabled = false;
+                        let answer = pollData.messages[pollData.messages.length - 1].text;
+                        
+                        // Parse tone if present
+                        if (answer.startsWith('[POSITIVO]')) {
+                            toneBadge.className = 'friendly-pill friendly-pill-success';
+                            toneBadge.innerText = 'TONO AMABLE';
+                            answer = answer.replace('[POSITIVO]', '').trim();
+                        } else if (answer.startsWith('[NEUTRO]')) {
+                            toneBadge.className = 'friendly-pill friendly-pill-primary';
+                            toneBadge.innerText = 'TONO CLARO';
+                            answer = answer.replace('[NEUTRO]', '').trim();
+                        } else if (answer.startsWith('[NEGATIVO]')) {
+                            toneBadge.className = 'friendly-pill friendly-pill-warning';
+                            toneBadge.innerText = 'ADVERTENCIA';
+                            answer = answer.replace('[NEGATIVO]', '').trim();
+                        }
+
+                        responseText.innerHTML = answer.replace(/\n/g, '<br>');
+                    } else if (attempts > 20) {
+                        clearInterval(demoPollInterval);
+                        btn.disabled = false;
+                        responseText.innerText = "La consulta tardó más de lo esperado. Prueba en el simulador completo de /chat.";
+                    }
+                }).catch(() => {
+                    clearInterval(demoPollInterval);
+                    btn.disabled = false;
+                });
+            }, 1200);
+        }).catch(err => {
+            btn.disabled = false;
+            responseText.innerText = "Error al enviar la consulta: " + err.message;
+        });
+    }
+
+    document.getElementById('demoQuestion').addEventListener('keypress', e => {
+        if (e.key === 'Enter') askDemoAI();
+    });
+
+    // 4. Number Counter Animation
+    function animateNumber(elementId, targetValue, duration = 600) {
         const el = document.getElementById(elementId);
         if (!el) return;
         const start = parseInt(el.innerText.replace(/[^0-9]/g, '')) || 0;
@@ -367,31 +510,31 @@
         requestAnimationFrame(update);
     }
 
-    // --- 1. CONFIGURACIÓN CHARTS (Cyberpunk Glass Style) ---
+    // 5. Chart.js Setup (Clean Light Style)
     Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
-    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.color = '#64748b';
 
     // Activity Line Chart
     const ctxLine = document.getElementById('activityChart').getContext('2d');
-    let gradientLine = ctxLine.createLinearGradient(0, 0, 0, 260);
-    gradientLine.addColorStop(0, 'rgba(0, 240, 255, 0.35)');
-    gradientLine.addColorStop(1, 'rgba(0, 240, 255, 0.0)');
+    let gradientLine = ctxLine.createLinearGradient(0, 0, 0, 240);
+    gradientLine.addColorStop(0, 'rgba(79, 70, 229, 0.22)');
+    gradientLine.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
 
     const activityChart = new Chart(ctxLine, {
         type: 'line',
         data: {
             labels: [],
             datasets: [{
-                label: 'Mensajes',
+                label: 'Preguntas',
                 data: [],
-                borderColor: '#00f0ff',
+                borderColor: '#4f46e5',
                 borderWidth: 2.5,
-                tension: 0.38,
+                tension: 0.35,
                 fill: true,
                 backgroundColor: gradientLine,
                 pointRadius: 0,
                 pointHoverRadius: 6,
-                pointHoverBackgroundColor: '#00f0ff',
+                pointHoverBackgroundColor: '#4f46e5',
                 pointHoverBorderColor: '#ffffff',
                 pointHoverBorderWidth: 2
             }]
@@ -402,28 +545,22 @@
             scales: {
                 x: {
                     grid: { display: false },
-                    ticks: { color: '#64748b', font: { size: 10 } }
+                    ticks: { color: '#94a3b8', font: { size: 11 } }
                 },
                 y: {
                     beginAtZero: true,
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.05)',
-                        borderDash: [4, 4]
-                    },
-                    ticks: { color: '#64748b', font: { size: 10 } }
+                    grid: { color: '#f1f5f9' },
+                    ticks: { color: '#94a3b8', font: { size: 11 } }
                 }
             },
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    backgroundColor: '#0f172a',
                     titleColor: '#f8fafc',
-                    bodyColor: '#00f0ff',
-                    borderColor: 'rgba(0, 240, 255, 0.3)',
-                    borderWidth: 1,
+                    bodyColor: '#e0e7ff',
                     padding: 10,
-                    boxPadding: 4,
-                    usePointStyle: true
+                    cornerRadius: 8
                 }
             }
         }
@@ -434,33 +571,30 @@
     const sentimentChart = new Chart(ctxSent, {
         type: 'doughnut',
         data: {
-            labels: ['Positivo', 'Neutro', 'Negativo'],
+            labels: ['Positivo', 'Neutro', 'Advertencia'],
             datasets: [{
                 data: [0, 0, 0],
-                backgroundColor: ['#10b981', '#94a3b8', '#ef4444'],
+                backgroundColor: ['#10b981', '#6366f1', '#f59e0b'],
                 borderWidth: 0,
-                hoverOffset: 6
+                hoverOffset: 4
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '76%',
+            cutout: '74%',
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                    titleColor: '#f8fafc',
-                    bodyColor: '#94a3b8',
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    borderWidth: 1,
-                    padding: 10
+                    backgroundColor: '#0f172a',
+                    padding: 10,
+                    cornerRadius: 8
                 }
             }
         }
     });
 
-    // --- 2. LÓGICA DE ACTUALIZACIÓN DE TELEMETRÍA (AJAX) ---
+    // 6. Live Telemetry Update (AJAX)
     function updateStats() {
         fetch('/api/stats', {
             headers: { 'ngrok-skip-browser-warning': 'true' }
@@ -472,17 +606,16 @@
             document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
             document.getElementById('last-update').innerText = data.last_updated;
 
-            // Actualizar URL de Ngrok
-            const ngrokLink = document.getElementById('ngrok-link');
+            // Link Ngrok
+            currentNgrokUrl = data.ngrok_url;
+            const ngrokLinkText = document.getElementById('ngrok-link-text');
             if (data.ngrok_url && data.ngrok_url !== "No disponible") {
-                ngrokLink.innerHTML = `${data.ngrok_url} <i class="bi bi-box-arrow-up-right" style="font-size:0.75rem;"></i>`;
-                ngrokLink.href = data.ngrok_url;
+                ngrokLinkText.innerText = data.ngrok_url;
             } else {
-                ngrokLink.innerText = "No disponible";
-                ngrokLink.removeAttribute('href');
+                ngrokLinkText.innerText = "Iniciando túnel seguro...";
             }
 
-            // Actualizar Charts
+            // Charts
             if (data.chart_line && data.chart_line.labels) {
                 activityChart.data.labels = data.chart_line.labels;
                 activityChart.data.datasets[0].data = data.chart_line.data;
@@ -494,134 +627,76 @@
                 sentimentChart.update();
             }
 
-            // Actualizar Tabla
+            // Table
             const tbody = document.getElementById('messages-body');
             if (data.messages && data.messages.length > 0) {
                 tbody.innerHTML = '';
                 data.messages.forEach(msg => {
-                    let moodPill = '<span class="tech-pill" style="font-size:0.7rem;"><span style="color:#94a3b8">●</span> NEUTRO</span>';
+                    let moodPill = '<span class="friendly-pill friendly-pill-primary">Informativo</span>';
                     if (msg.sentiment === 'POSITIVO') {
-                        moodPill = '<span class="tech-pill tech-pill-success" style="font-size:0.7rem;"><span style="color:#10b981">●</span> POSITIVO</span>';
+                        moodPill = '<span class="friendly-pill friendly-pill-success">Amable</span>';
                     } else if (msg.sentiment === 'NEGATIVO') {
-                        moodPill = '<span class="tech-pill" style="font-size:0.7rem; background:rgba(239,68,68,0.1); border-color:rgba(239,68,68,0.3); color:#ef4444;"><span style="color:#ef4444">●</span> NEGATIVO</span>';
+                        moodPill = '<span class="friendly-pill friendly-pill-warning">Advertencia</span>';
                     }
 
-                    let statusBadge = `<span class="tech-pill" style="font-size:0.72rem;">${msg.status}</span>`;
+                    let statusBadge = `<span class="friendly-pill">${msg.status}</span>`;
                     if (msg.status === 'procesado_ia') {
-                        statusBadge = '<span class="tech-pill tech-pill-primary" style="font-size:0.72rem;"><i class="bi bi-check-circle-fill"></i> PROCESADO</span>';
+                        statusBadge = '<span class="friendly-pill friendly-pill-success"><i class="bi bi-check2"></i> Resuelto</span>';
                     }
 
                     let textDisplay = msg.type === 'photo' 
-                        ? '<span class="tech-pill tech-pill-warning" style="font-size:0.75rem;"><i class="bi bi-camera-fill"></i> IMAGEN MULTIMODAL</span>' 
-                        : `<span style="color:var(--text-main); font-weight:500;">${msg.text.substring(0, 48)}${msg.text.length > 48 ? '...' : ''}</span>`;
+                        ? '<span class="friendly-pill friendly-pill-warning"><i class="bi bi-camera"></i> Foto Analizada</span>' 
+                        : `<span style="color:var(--text-title); font-weight:500;">${msg.text.substring(0, 50)}${msg.text.length > 50 ? '...' : ''}</span>`;
 
                     tbody.innerHTML += `
-                        <tr style="border-bottom: 1px solid var(--border-glass); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
-                            <td style="padding: 14px 24px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">${msg.time}</td>
-                            <td style="padding: 14px 24px; font-weight: 600; color: #ffffff;">${msg.user}</td>
+                        <tr style="border-bottom: 1px solid var(--border-card); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                            <td style="padding: 14px 24px; color: var(--text-muted); font-size: 0.85rem;">${msg.time}</td>
+                            <td style="padding: 14px 24px; font-weight: 700; color: var(--text-title);">${msg.user}</td>
                             <td style="padding: 14px 24px;">${textDisplay}</td>
                             <td style="padding: 14px 24px; text-align: center;">${moodPill}</td>
                             <td style="padding: 14px 24px; text-align: right;">${statusBadge}</td>
                         </tr>`;
                 });
             } else {
-                tbody.innerHTML = '<tr><td colspan="5" style="padding: 24px; text-align: center; color: var(--text-muted);">Sin datos recientes en la base de datos</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="padding: 24px; text-align: center; color: var(--text-muted);">Sin consultas registradas recientemente.</td></tr>';
             }
         }).catch(e => console.error(e));
     }
 
-    // --- 3. LÓGICA DE LOGS DE LA CONSOLA ---
-    let allLogs = [];
-    let currentFilter = 'ALL';
-
+    // 7. System Logs
     function fetchLogs() {
         const container = document.getElementById('log-selector').value;
         const icon = document.querySelector('#refresh-logs i');
         if (icon) {
-            icon.style.transition = 'transform 0.5s';
+            icon.style.transition = 'transform 0.4s';
             icon.style.transform = 'rotate(180deg)';
-            setTimeout(() => icon.style.transform = 'rotate(0deg)', 500);
+            setTimeout(() => icon.style.transform = 'rotate(0deg)', 400);
         }
 
         fetch(`/api/logs?container=${container}`, {
             headers: { 'ngrok-skip-browser-warning': 'true' }
         }).then(r => r.json()).then(data => {
             const logsText = data.logs || '';
+            const div = document.getElementById('logs-container');
+            div.innerHTML = "";
 
-            if (logsText.startsWith('⚠️') || logsText.startsWith('❌')) {
-                allLogs = [{
-                    time: new Date().toLocaleTimeString(),
-                    level: 'WARN',
-                    msg: logsText
-                }];
-                renderLogs();
+            if (!logsText.trim()) {
+                div.innerHTML = '<div style="color:var(--text-muted); text-align:center; margin-top:30px;">Sin registros para este servicio.</div>';
                 return;
             }
 
-            const lines = logsText.split('\n').filter(line => line.trim());
-            allLogs = lines.map(line => {
-                const timestamp = new Date().toLocaleTimeString();
-                let level = 'INFO';
-                let msg = line;
+            const lines = logsText.split('\n').filter(l => l.trim()).slice(-35);
+            lines.forEach(l => {
+                let color = "#475569";
+                if (l.includes('ERROR') || l.includes('❌')) color = "#dc2626";
+                else if (l.includes('WARN') || l.includes('⚠️')) color = "#d97706";
+                else if (l.includes('INFO') || l.includes('✅')) color = "#059669";
 
-                if (line.includes('ERROR') || line.includes('❌') || line.includes('Traceback')) {
-                    level = 'ERROR';
-                } else if (line.includes('WARNING') || line.includes('WARN') || line.includes('⚠️')) {
-                    level = 'WARN';
-                } else if (line.includes('INFO') || line.includes('✅') || line.includes('🔌') || line.includes('🎧')) {
-                    level = 'INFO';
-                }
-
-                return { time: timestamp, level: level, msg: msg };
+                div.innerHTML += `<div style="margin-bottom: 4px; color: ${color}; word-break: break-all;">${escapeHtml(l)}</div>`;
             });
-
-            renderLogs();
+            div.scrollTop = div.scrollHeight;
         }).catch(err => {
-            allLogs = [{
-                time: new Date().toLocaleTimeString(),
-                level: 'ERROR',
-                msg: `Error al leer logs: ${err.message}`
-            }];
-            renderLogs();
-        });
-    }
-
-    function setFilter(filter, btn) {
-        currentFilter = filter;
-        document.querySelectorAll('button[onclick^="setFilter"]').forEach(b => {
-            b.className = 'tech-pill';
-            b.style.background = 'rgba(255,255,255,0.04)';
-            b.style.borderColor = 'var(--border-glass)';
-            b.style.color = 'var(--text-muted)';
-        });
-        btn.className = 'tech-pill tech-pill-primary';
-        btn.style.background = 'rgba(0,240,255,0.12)';
-        btn.style.borderColor = 'rgba(0,240,255,0.4)';
-        btn.style.color = 'var(--primary)';
-        renderLogs();
-    }
-
-    function renderLogs() {
-        const div = document.getElementById('logs-container');
-        div.innerHTML = "";
-        const filtered = allLogs.filter(log => currentFilter === 'ALL' || log.level === currentFilter).reverse();
-
-        if (filtered.length === 0) {
-            div.innerHTML = '<div style="opacity:0.5; text-align:center; margin-top:40px;">Sin registros para el filtro seleccionado</div>';
-            return;
-        }
-
-        filtered.forEach(log => {
-            let badgeStyle = 'color: #10b981; background: rgba(16,185,129,0.15);';
-            if (log.level === 'ERROR') badgeStyle = 'color: #ef4444; background: rgba(239,68,68,0.15);';
-            if (log.level === 'WARN') badgeStyle = 'color: #f59e0b; background: rgba(245,158,11,0.15);';
-
-            div.innerHTML += `
-            <div style="margin-bottom: 6px; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.02); display: flex; align-items: flex-start; gap: 10px;">
-                <span style="color: var(--text-dim); font-size: 0.72rem; flex-shrink: 0;">${log.time}</span>
-                <span style="padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.65rem; flex-shrink: 0; ${badgeStyle}">${log.level}</span>
-                <span style="color: #cbd5e1; word-break: break-all;">${escapeHtml(log.msg)}</span>
-            </div>`;
+            document.getElementById('logs-container').innerText = "Error al leer registros: " + err.message;
         });
     }
 
@@ -629,12 +704,10 @@
         return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    // Listeners y polling
     document.getElementById('log-selector').addEventListener('change', fetchLogs);
     setInterval(updateStats, 3000);
-    setInterval(fetchLogs, 5000);
+    setInterval(fetchLogs, 8000);
 
-    // Arranque inicial
     updateStats();
     fetchLogs();
 </script>

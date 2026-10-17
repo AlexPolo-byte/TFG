@@ -4,60 +4,64 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TFG System &bull; Autonomous AI Gateway</title>
+    <title>Alex IA &bull; Asistente Tecnológico Adaptativo</title>
 
-    <!-- Google Fonts: Space Grotesk, Plus Jakarta Sans, JetBrains Mono -->
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     
-    <!-- Bootstrap Icons & FontAwesome CDN -->
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-    <!-- Chart.js & Vanilla Tilt for 3D Cards -->
+    <!-- Chart.js & Vanilla Tilt for gentle 3D cards -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
 
     <style>
         :root {
-            /* Futuristic Cyber Matrix System */
-            --bg-base: #03050c;
-            --bg-deep: #060918;
-            --bg-surface: rgba(11, 18, 38, 0.65);
-            --bg-surface-elevated: rgba(18, 28, 56, 0.75);
+            /* Palette: Modern Light AI (Clean, Friendly & Accessible) */
+            --bg-canvas: #f8fafc;
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --bg-card-solid: #ffffff;
+            --bg-surface-soft: #f1f5f9;
+            --bg-sidebar: rgba(255, 255, 255, 0.92);
             
-            --primary: #00f0ff;          /* Neon Cyan */
-            --primary-glow: rgba(0, 240, 255, 0.45);
-            --primary-subtle: rgba(0, 240, 255, 0.12);
+            --primary: #4f46e5;          /* Modern Indigo */
+            --primary-light: #6366f1;
+            --primary-soft: #eef2ff;
+            --primary-glow: rgba(79, 70, 229, 0.15);
             
-            --secondary: #6366f1;        /* Cyber Indigo */
-            --secondary-glow: rgba(99, 102, 241, 0.45);
+            --secondary: #06b6d4;        /* Fresh Cyan */
+            --accent: #8b5cf6;           /* Violet */
+            --success: #10b981;          /* Friendly Emerald */
+            --success-soft: #ecfdf5;
+            --warning: #f59e0b;          /* Soft Amber */
+            --warning-soft: #fffbeb;
+            --danger: #ef4444;           /* Coral Rose */
+            --danger-soft: #fef2f2;
             
-            --quantum: #ec4899;          /* Quantum Pink */
-            --matrix: #10b981;           /* Matrix Emerald */
-            --amber-alert: #f59e0b;      /* Cyber Amber */
-            --crimson-alert: #ef4444;    /* Crimson Alert */
+            --text-title: #0f172a;       /* Dark Slate */
+            --text-body: #334155;        /* Medium Slate */
+            --text-muted: #64748b;       /* Soft Gray */
+            --text-dim: #94a3b8;         /* Light Gray */
             
-            --text-title: #ffffff;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --text-dim: #475569;
-            
-            --border-glass: rgba(255, 255, 255, 0.08);
-            --border-glass-bright: rgba(255, 255, 255, 0.18);
-            --border-neon: rgba(0, 240, 255, 0.4);
+            --border-glass: rgba(226, 232, 240, 0.8);
+            --border-glass-bright: #ffffff;
+            --border-card: #e2e8f0;
             
             --radius-xs: 8px;
             --radius-sm: 12px;
             --radius-md: 18px;
-            --radius-lg: 28px;
+            --radius-lg: 24px;
             --radius-pill: 9999px;
             
-            --shadow-glass: 0 20px 50px -10px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 240, 255, 0.05);
-            --shadow-glow: 0 0 35px rgba(0, 240, 255, 0.3);
+            --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            --shadow-card: 0 10px 25px -4px rgba(15, 23, 42, 0.05), 0 4px 10px -2px rgba(15, 23, 42, 0.02);
+            --shadow-card-hover: 0 20px 35px -6px rgba(15, 23, 42, 0.08), 0 8px 16px -4px rgba(15, 23, 42, 0.04);
+            --shadow-primary: 0 8px 20px -3px rgba(79, 70, 229, 0.25);
             
-            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-            --transition-smooth: all 0.35s var(--ease-out);
+            --transition-smooth: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         * {
@@ -65,45 +69,19 @@
             margin: 0;
             padding: 0;
             -webkit-font-smoothing: antialiased;
-            text-rendering: optimizeLegibility;
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-base);
-            color: var(--text-main);
+            background-color: var(--bg-canvas);
+            color: var(--text-body);
             height: 100vh;
             display: flex;
             overflow: hidden;
             position: relative;
         }
 
-        /* Interactive Canvas for Holographic Particles */
-        #ambient-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0.85;
-        }
-
-        /* Mouse Glow Spotlight */
-        #cursor-glow {
-            position: fixed;
-            width: 600px;
-            height: 600px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(0, 240, 255, 0.07) 0%, rgba(99, 102, 241, 0.03) 40%, transparent 70%);
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            z-index: 2;
-            transition: opacity 0.3s ease;
-        }
-
-        /* Ambient Mesh Glowing Blobs */
+        /* Ambient Pastel Lighting */
         .ambient-mesh {
             position: fixed;
             top: 0;
@@ -118,108 +96,98 @@
         .ambient-orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(140px);
-            opacity: 0.3;
-            animation: orbFloat 20s ease-in-out infinite alternate;
+            filter: blur(100px);
+            opacity: 0.55;
+            animation: orbFloat 22s ease-in-out infinite alternate;
         }
 
         .ambient-orb-1 {
-            width: 650px;
-            height: 650px;
-            top: -15%;
-            left: 10%;
-            background: radial-gradient(circle, #00f0ff 0%, rgba(99, 102, 241, 0) 70%);
+            width: 600px;
+            height: 600px;
+            top: -12%;
+            left: 15%;
+            background: radial-gradient(circle, #e0e7ff 0%, #e0f2fe 60%, transparent 80%);
         }
 
         .ambient-orb-2 {
-            width: 700px;
-            height: 700px;
-            bottom: -20%;
-            right: 5%;
-            background: radial-gradient(circle, #6366f1 0%, rgba(236, 72, 153, 0) 70%);
-            animation-duration: 25s;
-            animation-delay: -6s;
+            width: 650px;
+            height: 650px;
+            bottom: -15%;
+            right: 10%;
+            background: radial-gradient(circle, #fae8ff 0%, #f3e8ff 60%, transparent 80%);
+            animation-duration: 26s;
+            animation-delay: -5s;
         }
 
         .ambient-orb-3 {
-            width: 500px;
-            height: 500px;
-            top: 35%;
-            right: 30%;
-            background: radial-gradient(circle, #ec4899 0%, transparent 70%);
-            opacity: 0.15;
-            animation-duration: 30s;
-            animation-delay: -12s;
+            width: 450px;
+            height: 450px;
+            top: 40%;
+            right: 35%;
+            background: radial-gradient(circle, #fef3c7 0%, transparent 70%);
+            opacity: 0.35;
         }
 
         @keyframes orbFloat {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            50% { transform: translate(50px, 40px) scale(1.1) rotate(60deg); }
-            100% { transform: translate(-40px, -30px) scale(0.92) rotate(-30deg); }
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, 20px) scale(1.05); }
+            100% { transform: translate(-25px, -15px) scale(0.95); }
         }
 
-        /* Ultra-Glass Sidebar Navigation */
+        /* Ambient Canvas for subtle micro-particles */
+        #ambient-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.6;
+        }
+
+        /* Clean White Frosted Sidebar */
         .app-nav {
-            width: 280px;
-            background: rgba(6, 10, 24, 0.65);
-            backdrop-filter: blur(30px) saturate(200%);
-            -webkit-backdrop-filter: blur(30px) saturate(200%);
-            border-right: 1px solid var(--border-glass-bright);
+            width: 275px;
+            background: var(--bg-sidebar);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-glass);
             display: flex;
             flex-direction: column;
-            padding: 30px 22px;
+            padding: 28px 20px;
             z-index: 100;
             flex-shrink: 0;
             position: relative;
-            box-shadow: 10px 0 35px rgba(0, 0, 0, 0.4);
+            box-shadow: 4px 0 24px rgba(15, 23, 42, 0.03);
         }
 
         .nav-brand {
             display: flex;
             align-items: center;
             gap: 14px;
-            margin-bottom: 40px;
+            margin-bottom: 34px;
             padding: 0 6px;
             text-decoration: none;
-            position: relative;
         }
 
         .brand-icon-box {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(99, 102, 241, 0.3));
-            border: 1px solid rgba(0, 240, 255, 0.5);
+            width: 46px;
+            height: 46px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
-            color: var(--primary);
-            box-shadow: 0 0 25px rgba(0, 240, 255, 0.35);
+            font-size: 1.35rem;
+            color: #ffffff;
+            box-shadow: 0 8px 18px -3px rgba(79, 70, 229, 0.35);
             transition: var(--transition-smooth);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .brand-icon-box::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            transform: rotate(45deg) translateX(-100%);
-            transition: transform 0.6s ease;
-        }
-
-        .nav-brand:hover .brand-icon-box::after {
-            transform: rotate(45deg) translateX(100%);
         }
 
         .nav-brand:hover .brand-icon-box {
-            transform: scale(1.08) rotate(4deg);
-            box-shadow: 0 0 35px rgba(0, 240, 255, 0.6);
+            transform: scale(1.06) rotate(3deg);
+            box-shadow: 0 12px 24px -3px rgba(79, 70, 229, 0.45);
         }
 
         .brand-text {
@@ -228,182 +196,154 @@
         }
 
         .brand-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
             font-size: 1.25rem;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #ffffff 30%, var(--primary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+            color: var(--text-title);
         }
 
         .brand-badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.68rem;
+            font-size: 0.72rem;
             color: var(--text-muted);
-            letter-spacing: 0.8px;
             display: flex;
             align-items: center;
             gap: 6px;
+            margin-top: 1px;
+            font-weight: 500;
         }
 
         .nav-section-label {
-            font-size: 0.66rem;
+            font-size: 0.68rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1.2px;
             color: var(--text-dim);
-            margin: 0 12px 12px 12px;
-            font-family: 'JetBrains Mono', monospace;
+            margin: 0 12px 10px 12px;
         }
 
         .nav-list {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             flex: 1;
         }
 
         .nav-item a {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 13px 18px;
+            gap: 13px;
+            padding: 12px 16px;
             color: var(--text-muted);
             text-decoration: none;
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-sm);
             font-weight: 600;
             font-size: 0.92rem;
             border: 1px solid transparent;
             transition: var(--transition-smooth);
-            position: relative;
-            overflow: hidden;
         }
 
         .nav-item a i {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
+            color: var(--text-dim);
             transition: var(--transition-smooth);
-            color: var(--text-muted);
         }
 
         .nav-item a:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--border-glass-bright);
-            transform: translateX(5px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            color: var(--text-title);
+            background: rgba(241, 245, 249, 0.85);
+            transform: translateX(3px);
         }
 
         .nav-item a:hover i {
             color: var(--primary);
-            transform: scale(1.15);
-            filter: drop-shadow(0 0 10px var(--primary-glow));
         }
 
         .nav-item a.active {
-            color: #ffffff;
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.14), rgba(99, 102, 241, 0.18));
-            border: 1px solid rgba(0, 240, 255, 0.4);
-            box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.1), 0 8px 30px rgba(0, 0, 0, 0.4);
+            color: var(--primary);
+            background: var(--primary-soft);
+            border-color: rgba(79, 70, 229, 0.15);
             font-weight: 700;
         }
 
         .nav-item a.active i {
             color: var(--primary);
-            filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.8));
         }
 
-        .nav-item a.active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 20%;
-            height: 60%;
-            width: 4px;
-            background: linear-gradient(180deg, var(--primary), var(--secondary));
-            border-radius: 0 4px 4px 0;
-            box-shadow: 0 0 16px var(--primary);
-        }
-
-        /* Sidebar Footer Status Pill */
+        /* Sidebar Bottom Hardware Card */
         .nav-footer {
             border-top: 1px solid var(--border-glass);
-            padding-top: 24px;
+            padding-top: 20px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
         }
 
         .hw-status-card {
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid var(--border-glass-bright);
-            border-radius: var(--radius-md);
-            padding: 12px 16px;
+            background: #ffffff;
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-sm);
+            padding: 11px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+            box-shadow: var(--shadow-subtle);
         }
 
         .hw-status-info {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 0.78rem;
-            color: var(--text-main);
-            font-family: 'JetBrains Mono', monospace;
+            gap: 9px;
+            font-size: 0.8rem;
+            color: var(--text-title);
             font-weight: 600;
         }
 
         .live-dot {
-            width: 9px;
-            height: 9px;
-            background: var(--matrix);
+            width: 8px;
+            height: 8px;
+            background: var(--success);
             border-radius: 50%;
-            box-shadow: 0 0 12px var(--matrix);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
             position: relative;
         }
 
-        .live-dot::after {
+        .live-dot.pulse::after {
             content: '';
             position: absolute;
             width: 100%;
             height: 100%;
             top: 0;
             left: 0;
-            background: var(--matrix);
+            background: var(--success);
             border-radius: 50%;
-            animation: pulseRadar 2.2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+            animation: pulseWave 2s infinite;
         }
 
-        @keyframes pulseRadar {
-            0% { transform: scale(1); opacity: 0.9; }
-            100% { transform: scale(3.2); opacity: 0; }
+        @keyframes pulseWave {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(3); opacity: 0; }
         }
 
         .btn-logout {
             text-decoration: none;
-            color: var(--crimson-alert);
+            color: var(--text-muted);
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 600;
-            padding: 11px 16px;
+            padding: 10px 14px;
             border-radius: var(--radius-sm);
-            border: 1px solid transparent;
             transition: var(--transition-smooth);
         }
 
         .btn-logout:hover {
-            background: rgba(239, 68, 68, 0.12);
-            border-color: rgba(239, 68, 68, 0.3);
-            transform: translateX(4px);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            background: var(--danger-soft);
         }
 
-        /* Main Container */
+        /* Main Workspace Container */
         .app-content {
             flex: 1;
             display: flex;
@@ -416,176 +356,198 @@
         .content-scroll {
             flex: 1;
             overflow-y: auto;
-            padding: 38px 46px;
-            padding-bottom: 100px;
+            padding: 34px 44px;
+            padding-bottom: 90px;
             -webkit-overflow-scrolling: touch;
         }
 
-        /* Custom Tech Scrollbar */
+        /* Elegant Modern Scrollbar */
         .content-scroll::-webkit-scrollbar { width: 7px; }
         .content-scroll::-webkit-scrollbar-track { background: transparent; }
         .content-scroll::-webkit-scrollbar-thumb { 
-            background: rgba(255, 255, 255, 0.14); 
+            background: #cbd5e1; 
             border-radius: var(--radius-pill); 
         }
         .content-scroll::-webkit-scrollbar-thumb:hover { 
-            background: var(--primary); 
-            box-shadow: 0 0 15px var(--primary);
+            background: #94a3b8; 
         }
 
-        /* Next-Gen Cyber-Glass Components */
+        /* Clean Glass Cards */
         .glass-card {
-            background: var(--bg-surface);
-            backdrop-filter: blur(28px) saturate(200%);
-            -webkit-backdrop-filter: blur(28px) saturate(200%);
-            border: 1px solid var(--border-glass-bright);
+            background: var(--bg-card);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
             border-radius: var(--radius-lg);
-            padding: 26px;
-            box-shadow: var(--shadow-glass);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
             transition: var(--transition-smooth);
             position: relative;
-            overflow: hidden;
-        }
-
-        /* Holographic Shimmer Edge */
-        .glass-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.5), rgba(99, 102, 241, 0.5), transparent);
-            opacity: 0.8;
-            transition: opacity 0.3s ease;
         }
 
         .glass-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(0, 240, 255, 0.35);
-            box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 240, 255, 0.12);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-card-hover);
         }
 
-        .glass-card:hover::before {
-            opacity: 1;
-            background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
-        }
-
-        /* Quick Interactive Tech Pills */
-        .tech-pill {
+        /* Clean Friendly Pills */
+        .friendly-pill {
             display: inline-flex;
             align-items: center;
-            gap: 7px;
-            padding: 6px 14px;
+            gap: 6px;
+            padding: 5px 12px;
             border-radius: var(--radius-pill);
-            font-size: 0.74rem;
-            font-weight: 700;
-            font-family: 'JetBrains Mono', monospace;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border-glass);
+            font-size: 0.76rem;
+            font-weight: 600;
+            background: var(--bg-surface-soft);
             color: var(--text-muted);
+            border: 1px solid var(--border-card);
             transition: var(--transition-smooth);
-            letter-spacing: 0.3px;
         }
 
-        .tech-pill-primary {
-            background: rgba(0, 240, 255, 0.1);
-            border-color: rgba(0, 240, 255, 0.35);
+        .friendly-pill-primary {
+            background: var(--primary-soft);
             color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+            border-color: rgba(79, 70, 229, 0.2);
         }
 
-        .tech-pill-success {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: rgba(16, 185, 129, 0.35);
-            color: var(--matrix);
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+        .friendly-pill-success {
+            background: var(--success-soft);
+            color: var(--success);
+            border-color: rgba(16, 185, 129, 0.2);
         }
 
-        .tech-pill-warning {
-            background: rgba(245, 158, 11, 0.1);
-            border-color: rgba(245, 158, 11, 0.35);
-            color: var(--amber-alert);
-            box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+        .friendly-pill-warning {
+            background: var(--warning-soft);
+            color: #d97706;
+            border-color: rgba(245, 158, 11, 0.2);
         }
 
-        /* Global Entrance Animations */
-        @keyframes fadeUpIn {
-            from { opacity: 0; transform: translateY(22px); }
+        .friendly-pill-danger {
+            background: var(--danger-soft);
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Buttons */
+        .btn-clean {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-clean-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: #ffffff;
+            box-shadow: var(--shadow-primary);
+        }
+
+        .btn-clean-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -3px rgba(79, 70, 229, 0.35);
+            color: #ffffff;
+        }
+
+        .btn-clean-outline {
+            background: #ffffff;
+            color: var(--text-title);
+            border-color: var(--border-card);
+        }
+
+        .btn-clean-outline:hover {
+            background: var(--bg-surface-soft);
+            border-color: #cbd5e1;
+        }
+
+        /* Entrance Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(14px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .fade-in {
-            animation: fadeUpIn 0.6s var(--ease-out) forwards;
+            animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         @media (max-width: 900px) {
             body { flex-direction: column; }
             .app-nav {
                 width: 100%;
-                height: 72px;
+                height: 70px;
                 flex-direction: row;
                 align-items: center;
                 justify-content: space-between;
-                padding: 10px 22px;
+                padding: 10px 20px;
                 border-right: none;
-                border-bottom: 1px solid var(--border-glass-bright);
+                border-bottom: 1px solid var(--border-glass);
             }
             .nav-section-label, .nav-footer, .brand-badge { display: none; }
             .nav-brand { margin-bottom: 0; }
-            .nav-list { flex-direction: row; gap: 8px; flex: initial; }
-            .nav-item a { padding: 8px 14px; font-size: 0.8rem; }
-            .content-scroll { padding: 22px; }
+            .nav-list { flex-direction: row; gap: 6px; flex: initial; }
+            .nav-item a { padding: 8px 12px; font-size: 0.82rem; }
+            .content-scroll { padding: 20px; }
         }
     </style>
 </head>
 
 <body>
-    <!-- Cursor Interactive Spotlight -->
-    <div id="cursor-glow"></div>
-
-    <!-- Canvas interactivo de partículas flotantes -->
-    <canvas id="ambient-canvas"></canvas>
-
-    <!-- Capa ambiental interactiva -->
+    <!-- Ambient Pastel Lighting Layers -->
     <div class="ambient-mesh">
         <div class="ambient-orb ambient-orb-1"></div>
         <div class="ambient-orb ambient-orb-2"></div>
         <div class="ambient-orb ambient-orb-3"></div>
     </div>
 
-    <!-- Navegación Lateral -->
+    <!-- Micro-particles Canvas -->
+    <canvas id="ambient-canvas"></canvas>
+
+    <!-- Sidebar Navigation -->
     <nav class="app-nav">
         <a href="{{ url_for('web.index') }}" class="nav-brand">
             <div class="brand-icon-box">
-                <i class="bi bi-cpu"></i>
+                <i class="bi bi-chat-heart-fill"></i>
             </div>
             <div class="brand-text">
-                <span class="brand-title">TFG System</span>
+                <span class="brand-title">Alex IA</span>
                 <span class="brand-badge">
-                    <span class="live-dot" style="width: 5px; height: 5px;"></span>
-                    <span>AI Gateway v2.8</span>
+                    <span class="live-dot pulse"></span>
+                    <span>Asistente Adaptativo</span>
                 </span>
             </div>
         </a>
 
-        <div class="nav-section-label">Supervisión Central</div>
+        <div class="nav-section-label">Supervisión</div>
         <ul class="nav-list">
             <li class="nav-item">
                 <a href="{{ url_for('web.index') }}" class="{{ 'active' if request.path == '/' else '' }}">
                     <i class="bi bi-grid-1x2-fill"></i>
-                    <span>Dashboard</span>
+                    <span>Panel General</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ url_for('web.users_list') }}" class="{{ 'active' if request.path == '/users' else '' }}">
+                <a href="{{ url_for('web.public_terminal') }}" class="{{ 'active' if request.path == '/chat' else '' }}">
+                    <i class="bi bi-chat-dots-fill"></i>
+                    <span>Probar Asistente</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('web.users_list') }}" class="{{ 'active' if request.path.startswith('/user') else '' }}">
                     <i class="bi bi-people-fill"></i>
-                    <span>Usuarios</span>
+                    <span>Personas</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{{ url_for('web.errors_list') }}" class="{{ 'active' if request.path == '/errors' else '' }}">
-                    <i class="bi bi-shield-exclamation"></i>
+                    <i class="bi bi-shield-check"></i>
                     <span>Incidencias</span>
                 </a>
             </li>
@@ -594,10 +556,10 @@
         <div class="nav-footer">
             <div class="hw-status-card">
                 <div class="hw-status-info">
-                    <span class="live-dot"></span>
-                    <span>RPi 5 &bull; 8GB</span>
+                    <span class="live-dot pulse"></span>
+                    <span>Raspberry Pi 5</span>
                 </div>
-                <span class="tech-pill tech-pill-success">ONLINE</span>
+                <span class="friendly-pill friendly-pill-success" style="font-size: 0.7rem;">EN LÍNEA</span>
             </div>
             <a href="{{ url_for('web.logout') }}" class="btn-logout">
                 <i class="bi bi-box-arrow-right"></i>
@@ -606,25 +568,20 @@
         </div>
     </nav>
 
-    <!-- Contenido Principal -->
+    <!-- Main Content Area -->
     <main class="app-content">
         <div class="content-scroll">
             {% block content %}{% endblock %}
         </div>
     </main>
 
+    <!-- Clean Toast Notifications Container -->
+    <div id="toast-container" style="position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Particle Engine & Mouse Spotlight Script -->
     <script>
-        // 1. Mouse Glow Tracking
-        const glow = document.getElementById('cursor-glow');
-        window.addEventListener('mousemove', (e) => {
-            glow.style.left = e.clientX + 'px';
-            glow.style.top = e.clientY + 'px';
-        });
-
-        // 2. Interactive Ambient Particles Canvas
+        // Micro-particles Canvas
         const canvas = document.getElementById('ambient-canvas');
         const ctx = canvas.getContext('2d');
         let width = canvas.width = window.innerWidth;
@@ -636,16 +593,16 @@
         });
 
         const particles = [];
-        const particleCount = 45;
+        const particleCount = 28;
 
         for (let i = 0; i < particleCount; i++) {
             particles.push({
                 x: Math.random() * width,
                 y: Math.random() * height,
-                vx: (Math.random() - 0.5) * 0.4,
-                vy: (Math.random() - 0.5) * 0.4,
-                radius: Math.random() * 2 + 0.8,
-                color: Math.random() > 0.5 ? 'rgba(0, 240, 255,' : 'rgba(99, 102, 241,'
+                vx: (Math.random() - 0.5) * 0.25,
+                vy: (Math.random() - 0.5) * 0.25,
+                radius: Math.random() * 2 + 1,
+                color: Math.random() > 0.5 ? 'rgba(99, 102, 241,' : 'rgba(6, 182, 212,'
             });
         }
 
@@ -664,91 +621,59 @@
 
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fillStyle = p.color + ' 0.6)';
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = p.color + ' 0.8)';
+                ctx.fillStyle = p.color + ' 0.35)';
                 ctx.fill();
-
-                // Draw subtle connecting constellation lines
-                for (let j = i + 1; j < particleCount; j++) {
-                    const p2 = particles[j];
-                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                    if (dist < 110) {
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `rgba(0, 240, 255, ${0.15 * (1 - dist / 110)})`;
-                        ctx.lineWidth = 0.6;
-                        ctx.stroke();
-                    }
-                }
             }
             requestAnimationFrame(animateParticles);
         }
         animateParticles();
 
-        // 3. Auto-initialize 3D Vanilla Tilt for glass cards
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof VanillaTilt !== 'undefined') {
-                VanillaTilt.init(document.querySelectorAll(".tilt-card"), {
-                    max: 8,
-                    speed: 400,
-                    glare: true,
-                    "max-glare": 0.15,
-                    scale: 1.02
-                });
-            }
-        });
-
-        // 4. Cyber Holographic Toast Notification System
+        // Friendly Toast Notification
         window.showToast = function(title, message, type = 'info') {
             const container = document.getElementById('toast-container');
             if (!container) return;
             const toast = document.createElement('div');
             toast.style.cssText = `
                 pointer-events: auto;
-                min-width: 280px;
+                min-width: 270px;
                 max-width: 360px;
-                background: rgba(15, 23, 42, 0.85);
-                backdrop-filter: blur(20px);
-                border: 1px solid var(--border-neon);
+                background: #ffffff;
+                border: 1px solid var(--border-card);
                 border-radius: var(--radius-md);
                 padding: 14px 18px;
-                box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.25);
+                box-shadow: 0 16px 32px rgba(15, 23, 42, 0.1);
                 display: flex;
                 align-items: center;
                 gap: 12px;
-                color: #ffffff;
-                animation: fadeUpIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                animation: fadeIn 0.3s ease forwards;
                 transition: opacity 0.3s ease, transform 0.3s ease;
             `;
 
-            let iconHtml = '<i class="bi bi-info-circle-fill" style="color:var(--primary); font-size:1.2rem;"></i>';
+            let iconHtml = '<i class="bi bi-info-circle-fill" style="color:var(--primary); font-size:1.25rem;"></i>';
             if (type === 'success') {
-                iconHtml = '<i class="bi bi-check-circle-fill" style="color:var(--matrix); font-size:1.2rem;"></i>';
-                toast.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+                iconHtml = '<i class="bi bi-check-circle-fill" style="color:var(--success); font-size:1.25rem;"></i>';
+            } else if (type === 'warning') {
+                iconHtml = '<i class="bi bi-exclamation-triangle-fill" style="color:var(--warning); font-size:1.25rem;"></i>';
             } else if (type === 'error') {
-                iconHtml = '<i class="bi bi-exclamation-octagon-fill" style="color:var(--crimson-alert); font-size:1.2rem;"></i>';
-                toast.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+                iconHtml = '<i class="bi bi-x-circle-fill" style="color:var(--danger); font-size:1.25rem;"></i>';
             }
 
             toast.innerHTML = `
                 ${iconHtml}
                 <div style="flex: 1;">
-                    <div style="font-weight: 700; font-size: 0.86rem; font-family: 'Space Grotesk', sans-serif;">${title}</div>
-                    <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">${message}</div>
+                    <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-title);">${title}</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">${message}</div>
                 </div>
             `;
             container.appendChild(toast);
 
             setTimeout(() => {
                 toast.style.opacity = '0';
-                toast.style.transform = 'translateY(10px)';
+                toast.style.transform = 'translateY(8px)';
                 setTimeout(() => toast.remove(), 300);
             }, 3500);
         };
     </script>
-    <div id="toast-container" style="position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none;"></div>
     {% block scripts %}{% endblock %}
 </body>
 
