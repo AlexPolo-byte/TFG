@@ -27,10 +27,15 @@ class CacheManager:
         except Exception as e:
             logger.warning(f"⚠️ Redis no disponible: {e}. Caché desactivado.")
             self.enabled = False
+
+    @property
+    def redis(self):
+        """Propiedad para compatibilidad con código que use cache.redis"""
+        return self.client if self.enabled else None
     
     def get(self, key):
         """Obtiene valor del caché"""
-        if not self.enabled:
+        if not self.enabled or not self.client:
             return None
         try:
             value = self.client.get(key)
@@ -40,7 +45,7 @@ class CacheManager:
     
     def set(self, key, value, ttl=None):
         """Guarda valor en caché"""
-        if not self.enabled:
+        if not self.enabled or not self.client:
             return False
         try:
             ttl = ttl or CACHE_TTL_SECONDS
@@ -51,10 +56,20 @@ class CacheManager:
     
     def delete(self, key):
         """Elimina valor del caché"""
-        if not self.enabled:
+        if not self.enabled or not self.client:
             return False
         try:
             self.client.delete(key)
+            return True
+        except:
+            return False
+
+    def flush(self):
+        """Vacía todo el caché de Redis"""
+        if not self.enabled or not self.client:
+            return False
+        try:
+            self.client.flushall()
             return True
         except:
             return False

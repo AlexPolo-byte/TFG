@@ -792,10 +792,19 @@ def api_db_flush_cache():
     """Vacía la memoria caché Redis"""
     try:
         from core.cache import cache
-        if cache.redis:
+        flushed = False
+        if hasattr(cache, 'flush'):
+            flushed = cache.flush()
+        elif hasattr(cache, 'client') and cache.client:
+            cache.client.flushall()
+            flushed = True
+        elif hasattr(cache, 'redis') and cache.redis:
             cache.redis.flushall()
+            flushed = True
+
+        if flushed:
             return jsonify({"status": "success", "message": "Caché Redis vaciada completamente."})
-        return jsonify({"status": "warning", "message": "Redis no conectado."})
+        return jsonify({"status": "warning", "message": "Redis no disponible o ya vacía."})
     except Exception as e:
         logger.error(f"Error vaciando caché: {e}")
         return jsonify({"error": str(e)}), 500
@@ -844,10 +853,17 @@ def api_db_reset_all():
 
         del_m = db.messages.delete_many({})
         del_u = db.users.delete_many({})
+        
         from core.cache import cache
-        if cache.redis:
-            try: cache.redis.flushall()
-            except Exception: pass
+        try:
+            if hasattr(cache, 'flush'):
+                cache.flush()
+            elif hasattr(cache, 'client') and cache.client:
+                cache.client.flushall()
+            elif hasattr(cache, 'redis') and cache.redis:
+                cache.redis.flushall()
+        except Exception as ce:
+            logger.warning(f"Error vaciando redis en reset: {ce}")
 
         return jsonify({
             "status": "success",

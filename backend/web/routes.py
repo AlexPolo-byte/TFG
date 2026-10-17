@@ -136,8 +136,9 @@ def database_manager():
     from core.cache import cache
     redis_keys = 0
     try:
-        if cache.redis:
-            redis_keys = len(cache.redis.keys("*"))
+        client = getattr(cache, 'client', None) or getattr(cache, 'redis', None)
+        if client:
+            redis_keys = len(client.keys("*"))
     except Exception:
         pass
         
