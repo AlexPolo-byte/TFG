@@ -231,6 +231,314 @@
             box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
         }
 
+        /* --- MECANISMOS DE RESALTE DINÁMICO & FORMATO RICO --- */
+        .msg-bot strong, .msg-bot b, .alex-highlight {
+            font-weight: 700;
+            color: #4338ca;
+            background: linear-gradient(120deg, rgba(79, 70, 229, 0.12) 0%, rgba(6, 182, 212, 0.12) 100%);
+            padding: 1px 6px;
+            border-radius: 6px;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+            display: inline;
+        }
+
+        body.theme-dark .msg-bot strong,
+        body.theme-dark .msg-bot b,
+        body.theme-dark .alex-highlight {
+            color: #a5b4fc;
+            background: rgba(99, 102, 241, 0.22);
+        }
+
+        body.theme-contrast .msg-bot strong,
+        body.theme-contrast .msg-bot b,
+        body.theme-contrast .alex-highlight {
+            color: #ffff00 !important;
+            background: #222200 !important;
+            border: 1px solid #ffff00;
+        }
+
+        /* Tech Concept Pills (Conceptos Clave de Tecnología) */
+        .tech-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #eef2ff;
+            color: #4338ca;
+            font-weight: 600;
+            font-size: 0.88em;
+            padding: 1px 7px;
+            border-radius: 6px;
+            border: 1px solid #c7d2fe;
+            vertical-align: baseline;
+            white-space: nowrap;
+            transition: transform 0.15s, background-color 0.15s;
+        }
+
+        .tech-pill:hover {
+            transform: translateY(-1px);
+            background: #e0e7ff;
+        }
+
+        body.theme-dark .tech-pill {
+            background: #1e1b4b;
+            color: #818cf8;
+            border-color: #3730a3;
+        }
+
+        body.theme-dark .tech-pill:hover {
+            background: #2e266d;
+        }
+
+        body.theme-contrast .tech-pill {
+            background: #000000 !important;
+            color: #ffff00 !important;
+            border: 1px solid #ffff00 !important;
+        }
+
+        /* Inline Code Badge */
+        .code-inline {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.88em;
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        body.theme-dark .code-inline {
+            background: #0f172a;
+            color: #38bdf8;
+            border-color: #334155;
+        }
+
+        body.theme-contrast .code-inline {
+            background: #000000 !important;
+            color: #ffffff !important;
+            border: 1px solid #ffff00 !important;
+        }
+
+        /* Callout / Metaphor Cards */
+        .chat-callout {
+            display: flex;
+            gap: 12px;
+            background: #f8fafc;
+            border-left: 4px solid var(--primary);
+            padding: 12px 14px;
+            border-radius: 0 12px 12px 0;
+            margin: 10px 0;
+            font-size: 0.92rem;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+        }
+
+        .chat-callout-icon {
+            font-size: 1.25rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        body.theme-dark .chat-callout {
+            background: #0f172a;
+            border-left-color: #6366f1;
+        }
+
+        body.theme-contrast .chat-callout {
+            background: #000000 !important;
+            border: 2px solid #ffff00 !important;
+            color: #ffffff !important;
+        }
+
+        /* Code Blocks */
+        .code-block-wrapper {
+            position: relative;
+            margin: 12px 0;
+            background: #0f172a;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 14px;
+            background: #1e293b;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .btn-copy-code {
+            background: transparent;
+            border: 1px solid #475569;
+            color: #cbd5e1;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 0.72rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .btn-copy-code:hover {
+            background: #334155;
+            color: #ffffff;
+        }
+
+        .code-block-pre {
+            margin: 0;
+            padding: 14px;
+            overflow-x: auto;
+            color: #e2e8f0;
+            font-family: 'SFMono-Regular', Consolas, monospace;
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        /* Lists */
+        .msg-list {
+            margin: 8px 0;
+            padding-left: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .msg-list-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .msg-bullet {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary);
+            margin-top: 9px;
+            flex-shrink: 0;
+        }
+
+        .msg-num-badge {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        body.theme-dark .msg-num-badge {
+            background: #1e1b4b;
+            color: #a5b4fc;
+        }
+
+        body.theme-contrast .msg-num-badge {
+            background: #ffff00 !important;
+            color: #000000 !important;
+        }
+
+        /* Bubble Footer Actions (TTS, Copy, Accessibility Tag) */
+        .bubble-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(226, 232, 240, 0.7);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        body.theme-dark .bubble-footer {
+            border-top-color: #28334a;
+        }
+
+        body.theme-contrast .bubble-footer {
+            border-top-color: #ffff00;
+        }
+
+        .accessibility-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #059669;
+            background: #ecfdf5;
+            padding: 2px 7px;
+            border-radius: 6px;
+            border: 1px solid #a7f3d0;
+        }
+
+        body.theme-dark .accessibility-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border-color: rgba(52, 211, 153, 0.3);
+        }
+
+        body.theme-contrast .accessibility-badge {
+            background: #000000;
+            color: #ffff00;
+            border: 1px solid #ffff00;
+        }
+
+        .bubble-actions-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bubble-action-btn {
+            background: transparent;
+            border: 1px solid var(--border-card);
+            color: var(--text-muted);
+            font-size: 0.74rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .bubble-action-btn:hover {
+            background: rgba(79, 70, 229, 0.08);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .bubble-action-btn.speaking {
+            background: #fee2e2;
+            color: #ef4444;
+            border-color: #fca5a5;
+        }
+
+        body.theme-dark .bubble-action-btn:hover {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+        }
+
+        body.theme-contrast .bubble-action-btn {
+            border: 1px solid #ffff00 !important;
+            color: #ffff00 !important;
+        }
+
         .input-area {
             padding: 16px 24px;
             padding-bottom: max(16px, env(safe-area-inset-bottom));
@@ -414,10 +722,25 @@
 
     <div class="chat-area" id="box">
         <div class="msg msg-bot">
-            ¡Hola! 👋 Soy Alex, tu asistente de tecnología.<br><br>
-            Mi objetivo es explicarte cualquier duda o aparato tecnológico de forma fácil y sin palabras raras.<br><br>
-            Para adaptar mis ejemplos a ti, dime cuántos años tienes escribiendo:<br>
-            <b>/edad &lt;tu_edad&gt;</b> (por ejemplo: <b>/edad 25</b> o <b>/edad 70</b>).
+            <div class="msg-body">
+                ¡Hola! 👋 Soy <b>Alex</b>, tu asistente de tecnología.<br><br>
+                Mi objetivo es explicarte cualquier concepto como la <span class="tech-pill"><i class="bi bi-cpu"></i> CPU</span>, la <span class="tech-pill"><i class="bi bi-cpu"></i> memoria RAM</span> o tu conexión <span class="tech-pill"><i class="bi bi-cpu"></i> Wi-Fi</span> de forma cercana, visual y adaptada a tu edad.<br>
+                <div class="chat-callout">
+                    <span class="chat-callout-icon">💡</span>
+                    <div><strong>Consejo de Alex:</strong> Puedes preguntarme dudas como <em>"¿Para qué sirve una dirección IP?"</em>, <em>"¿Cómo funciona la nube?"</em> o pedirme que compare componentes.</div>
+                </div>
+            </div>
+            <div class="bubble-footer">
+                <span class="accessibility-badge"><i class="bi bi-check-circle-fill"></i> Lectura Fácil</span>
+                <div class="bubble-actions-group">
+                    <button class="bubble-action-btn" onclick="speakMessage(this, 'msg_0')" title="Escuchar en voz alta">
+                        <i class="bi bi-volume-up-fill"></i> Escuchar
+                    </button>
+                    <button class="bubble-action-btn" onclick="copyMessage(this, 'msg_0')" title="Copiar mensaje">
+                        <i class="bi bi-clipboard"></i> Copiar
+                    </button>
+                </div>
+            </div>
         </div>
         
         <div class="typing-indicator" id="typing">
@@ -493,6 +816,130 @@
             box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
         }
 
+        // --- MOTOR DE RESALTE DINÁMICO & PARSER DE MARKDOWN ---
+        const messageRegistry = {
+            'msg_0': '¡Hola! Soy Alex, tu asistente de tecnología. Mi objetivo es explicarte cualquier concepto de forma cercana, visual y adaptada a tu edad.'
+        };
+        let messageCounter = 0;
+
+        function renderFormattedText(text) {
+            if (!text) return '';
+
+            // 1. Escapar caracteres HTML básicos para prevenir inyección
+            let out = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            // 2. Extraer bloques de código ```lenguaje ... ```
+            const codeBlocks = [];
+            out = out.replace(/```([a-zA-Z0-9_\-\+]*)\n?([\s\S]*?)```/g, (match, lang, code) => {
+                const id = codeBlocks.length;
+                const cleanLang = (lang || 'código').trim();
+                codeBlocks.push({ lang: cleanLang, code: code.trim() });
+                return `%%%CODEBLOCK_${id}%%%`;
+            });
+
+            // 3. Código en línea `...`
+            out = out.replace(/`([^`\n]+)`/g, '<code class="code-inline">$1</code>');
+
+            // 4. Negritas con estilo de resalte visual Alex
+            out = out.replace(/\*\*([^*]+)\*\*/g, '<strong class="alex-highlight">$1</strong>');
+            out = out.replace(/__([^_]+)__/g, '<strong class="alex-highlight">$1</strong>');
+
+            // 5. Cursivas
+            out = out.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+            out = out.replace(/_([^_]+)_/g, '<em>$1</em>');
+
+            // 6. Tarjetas de consejos y notas destacadas (> ...)
+            out = out.replace(/^&gt;\s*\[!(TIP|CONSEJO|IDEA)\]\s*(.*)$/gim, '<div class="chat-callout"><span class="chat-callout-icon">💡</span><div><strong>Consejo de Alex:</strong> $2</div></div>');
+            out = out.replace(/^&gt;\s*\[!(NOTE|NOTA)\]\s*(.*)$/gim, '<div class="chat-callout"><span class="chat-callout-icon">📌</span><div><strong>Nota clave:</strong> $2</div></div>');
+            out = out.replace(/^&gt;\s*(.*)$/gm, '<div class="chat-callout"><span class="chat-callout-icon">💬</span><div>$1</div></div>');
+
+            // 7. Detección automática de analogías y explicaciones didácticas
+            out = out.replace(/(?:^|\n)(Por ejemplo:|Imagina que:|En resumen:|Un ejemplo sencillo:|Recuerda que:)\s*([^\n]+)/gi, 
+                '<div class="chat-callout"><span class="chat-callout-icon">✨</span><div><strong>$1</strong> $2</div></div>');
+
+            // 8. Resaltado inteligente de Términos y Conceptos Tecnológicos Clave
+            const techTerms = [
+                'dirección IP', 'direcciones IP', 'IP pública', 'IP privada', 'IP',
+                'memoria RAM', 'disco SSD', 'tarjeta gráfica', 'fibra óptica', 'cable Ethernet',
+                'Wi-Fi', 'WiFi', 'Bluetooth', 'CPU', 'procesador', 'RAM', 'SSD', 'GPU',
+                'Router', 'servidor', 'servidores', 'la nube', 'Cloud', 'DNS',
+                'HTTP', 'HTTPS', 'Firewall', 'cortafuegos', 'algoritmo', 'caché',
+                'cache', 'módem', 'USB', 'HDMI', 'latencia', 'ping', 'megabits', 'gigabytes'
+            ];
+            techTerms.sort((a, b) => b.length - a.length);
+            const techPattern = new RegExp(`(?<![<a-zA-Z0-9_áéíóúÁÉÍÓÚñÑ])(${techTerms.join('|')})(?![>a-zA-Z0-9_áéíóúÁÉÍÓÚñÑ])`, 'gi');
+
+            const parts = out.split(/(<[^>]+>|%%%CODEBLOCK_\d+%%%)/g);
+            out = parts.map(part => {
+                if (part.startsWith('<') || part.startsWith('%%%CODEBLOCK_')) {
+                    return part;
+                }
+                return part.replace(techPattern, '<span class="tech-pill"><i class="bi bi-cpu"></i> $1</span>');
+            }).join('');
+
+            // 9. Listas ordenadas e ítems estructurados
+            const rawLines = out.split('\n');
+            let inList = false;
+            let listType = null;
+            const resLines = [];
+
+            rawLines.forEach(line => {
+                const bulletM = line.match(/^\s*[-•*]\s+(.*)$/);
+                const numM = line.match(/^\s*(\d+)[.)]\s+(.*)$/);
+
+                if (bulletM) {
+                    if (!inList || listType !== 'ul') {
+                        if (inList) resLines.push('</div>');
+                        resLines.push('<div class="msg-list">');
+                        inList = true;
+                        listType = 'ul';
+                    }
+                    resLines.push(`<div class="msg-list-item"><div class="msg-bullet"></div><div>${bulletM[1]}</div></div>`);
+                } else if (numM) {
+                    if (!inList || listType !== 'ol') {
+                        if (inList) resLines.push('</div>');
+                        resLines.push('<div class="msg-list">');
+                        inList = true;
+                        listType = 'ol';
+                    }
+                    resLines.push(`<div class="msg-list-item"><div class="msg-num-badge">${numM[1]}</div><div>${numM[2]}</div></div>`);
+                } else {
+                    if (inList) {
+                        resLines.push('</div>');
+                        inList = false;
+                        listType = null;
+                    }
+                    resLines.push(line);
+                }
+            });
+            if (inList) resLines.push('</div>');
+            out = resLines.join('\n');
+
+            // 10. Párrafos limpios y espaciados
+            out = out.replace(/\n{2,}/g, '<div style="margin-top: 10px;"></div>');
+            out = out.replace(/\n/g, '<br>');
+
+            // 11. Restaurar bloques de código con botón de copiar
+            codeBlocks.forEach((cb, idx) => {
+                const bId = `code_${Date.now()}_${idx}`;
+                messageRegistry[bId] = cb.code;
+                const html = `
+                <div class="code-block-wrapper">
+                    <div class="code-block-header">
+                        <span><i class="bi bi-terminal-fill"></i> ${cb.lang}</span>
+                        <button class="btn-copy-code" onclick="copySnippet(this, '${bId}')"><i class="bi bi-clipboard"></i> Copiar</button>
+                    </div>
+                    <pre class="code-block-pre"><code>${cb.code}</code></pre>
+                </div>`;
+                out = out.replace(`%%%CODEBLOCK_${idx}%%%`, html);
+            });
+
+            return out;
+        }
+
         function add(t, isUser) {
             const typingInd = document.getElementById('typing');
             typingInd.style.display = 'none';
@@ -502,12 +949,97 @@
                 cleanedText = cleanedText.replace(/^\[(POSITIVO|NEUTRO|NEGATIVO)\]\s*/i, '');
             }
 
+            const msgId = 'msg_' + (++messageCounter);
+            messageRegistry[msgId] = cleanedText;
+
             const d = document.createElement('div');
             d.className = isUser ? 'msg msg-user' : 'msg msg-bot';
-            d.innerHTML = cleanedText.replace(/\n/g, '<br>');
+            
+            if (isUser) {
+                d.innerHTML = cleanedText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+            } else {
+                const bodyHtml = renderFormattedText(cleanedText);
+                d.innerHTML = `
+                    <div class="msg-body">${bodyHtml}</div>
+                    <div class="bubble-footer">
+                        <span class="accessibility-badge"><i class="bi bi-check-circle-fill"></i> Lectura Fácil</span>
+                        <div class="bubble-actions-group">
+                            <button class="bubble-action-btn" onclick="speakMessage(this, '${msgId}')" title="Escuchar en voz alta">
+                                <i class="bi bi-volume-up-fill"></i> Escuchar
+                            </button>
+                            <button class="bubble-action-btn" onclick="copyMessage(this, '${msgId}')" title="Copiar explicación">
+                                <i class="bi bi-clipboard"></i> Copiar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
             
             document.getElementById('box').insertBefore(d, typingInd);
             scrollToBottom();
+        }
+
+        function copySnippet(btn, bId) {
+            const code = messageRegistry[bId] || '';
+            navigator.clipboard.writeText(code).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check2"></i> Copiado';
+                setTimeout(() => { btn.innerHTML = orig; }, 2000);
+            });
+        }
+
+        function copyMessage(btn, msgId) {
+            const raw = messageRegistry[msgId] || '';
+            const plain = raw.replace(/<[^>]*>/g, '').replace(/[*_`#]/g, '');
+            navigator.clipboard.writeText(plain).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check2"></i> ¡Copiado!';
+                btn.style.color = '#10b981';
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.style.color = '';
+                }, 2000);
+            });
+        }
+
+        function speakMessage(btn, msgId) {
+            if (!('speechSynthesis' in window)) {
+                alert('Tu navegador no admite síntesis de voz.');
+                return;
+            }
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                const wasThisSpeaking = btn.classList.contains('speaking');
+                document.querySelectorAll('.bubble-action-btn.speaking').forEach(b => {
+                    b.innerHTML = '<i class="bi bi-volume-up-fill"></i> Escuchar';
+                    b.classList.remove('speaking');
+                });
+                if (wasThisSpeaking) return;
+            }
+
+            const raw = messageRegistry[msgId] || '';
+            const plain = raw
+                .replace(/^\[(POSITIVO|NEUTRO|NEGATIVO)\]\s*/i, '')
+                .replace(/[*_`#]/g, '')
+                .replace(/\n+/g, ' ');
+
+            const utter = new SpeechSynthesisUtterance(plain);
+            utter.lang = 'es-ES';
+            utter.rate = 0.95;
+
+            btn.innerHTML = '<i class="bi bi-stop-fill"></i> Detener';
+            btn.classList.add('speaking');
+
+            utter.onend = () => {
+                btn.innerHTML = '<i class="bi bi-volume-up-fill"></i> Escuchar';
+                btn.classList.remove('speaking');
+            };
+            utter.onerror = () => {
+                btn.innerHTML = '<i class="bi bi-volume-up-fill"></i> Escuchar';
+                btn.classList.remove('speaking');
+            };
+
+            window.speechSynthesis.speak(utter);
         }
 
         function showTyping() {
