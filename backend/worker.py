@@ -201,30 +201,30 @@ def process_message(ch, method, properties, body):
             response_text = "Solo entiendo texto y fotos por ahora."
         
         if source == 'web':
-            # Solo guardamos en caché para que la web lo lea mediante polling
+            # Guardamos en caché para que la web lo lea inmediatamente mediante polling
             logger.info(f"⚡ Guardando respuesta en caché para web (session_id={chat_id})")
             cache_key = f"web:{chat_id}"
             cache.set(cache_key, {"text": response_text, "timestamp": time.time()}, ttl=300)
-        else:
-            # Guardar en MongoDB (persistente para Telegram)
-            logger.info(f"💾 Guardando respuesta para chat_id={chat_id}, message_id={message_id}")
-            update_data = {
-                "message": message,
-                "status": "procesado_ia",
-                "processed_at": time.time(),
-                "ai_response": response_text,
-                "type": msg_type,
-                "sentiment": sentiment,
-                "user_age": user.get('age')
-            }
-            if msg_type == 'photo' and 'image_data_b64' in locals():
-                update_data['image_data'] = image_data_b64
-                
-            db.messages.update_one(
-                {"message.message_id": message_id},
-                {"$set": update_data},
-                upsert=True
-            )
+
+        # Guardar en MongoDB (persistente para Telegram y Web)
+        logger.info(f"💾 Guardando respuesta para chat_id={chat_id}, message_id={message_id}")
+        update_data = {
+            "message": message,
+            "status": "procesado_ia",
+            "processed_at": time.time(),
+            "ai_response": response_text,
+            "type": msg_type,
+            "sentiment": sentiment,
+            "user_age": user.get('age')
+        }
+        if msg_type == 'photo' and 'image_data_b64' in locals():
+            update_data['image_data'] = image_data_b64
+            
+        db.messages.update_one(
+            {"message.message_id": message_id},
+            {"$set": update_data},
+            upsert=True
+        )
         
         # Responder
         if source != 'web':

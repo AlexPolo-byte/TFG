@@ -585,33 +585,40 @@ def api_db_stats():
 @api_bp.route("/db/user/delete", methods=['POST'])
 @login_required
 def api_db_user_delete():
-    """Elimina completamente un usuario y todos sus mensajes asociados"""
+    """Elimina completamente uno o varios usuarios y sus mensajes asociados"""
     try:
         data = request.get_json(silent=True, force=True) or {}
-        chat_id = data.get('chat_id')
-        if not chat_id:
-            return jsonify({"error": "chat_id requerido"}), 400
+        raw_ids = list(data.get('chat_ids') or [])
+        single_id = data.get('chat_id')
+        if single_id:
+            raw_ids.append(single_id)
+
+        if not raw_ids:
+            return jsonify({"error": "chat_id o chat_ids requerido"}), 400
             
-        possible_ids = [chat_id]
-        try: possible_ids.append(int(chat_id))
-        except (ValueError, TypeError): pass
-        try: possible_ids.append(str(chat_id))
-        except (ValueError, TypeError): pass
+        possible_ids = []
+        for cid in raw_ids:
+            possible_ids.append(cid)
+            try: possible_ids.append(int(cid))
+            except (ValueError, TypeError): pass
+            try: possible_ids.append(str(cid))
+            except (ValueError, TypeError): pass
 
         del_user = db.users.delete_many({"chat_id": {"$in": possible_ids}})
         del_msgs = db.messages.delete_many({"message.chat.id": {"$in": possible_ids}})
         
         from core.cache import cache
-        try:
-            cache.delete(f"web:{chat_id}")
-        except Exception:
-            pass
+        for cid in raw_ids:
+            try:
+                cache.delete(f"web:{cid}")
+            except Exception:
+                pass
 
         return jsonify({
             "status": "success",
             "deleted_user_count": del_user.deleted_count,
             "deleted_messages_count": del_msgs.deleted_count,
-            "message": f"Usuario {chat_id} y sus {del_msgs.deleted_count} mensajes eliminados."
+            "message": f"{del_user.deleted_count} usuario(s) y {del_msgs.deleted_count} mensajes eliminados."
         })
     except Exception as e:
         logger.error(f"Error borrando usuario: {e}")
@@ -687,33 +694,45 @@ def api_db_user_clear_messages():
 @api_bp.route("/db/message/delete", methods=['POST'])
 @login_required
 def api_db_message_delete():
-    """Elimina un mensaje específico por su ObjectId o message_id"""
+    """Elimina uno o varios mensajes específicos por su ObjectId o message_id"""
     try:
         from bson.objectid import ObjectId
         data = request.get_json(silent=True, force=True) or {}
+        ids = list(data.get('ids') or [])
         msg_id_str = data.get('id') or data.get('_id')
+        if msg_id_str:
+            ids.append(msg_id_str)
         message_id = data.get('message_id')
 
-        query = {}
-        if msg_id_str:
+        if not ids and not message_id:
+            return jsonify({"error": "ID o lista de IDs de mensajes requerida"}), 400
+
+        or_conditions = []
+        for i in ids:
+            if isinstance(i, dict) and '$oid' in i:
+                i = i['$oid']
             try:
-                query["_id"] = ObjectId(msg_id_str)
+                or_conditions.append({"_id": ObjectId(str(i))})
             except Exception:
-                query["_id"] = msg_id_str
-        elif message_id:
+                or_conditions.append({"_id": str(i)})
+            try:
+                or_conditions.append({"message.message_id": int(i)})
+            except (ValueError, TypeError):
+                pass
+        
+        if message_id:
             try: message_id = int(message_id)
             except (ValueError, TypeError): pass
-            query["message.message_id"] = message_id
-        else:
-            return jsonify({"error": "ID de mensaje requerido"}), 400
+            or_conditions.append({"message.message_id": message_id})
 
-        res = db.messages.delete_one(query)
+        res = db.messages.delete_many({"$or": or_conditions})
         return jsonify({
             "status": "success",
-            "deleted": res.deleted_count > 0
+            "deleted": res.deleted_count > 0,
+            "deleted_count": res.deleted_count
         })
     except Exception as e:
-        logger.error(f"Error borrando mensaje: {e}")
+        logger.error(f"Error borrando mensaje(s): {e}")
         return jsonify({"error": str(e)}), 500
 
 @api_bp.route("/db/purge_benchmarks", methods=['POST'])

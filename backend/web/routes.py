@@ -85,10 +85,52 @@ def database_manager():
         ]
     })
     
-    # 50 mensajes más recientes
-    recent_msgs = list(db.messages.find().sort("message.date", -1).limit(50))
-    # Usuarios registrados
-    users = list(db.users.find().sort("registered_at", -1))
+    user_filter = request.args.get('user', '').strip()
+    msg_query = {}
+    if user_filter:
+        possible_filter_ids = [user_filter]
+        try: possible_filter_ids.append(int(user_filter))
+        except (ValueError, TypeError): pass
+        try: possible_filter_ids.append(str(user_filter))
+        except (ValueError, TypeError): pass
+        msg_query = {"message.chat.id": {"$in": possible_filter_ids}}
+
+    # Mensajes recientes (hasta 100)
+    recent_msgs = list(db.messages.find(msg_query).sort("message.date", -1).limit(100))
+    
+    # Usuarios registrados y enriquecidos con conteo de mensajes
+    raw_users = list(db.users.find().sort("registered_at", -1))
+    users = []
+    seen_cids = set()
+    for u in raw_users:
+        cid = u.get('chat_id')
+        seen_cids.add(str(cid))
+        possible_ids = [cid]
+        try: possible_ids.append(int(cid))
+        except (ValueError, TypeError): pass
+        try: possible_ids.append(str(cid))
+        except (ValueError, TypeError): pass
+        u['msg_count'] = db.messages.count_documents({"message.chat.id": {"$in": possible_ids}})
+        users.append(u)
+
+    # Identificar usuarios que tienen mensajes pero no están en la colección users
+    msg_users = db.messages.aggregate([
+        {"$group": {"_id": "$message.chat.id", "first_name": {"$first": "$message.chat.first_name"}, "msg_count": {"$sum": 1}}}
+    ])
+    for mu in msg_users:
+        cid = mu['_id']
+        if str(cid) not in seen_cids:
+            users.append({
+                "chat_id": cid,
+                "first_name": mu.get('first_name', 'Usuario'),
+                "age": None,
+                "msg_count": mu.get('msg_count', 0),
+                "registered_at": None
+            })
+            seen_cids.add(str(cid))
+            
+    # Ordenar por número de mensajes descendente
+    users.sort(key=lambda x: x.get('msg_count', 0), reverse=True)
     
     # Caché Redis
     from core.cache import cache
@@ -102,12 +144,13 @@ def database_manager():
     return render_template(
         "database.html",
         total_messages=total_messages,
-        total_users=total_users,
+        total_users=len(users),
         total_images=total_images,
         total_errors=total_errors,
         redis_keys=redis_keys,
         recent_msgs=recent_msgs,
-        users=users
+        users=users,
+        selected_user=user_filter
     )
 
 @web_bp.route("/errors")
