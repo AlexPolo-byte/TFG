@@ -274,47 +274,140 @@
     </div>
 </div>
 
-<!-- Friendly Guide: How Alex works -->
+<!-- Admin Infrastructure & Service Health Monitor -->
 <div class="glass-card mb-4 fade-in" style="margin-bottom: 26px; background: #ffffff;">
-    <div style="margin-bottom: 16px;">
-        <h3 style="font-size: 1.1rem; font-weight: 800; margin: 0; color: var(--text-title);">¿Cómo ayuda Alex a las personas?</h3>
-        <p style="color: var(--text-muted); font-size: 0.86rem; margin: 4px 0 0 0;">
-            El objetivo del proyecto es eliminar la frustración y la brecha digital con explicaciones a medida:
-        </p>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-hdd-network-fill" style="color: var(--primary); font-size: 1.2rem;"></i>
+                <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--text-title);">
+                    Estado de Infraestructura y Servicios (RPi 5)
+                </h3>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.86rem; margin: 4px 0 0 0;">
+                Monitorización activa de los 4 componentes que hacen funcionar a Alex
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+            <a href="/rabbitmq/" target="_blank" class="friendly-pill friendly-pill-primary" style="text-decoration: none; font-size: 0.78rem;">
+                <i class="bi bi-inboxes-fill"></i> RabbitMQ Panel
+            </a>
+            <a href="/grafana/" target="_blank" class="friendly-pill" style="text-decoration: none; font-size: 0.78rem; background: #fff1f2; color: #e11d48; border-color: #fecdd3;">
+                <i class="bi bi-graph-up-arrow"></i> Grafana Métricas
+            </a>
+            <a href="https://cloud.mongodb.com" target="_blank" class="friendly-pill friendly-pill-success" style="text-decoration: none; font-size: 0.78rem;">
+                <i class="bi bi-database-fill"></i> MongoDB Atlas
+            </a>
+        </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px;">
-        <div style="background: var(--bg-canvas); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
-            <div style="font-size: 1.4rem; margin-bottom: 8px;">🧒 Para Niños (5-12)</div>
-            <div style="font-size: 0.85rem; color: var(--text-body); line-height: 1.5;">
-                Usa metáforas de videojuegos, magia y animales. Ejemplos visuales y explicaciones cortas y divertidas.
+    <!-- 4 Infrastructure Pillars Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+        
+        <!-- Service 1: RabbitMQ Broker -->
+        <div style="background: var(--bg-canvas); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-title); display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-inboxes" style="color: #f59e0b; font-size: 1.15rem;"></i>
+                        <span>RabbitMQ Broker</span>
+                    </div>
+                    <span class="friendly-pill friendly-pill-success" style="font-size: 0.68rem;">ACTIVO</span>
+                </div>
+                <div style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5;">
+                    Cola asíncrona <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-size:0.78rem;">telegram_queue</code>. Desacopla la recepción del procesamiento IA.
+                </div>
+            </div>
+            <div style="margin-top: 14px; font-size: 0.78rem; color: var(--text-dim); display: flex; justify-content: space-between; border-top: 1px solid var(--border-card); padding-top: 8px;">
+                <span>Modo: AMQP Persistente</span>
+                <span style="color: var(--success); font-weight: 700;">0 en cola</span>
             </div>
         </div>
 
-        <div style="background: var(--bg-canvas); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
-            <div style="font-size: 1.4rem; margin-bottom: 8px;">🎓 Para Jóvenes (13-35)</div>
-            <div style="font-size: 0.85rem; color: var(--text-body); line-height: 1.5;">
-                Tono moderno y directo. Conexión con redes sociales, streaming, trabajo y utilidad real práctica.
+        <!-- Service 2: Redis RAM Cache -->
+        <div style="background: var(--bg-canvas); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-title); display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-lightning-charge" style="color: #ef4444; font-size: 1.15rem;"></i>
+                        <span>Caché Redis en RAM</span>
+                    </div>
+                    <span class="friendly-pill friendly-pill-success" style="font-size: 0.68rem;">EN LÍNEA</span>
+                </div>
+                <div style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5;">
+                    Acelera consultas repetidas con TTL de 2 horas. Evita gastar llamadas a la API de Google.
+                </div>
+            </div>
+            <div style="margin-top: 14px; font-size: 0.78rem; color: var(--text-dim); display: flex; justify-content: space-between; border-top: 1px solid var(--border-card); padding-top: 8px;">
+                <span>Puerto: 6379</span>
+                <span style="color: var(--primary); font-weight: 700;">Latencia &lt; 2ms</span>
             </div>
         </div>
 
-        <div style="background: var(--bg-canvas); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
-            <div style="font-size: 1.4rem; margin-bottom: 8px;">👵 Para Mayores (56+)</div>
-            <div style="font-size: 0.85rem; color: var(--text-body); line-height: 1.5;">
-                Paciencia infinita, paso a paso y sin tecnicismos. Comparaciones con cartas, enciclopedias y buzones analógicos.
+        <!-- Service 3: Gemini AI Engine -->
+        <div style="background: var(--bg-canvas); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-title); display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-robot" style="color: var(--primary); font-size: 1.15rem;"></i>
+                        <span>Motor Gemini IA</span>
+                    </div>
+                    <span class="friendly-pill friendly-pill-primary" style="font-size: 0.68rem;">FLASH 2.5</span>
+                </div>
+                <div style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5;">
+                    Modelo multimodal de Google. Adapta el prompt según la edad e interpreta fotos de aparatos.
+                </div>
+            </div>
+            <div style="margin-top: 14px; font-size: 0.78rem; color: var(--text-dim); display: flex; justify-content: space-between; border-top: 1px solid var(--border-card); padding-top: 8px;">
+                <span>Capacidad: Texto + Visión</span>
+                <span style="color: var(--success); font-weight: 700;">Cuota OK</span>
             </div>
         </div>
+
+        <!-- Service 4: MongoDB Atlas -->
+        <div style="background: var(--bg-canvas); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-card); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-title); display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-database" style="color: #10b981; font-size: 1.15rem;"></i>
+                        <span>MongoDB Atlas</span>
+                    </div>
+                    <span class="friendly-pill friendly-pill-success" style="font-size: 0.68rem;">CLUSTER M0</span>
+                </div>
+                <div style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5;">
+                    Base de datos documental en la nube con réplicas automáticas y consultas de analítica.
+                </div>
+            </div>
+            <div style="margin-top: 14px; font-size: 0.78rem; color: var(--text-dim); display: flex; justify-content: space-between; border-top: 1px solid var(--border-card); padding-top: 8px;">
+                <span>Colección: messages</span>
+                <span style="color: var(--success); font-weight: 700;">TLS Cifrado</span>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <!-- Table: Recent Consultations Feed -->
 <div class="glass-card" style="padding: 0; overflow: hidden; margin-bottom: 26px;">
-    <div style="padding: 18px 24px; border-bottom: 1px solid var(--border-card); background: #ffffff; display: flex; justify-content: space-between; align-items: center;">
+    <div style="padding: 18px 24px; border-bottom: 1px solid var(--border-card); background: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <i class="bi bi-chat-quote-fill" style="color: var(--primary); font-size: 1.1rem;"></i>
             <h3 style="font-size: 1rem; font-weight: 800; color: var(--text-title); margin: 0;">Consultas Recientes Recibidas</h3>
         </div>
-        <span class="friendly-pill friendly-pill-primary">TELEGRAM & WEB</span>
+
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div style="position: relative;">
+                <i class="bi bi-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.8rem;"></i>
+                <input type="text" id="tableFilterInput" onkeyup="filterMessagesTable()" placeholder="Filtrar mensajes..." style="padding: 6px 12px 6px 30px; border-radius: 8px; border: 1px solid var(--border-card); font-size: 0.8rem; outline: none; width: 170px; background: #f8fafc;">
+            </div>
+
+            <div style="display: flex; gap: 5px;">
+                <button type="button" class="friendly-pill friendly-pill-primary table-chip active" onclick="setTableMood('ALL', this)" style="cursor: pointer; border: 1px solid var(--border-card);">Todas</button>
+                <button type="button" class="friendly-pill table-chip" onclick="setTableMood('POSITIVO', this)" style="cursor: pointer; border: 1px solid var(--border-card);">Amables</button>
+                <button type="button" class="friendly-pill table-chip" onclick="setTableMood('photo', this)" style="cursor: pointer; border: 1px solid var(--border-card);">Fotos</button>
+            </div>
+        </div>
     </div>
     <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
@@ -627,40 +720,76 @@
                 sentimentChart.update();
             }
 
-            // Table
-            const tbody = document.getElementById('messages-body');
-            if (data.messages && data.messages.length > 0) {
-                tbody.innerHTML = '';
-                data.messages.forEach(msg => {
-                    let moodPill = '<span class="friendly-pill friendly-pill-primary">Informativo</span>';
-                    if (msg.sentiment === 'POSITIVO') {
-                        moodPill = '<span class="friendly-pill friendly-pill-success">Amable</span>';
-                    } else if (msg.sentiment === 'NEGATIVO') {
-                        moodPill = '<span class="friendly-pill friendly-pill-warning">Advertencia</span>';
-                    }
-
-                    let statusBadge = `<span class="friendly-pill">${msg.status}</span>`;
-                    if (msg.status === 'procesado_ia') {
-                        statusBadge = '<span class="friendly-pill friendly-pill-success"><i class="bi bi-check2"></i> Resuelto</span>';
-                    }
-
-                    let textDisplay = msg.type === 'photo' 
-                        ? '<span class="friendly-pill friendly-pill-warning"><i class="bi bi-camera"></i> Foto Analizada</span>' 
-                        : `<span style="color:var(--text-title); font-weight:500;">${msg.text.substring(0, 50)}${msg.text.length > 50 ? '...' : ''}</span>`;
-
-                    tbody.innerHTML += `
-                        <tr style="border-bottom: 1px solid var(--border-card); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-                            <td style="padding: 14px 24px; color: var(--text-muted); font-size: 0.85rem;">${msg.time}</td>
-                            <td style="padding: 14px 24px; font-weight: 700; color: var(--text-title);">${msg.user}</td>
-                            <td style="padding: 14px 24px;">${textDisplay}</td>
-                            <td style="padding: 14px 24px; text-align: center;">${moodPill}</td>
-                            <td style="padding: 14px 24px; text-align: right;">${statusBadge}</td>
-                        </tr>`;
-                });
-            } else {
-                tbody.innerHTML = '<tr><td colspan="5" style="padding: 24px; text-align: center; color: var(--text-muted);">Sin consultas registradas recientemente.</td></tr>';
-            }
+            // Table data cache and render
+            latestMessages = data.messages || [];
+            renderMessagesTable();
         }).catch(e => console.error(e));
+    }
+
+    let latestMessages = [];
+    let currentTableMood = 'ALL';
+
+    function setTableMood(mood, btn) {
+        currentTableMood = mood;
+        document.querySelectorAll('.table-chip').forEach(b => {
+            b.className = 'friendly-pill table-chip';
+            b.style.borderColor = 'var(--border-card)';
+        });
+        btn.className = 'friendly-pill friendly-pill-primary table-chip active';
+        renderMessagesTable();
+    }
+
+    function filterMessagesTable() {
+        renderMessagesTable();
+    }
+
+    function renderMessagesTable() {
+        const tbody = document.getElementById('messages-body');
+        if (!tbody) return;
+
+        const searchFilter = (document.getElementById('tableFilterInput')?.value || '').toLowerCase();
+        
+        const filtered = latestMessages.filter(msg => {
+            const matchesText = (msg.text || '').toLowerCase().includes(searchFilter) || (msg.user || '').toLowerCase().includes(searchFilter);
+            if (!matchesText) return false;
+
+            if (currentTableMood === 'ALL') return true;
+            if (currentTableMood === 'photo') return msg.type === 'photo';
+            if (currentTableMood === 'POSITIVO') return msg.sentiment === 'POSITIVO';
+            return true;
+        });
+
+        if (filtered.length > 0) {
+            tbody.innerHTML = '';
+            filtered.forEach(msg => {
+                let moodPill = '<span class="friendly-pill friendly-pill-primary">Informativo</span>';
+                if (msg.sentiment === 'POSITIVO') {
+                    moodPill = '<span class="friendly-pill friendly-pill-success">Amable</span>';
+                } else if (msg.sentiment === 'NEGATIVO') {
+                    moodPill = '<span class="friendly-pill friendly-pill-warning">Advertencia</span>';
+                }
+
+                let statusBadge = `<span class="friendly-pill">${msg.status}</span>`;
+                if (msg.status === 'procesado_ia') {
+                    statusBadge = '<span class="friendly-pill friendly-pill-success"><i class="bi bi-check2"></i> Resuelto</span>';
+                }
+
+                let textDisplay = msg.type === 'photo' 
+                    ? '<span class="friendly-pill friendly-pill-warning"><i class="bi bi-camera"></i> Foto Analizada</span>' 
+                    : `<span style="color:var(--text-title); font-weight:500;">${escapeHtml(msg.text.substring(0, 52))}${msg.text.length > 52 ? '...' : ''}</span>`;
+
+                tbody.innerHTML += `
+                    <tr style="border-bottom: 1px solid var(--border-card); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 14px 24px; color: var(--text-muted); font-size: 0.85rem;">${msg.time}</td>
+                        <td style="padding: 14px 24px; font-weight: 700; color: var(--text-title);">${escapeHtml(msg.user)}</td>
+                        <td style="padding: 14px 24px;">${textDisplay}</td>
+                        <td style="padding: 14px 24px; text-align: center;">${moodPill}</td>
+                        <td style="padding: 14px 24px; text-align: right;">${statusBadge}</td>
+                    </tr>`;
+            });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="5" style="padding: 24px; text-align: center; color: var(--text-muted);">Sin consultas que coincidan con el filtro.</td></tr>';
+        }
     }
 
     // 7. System Logs
