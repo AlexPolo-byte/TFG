@@ -302,6 +302,99 @@
         </div>
     </div>
 
+<!-- Raspberry Pi 5 Hardware Real-time Cockpit Bar -->
+<div class="glass-card mb-4 fade-in" style="margin-bottom: 24px; padding: 18px 24px; background: #ffffff;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-motherboard-fill" style="color: var(--primary); font-size: 1.25rem;"></i>
+            <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0; color: var(--text-title);">
+                Telemetría de Hardware en Vivo &bull; Raspberry Pi 5
+            </h3>
+        </div>
+        <span class="friendly-pill friendly-pill-success" style="font-size: 0.72rem;">
+            <span class="live-dot pulse"></span>
+            SENSORES RPI ACTIVOS
+        </span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px;">
+        <!-- Temp -->
+        <div style="background: var(--bg-canvas); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+            <div style="font-size: 0.74rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">
+                <i class="bi bi-thermometer-half" style="color: #ef4444;"></i> TEMPERATURA CPU
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 4px;">
+                <span style="font-size: 1.6rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text-title);" id="rpi-temp">--</span>
+                <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">°C</span>
+            </div>
+            <div style="font-size: 0.72rem; color: #10b981; font-weight: 600; margin-top: 2px;" id="rpi-temp-status">Refrigeración Óptima</div>
+        </div>
+
+        <!-- RAM -->
+        <div style="background: var(--bg-canvas); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+            <div style="font-size: 0.74rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">
+                <i class="bi bi-memory" style="color: var(--primary);"></i> MEMORIA RAM
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 4px;">
+                <span style="font-size: 1.35rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text-title);" id="rpi-ram">-- GB</span>
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;" id="rpi-ram-percent">Cálculo de RAM en uso</div>
+        </div>
+
+        <!-- Disk -->
+        <div style="background: var(--bg-canvas); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+            <div style="font-size: 0.74rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">
+                <i class="bi bi-hdd-fill" style="color: #f59e0b;"></i> ALMACENAMIENTO
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 4px;">
+                <span style="font-size: 1.35rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text-title);" id="rpi-disk">-- GB</span>
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;" id="rpi-disk-percent">Espacio en MicroSD</div>
+        </div>
+
+        <!-- Uptime & Latency -->
+        <div style="background: var(--bg-canvas); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-card);">
+            <div style="font-size: 0.74rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">
+                <i class="bi bi-clock-history" style="color: var(--success);"></i> TIEMPO ACTIVO (UPTIME)
+            </div>
+            <div style="font-size: 1.35rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text-title);" id="rpi-uptime">
+                --
+            </div>
+            <div style="font-size: 0.72rem; color: var(--primary); font-weight: 600; margin-top: 2px;">
+                SLA Respuesta: <span id="rpi-sla-latency">1.15s</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Infrastructure & Service Health Monitor -->
+<div class="glass-card mb-4 fade-in" style="margin-bottom: 26px; background: #ffffff;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-hdd-network-fill" style="color: var(--primary); font-size: 1.2rem;"></i>
+                <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--text-title);">
+                    Estado de Infraestructura y Servicios (RPi 5)
+                </h3>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.86rem; margin: 4px 0 0 0;">
+                Monitorización activa y comprobación de estado real de cada microservicio
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+            <a href="/rabbitmq/" target="_blank" class="friendly-pill friendly-pill-primary" style="text-decoration: none; font-size: 0.78rem;">
+                <i class="bi bi-inboxes-fill"></i> RabbitMQ Panel
+            </a>
+            <a href="/grafana/" target="_blank" class="friendly-pill" style="text-decoration: none; font-size: 0.78rem; background: #fff1f2; color: #e11d48; border-color: #fecdd3;">
+                <i class="bi bi-graph-up-arrow"></i> Grafana Métricas
+            </a>
+            <a href="https://cloud.mongodb.com" target="_blank" class="friendly-pill friendly-pill-success" style="text-decoration: none; font-size: 0.78rem;">
+                <i class="bi bi-database-fill"></i> MongoDB Atlas
+            </a>
+        </div>
+    </div>
+
     <!-- 4 Infrastructure Pillars Grid -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
         
@@ -313,7 +406,7 @@
                         <i class="bi bi-inboxes" style="color: #f59e0b; font-size: 1.15rem;"></i>
                         <span>RabbitMQ Broker</span>
                     </div>
-                    <span class="friendly-pill friendly-pill-success" style="font-size: 0.68rem;">ACTIVO</span>
+                    <span class="friendly-pill friendly-pill-success" style="font-size: 0.68rem;" id="service-rmq-badge">ACTIVO</span>
                 </div>
                 <div style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5;">
                     Cola asíncrona <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-size:0.78rem;">telegram_queue</code>. Desacopla la recepción del procesamiento IA.
@@ -321,7 +414,7 @@
             </div>
             <div style="margin-top: 14px; font-size: 0.78rem; color: var(--text-dim); display: flex; justify-content: space-between; border-top: 1px solid var(--border-card); padding-top: 8px;">
                 <span>Modo: AMQP Persistente</span>
-                <span style="color: var(--success); font-weight: 700;">0 en cola</span>
+                <span style="color: var(--success); font-weight: 700;" id="service-rmq-queue">0 en cola</span>
             </div>
         </div>
 
@@ -333,15 +426,15 @@
                         <i class="bi bi-lightning-charge" style="color: #ef4444; font-size: 1.15rem;"></i>
                         <span>Caché Redis en RAM</span>
                     </div>
-                    <span class="friendly-pill friendly-pill-success" style="font-size: 0.68rem;">EN LÍNEA</span>
+                    <span class="friendly-pill friendly-pill-success" style="font-size: 0.68rem;" id="service-redis-badge">EN LÍNEA</span>
                 </div>
                 <div style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5;">
                     Acelera consultas repetidas con TTL de 2 horas. Evita gastar llamadas a la API de Google.
                 </div>
             </div>
             <div style="margin-top: 14px; font-size: 0.78rem; color: var(--text-dim); display: flex; justify-content: space-between; border-top: 1px solid var(--border-card); padding-top: 8px;">
-                <span>Puerto: 6379</span>
-                <span style="color: var(--primary); font-weight: 700;">Latencia &lt; 2ms</span>
+                <span id="service-redis-keys">0 claves en caché</span>
+                <span style="color: var(--primary); font-weight: 700;" id="service-redis-latency">Latencia &lt; 2ms</span>
             </div>
         </div>
 
@@ -353,7 +446,7 @@
                         <i class="bi bi-robot" style="color: var(--primary); font-size: 1.15rem;"></i>
                         <span>Motor Gemini IA</span>
                     </div>
-                    <span class="friendly-pill friendly-pill-primary" style="font-size: 0.68rem;">FLASH 2.5</span>
+                    <span class="friendly-pill friendly-pill-primary" style="font-size: 0.68rem;" id="service-gemini-badge">FLASH 2.5</span>
                 </div>
                 <div style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5;">
                     Modelo multimodal de Google. Adapta el prompt según la edad e interpreta fotos de aparatos.
@@ -361,7 +454,7 @@
             </div>
             <div style="margin-top: 14px; font-size: 0.78rem; color: var(--text-dim); display: flex; justify-content: space-between; border-top: 1px solid var(--border-card); padding-top: 8px;">
                 <span>Capacidad: Texto + Visión</span>
-                <span style="color: var(--success); font-weight: 700;">Cuota OK</span>
+                <span style="color: var(--success); font-weight: 700;" id="service-gemini-status">Cuota OK</span>
             </div>
         </div>
 
@@ -373,19 +466,20 @@
                         <i class="bi bi-database" style="color: #10b981; font-size: 1.15rem;"></i>
                         <span>MongoDB Atlas</span>
                     </div>
-                    <span class="friendly-pill friendly-pill-success" style="font-size: 0.68rem;">CLUSTER M0</span>
+                    <span class="friendly-pill friendly-pill-success" style="font-size: 0.68rem;" id="service-mongo-badge">CLUSTER M0</span>
                 </div>
                 <div style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5;">
                     Base de datos documental en la nube con réplicas automáticas y consultas de analítica.
                 </div>
             </div>
             <div style="margin-top: 14px; font-size: 0.78rem; color: var(--text-dim); display: flex; justify-content: space-between; border-top: 1px solid var(--border-card); padding-top: 8px;">
-                <span>Colección: messages</span>
-                <span style="color: var(--success); font-weight: 700;">TLS Cifrado</span>
+                <span>Ping TLS</span>
+                <span style="color: var(--success); font-weight: 700;" id="service-mongo-latency">-- ms</span>
             </div>
         </div>
 
     </div>
+</div>
 </div>
 
 <!-- Table: Recent Consultations Feed -->
@@ -698,6 +792,58 @@
             animateNumber('cpu-val', data.system.cpu);
             document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
             document.getElementById('last-update').innerText = data.last_updated;
+
+            // Telemetría Real de Hardware RPi 5
+            if (data.system) {
+                if (data.system.cpu_temp) {
+                    document.getElementById('rpi-temp').innerText = data.system.cpu_temp;
+                    const statusEl = document.getElementById('rpi-temp-status');
+                    if (data.system.cpu_temp < 60) {
+                        statusEl.innerText = "Refrigeración Óptima";
+                        statusEl.style.color = "#10b981";
+                    } else if (data.system.cpu_temp < 75) {
+                        statusEl.innerText = "Carga Térmica Normal";
+                        statusEl.style.color = "#f59e0b";
+                    } else {
+                        statusEl.innerText = "Temperatura Alta (Alerta)";
+                        statusEl.style.color = "#ef4444";
+                    }
+                }
+                if (data.system.ram_used_gb && data.system.ram_total_gb) {
+                    document.getElementById('rpi-ram').innerText = `${data.system.ram_used_gb} / ${data.system.ram_total_gb} GB`;
+                    document.getElementById('rpi-ram-percent').innerText = `${data.system.ram}% en uso`;
+                }
+                if (data.system.disk_used_gb && data.system.disk_total_gb) {
+                    document.getElementById('rpi-disk').innerText = `${data.system.disk_used_gb} / ${data.system.disk_total_gb} GB`;
+                    document.getElementById('rpi-disk-percent').innerText = `${data.system.disk_percent}% en uso`;
+                }
+                if (data.system.uptime) {
+                    document.getElementById('rpi-uptime').innerText = data.system.uptime;
+                }
+            }
+
+            // Estado Real de Microservicios
+            if (data.services) {
+                if (data.services.rabbitmq) {
+                    document.getElementById('service-rmq-queue').innerText = `${data.services.rabbitmq.queue_len} en cola`;
+                    document.getElementById('service-rmq-badge').innerText = data.services.rabbitmq.badge || 'ACTIVO';
+                }
+                if (data.services.redis) {
+                    document.getElementById('service-redis-keys').innerText = `${data.services.redis.keys} claves en caché`;
+                    document.getElementById('service-redis-latency').innerText = `${data.services.redis.latency_ms} ms`;
+                    document.getElementById('service-redis-badge').innerText = data.services.redis.badge || 'EN LÍNEA';
+                }
+                if (data.services.mongodb) {
+                    document.getElementById('service-mongo-latency').innerText = `${data.services.mongodb.latency_ms} ms`;
+                    document.getElementById('service-mongo-badge').innerText = data.services.mongodb.badge || 'CLUSTER M0';
+                }
+            }
+
+            // SLA de la IA
+            if (data.sla && data.sla.avg_latency) {
+                const slaEl = document.getElementById('rpi-sla-latency');
+                if (slaEl) slaEl.innerText = `${data.sla.avg_latency}s`;
+            }
 
             // Link Ngrok
             currentNgrokUrl = data.ngrok_url;
