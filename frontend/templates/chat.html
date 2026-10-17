@@ -454,7 +454,7 @@
         .bubble-footer {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-end;
             gap: 8px;
             margin-top: 10px;
             padding-top: 8px;
@@ -469,31 +469,6 @@
 
         body.theme-contrast .bubble-footer {
             border-top-color: #ffff00;
-        }
-
-        .accessibility-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: #059669;
-            background: #ecfdf5;
-            padding: 2px 7px;
-            border-radius: 6px;
-            border: 1px solid #a7f3d0;
-        }
-
-        body.theme-dark .accessibility-badge {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            border-color: rgba(52, 211, 153, 0.3);
-        }
-
-        body.theme-contrast .accessibility-badge {
-            background: #000000;
-            color: #ffff00;
-            border: 1px solid #ffff00;
         }
 
         .bubble-actions-group {
@@ -724,14 +699,16 @@
         <div class="msg msg-bot">
             <div class="msg-body">
                 ¡Hola! 👋 Soy <b>Alex</b>, tu asistente de tecnología.<br><br>
-                Mi objetivo es explicarte cualquier concepto como la <span class="tech-pill"><i class="bi bi-cpu"></i> CPU</span>, la <span class="tech-pill"><i class="bi bi-cpu"></i> memoria RAM</span> o tu conexión <span class="tech-pill"><i class="bi bi-cpu"></i> Wi-Fi</span> de forma cercana, visual y adaptada a tu edad.<br>
-                <div class="chat-callout">
+                Me adapto a ti para explicarte la tecnología de la forma más sencilla, clara y comprensible posible.<br><br>
+                Para empezar y poder personalizar mis respuestas a tu nivel, <b>¿cuántos años tienes?</b><br><br>
+                Por favor, escribe:<br>
+                <code>/edad &lt;tu_edad&gt;</code> (por ejemplo: <code>/edad 25</code> o <code>/edad 60</code>).
+                <div class="chat-callout" style="margin-top: 14px;">
                     <span class="chat-callout-icon">💡</span>
-                    <div><strong>Consejo de Alex:</strong> Puedes preguntarme dudas como <em>"¿Para qué sirve una dirección IP?"</em>, <em>"¿Cómo funciona la nube?"</em> o pedirme que compare componentes.</div>
+                    <div><strong>Consejo de Alex:</strong> Una vez me digas tu edad, podrás preguntarme cualquier duda como <em>"¿Para qué sirve una CPU?"</em>, <em>"¿Qué es la memoria RAM?"</em> o <em>"¿Cómo funciona la nube?"</em>.</div>
                 </div>
             </div>
             <div class="bubble-footer">
-                <span class="accessibility-badge"><i class="bi bi-check-circle-fill"></i> Lectura Fácil</span>
                 <div class="bubble-actions-group">
                     <button class="bubble-action-btn" onclick="speakMessage(this, 'msg_0')" title="Escuchar en voz alta">
                         <i class="bi bi-volume-up-fill"></i> Escuchar
@@ -765,9 +742,8 @@
                 <i class="bi bi-chat-heart-fill"></i>
             </div>
             <h2>¡Hola!</h2>
-            <p>Dinos tu nombre y edad para que Alex adapte sus explicaciones exactamente a ti:</p>
+            <p>Dinos cómo te llamas para que Alex pueda dirigirse a ti en la conversación:</p>
             <input type="text" id="username-in" placeholder="Tu nombre...">
-            <input type="number" id="age-in" placeholder="Tu edad (ej: 25)..." style="margin-top: 10px;" min="5" max="110">
             <button onclick="saveUser()">Comenzar a Chatear ✨</button>
         </div>
     </div>
@@ -793,21 +769,10 @@
 
         function saveUser() {
             const u = document.getElementById('username-in').value.trim();
-            const a = document.getElementById('age-in').value.trim();
             if (u) {
                 username = u;
                 localStorage.setItem('chat_username', username);
                 document.getElementById('id-modal').style.display = 'none';
-                if (a) {
-                    fetch('/api/web/send', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'ngrok-skip-browser-warning': 'true'
-                        },
-                        body: JSON.stringify({ text: '/edad ' + a, session_id: sid, username: username })
-                    }).catch(() => {});
-                }
             }
         }
 
@@ -962,7 +927,6 @@
                 d.innerHTML = `
                     <div class="msg-body">${bodyHtml}</div>
                     <div class="bubble-footer">
-                        <span class="accessibility-badge"><i class="bi bi-check-circle-fill"></i> Lectura Fácil</span>
                         <div class="bubble-actions-group">
                             <button class="bubble-action-btn" onclick="speakMessage(this, '${msgId}')" title="Escuchar en voz alta">
                                 <i class="bi bi-volume-up-fill"></i> Escuchar
@@ -1076,7 +1040,6 @@
         
         document.getElementById('in').addEventListener('keypress', e => { if (e.key === 'Enter') s() });
         document.getElementById('username-in').addEventListener('keypress', e => { if (e.key === 'Enter') saveUser() });
-        document.getElementById('age-in').addEventListener('keypress', e => { if (e.key === 'Enter') saveUser() });
 
         // Polling para leer la respuesta de Alex
         setInterval(() => {
