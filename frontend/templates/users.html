@@ -13,58 +13,96 @@
             <h1 style="font-size: 1.7rem; font-weight: 800; letter-spacing: -0.4px; margin: 0; color: var(--text-title); display: flex; align-items: center; gap: 8px;">
                 Personas Atendidas por Alex <span style="background: linear-gradient(135deg, var(--primary), #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">IA</span>
             </h1>
-            <span class="friendly-pill friendly-pill-primary">{{ users|length }} PERSONAS</span>
+            <span class="friendly-pill friendly-pill-primary">{{ users|length }} REGISTRADOS</span>
         </div>
         <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
-            Historial de usuarios que han consultado a Alex a través de Telegram o la Web
+            Gestión completa de usuarios, edades adaptativas e historiales en MongoDB
         </p>
     </div>
 
-    <div style="position: relative;">
-        <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.95rem;"></i>
-        <input type="text" id="userSearch" placeholder="Buscar por nombre..."
-            style="padding: 11px 16px 11px 40px; border: 1px solid var(--border-card); border-radius: var(--radius-sm); outline: none; width: 260px; font-family: inherit; font-size: 0.9rem; background: #ffffff; color: var(--text-title); box-shadow: var(--shadow-subtle);">
+    <!-- Barra de Búsqueda y Acciones Rápidas -->
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <div style="position: relative;">
+            <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.95rem;"></i>
+            <input type="text" id="userSearch" placeholder="Buscar por nombre o ID..."
+                style="padding: 11px 16px 11px 40px; border: 1px solid var(--border-card); border-radius: var(--radius-sm); outline: none; width: 240px; font-family: inherit; font-size: 0.9rem; background: #ffffff; color: var(--text-title); box-shadow: var(--shadow-subtle);">
+        </div>
+
+        <button onclick="purgeBenchmarks()" class="btn-clean btn-clean-outline" style="padding: 10px 14px; font-size: 0.85rem;" title="Eliminar mensajes y usuarios de pruebas automatizadas">
+            <i class="bi bi-broom" style="color: #f59e0b;"></i>
+            <span>Limpiar Pruebas</span>
+        </button>
+
+        <a href="/api/db/export" class="btn-clean btn-clean-outline" style="padding: 10px 14px; font-size: 0.85rem;" title="Descargar copia de seguridad completa">
+            <i class="bi bi-download" style="color: var(--primary);"></i>
+            <span>Backup JSON</span>
+        </a>
     </div>
 </div>
 
 <div class="glass-card" style="padding: 0; overflow: hidden;" id="usersContainer">
     {% for user in users %}
-    <div class="user-row" data-name="{{ user.first_name or 'Anónimo' }} {{ user._id }}"
-        style="padding: 18px 24px; border-bottom: 1px solid var(--border-card); display: flex; align-items: center; justify-content: space-between; transition: background 0.2s; gap: 14px; flex-wrap: wrap;" 
-        onmouseover="this.style.background='#f8fafc'" 
-        onmouseout="this.style.background='transparent'">
+    <div class="user-row" id="user-row-{{ user._id }}" data-name="{{ user.first_name or 'Anónimo' }} {{ user._id }}"
+        style="padding: 18px 24px; border-bottom: 1px solid var(--border-card); display: flex; align-items: center; justify-content: space-between; transition: background 0.2s; gap: 14px; flex-wrap: wrap;">
         
         <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="width: 46px; height: 46px; background: var(--primary-soft); color: var(--primary); border: 1px solid rgba(79, 70, 229, 0.2); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.15rem;">
+            <div style="width: 46px; height: 46px; background: var(--primary-soft); color: var(--primary); border: 1px solid rgba(79, 70, 229, 0.2); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.15rem; flex-shrink: 0;">
                 {{ (user.first_name or 'P')[:1] }}
             </div>
             <div>
-                <div style="font-weight: 700; font-size: 1.02rem; color: var(--text-title); margin-bottom: 2px;">
-                    {{ user.first_name or 'Persona Anónima' }}
+                <div style="font-weight: 700; font-size: 1.02rem; color: var(--text-title); margin-bottom: 2px; display: flex; align-items: center; gap: 8px;">
+                    <span id="name-display-{{ user._id }}">{{ user.first_name or 'Persona Anónima' }}</span>
+                    {% if user.age %}
+                        <span class="friendly-pill friendly-pill-success" style="font-size: 0.72rem;" id="age-badge-{{ user._id }}">
+                            <i class="bi bi-person-badge"></i> {{ user.age }} años
+                        </span>
+                    {% else %}
+                        <span class="friendly-pill" style="font-size: 0.72rem; opacity: 0.6;" id="age-badge-{{ user._id }}">
+                            Edad no definida
+                        </span>
+                    {% endif %}
                 </div>
-                <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
-                    <span>ID: {{ user._id }}</span>
+                <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <code>ID: {{ user._id }}</code>
                     <span>&bull;</span>
                     <span><i class="bi bi-clock"></i> Última consulta: {{ user.last_msg_date | human_time }}</span>
                 </div>
             </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <span class="friendly-pill friendly-pill-primary" style="font-size: 0.8rem;">
                 <i class="bi bi-chat-dots-fill"></i>
-                {{ user.msg_count }} preguntas
+                <span id="msg-count-{{ user._id }}">{{ user.msg_count }}</span> msgs
             </span>
 
-            <a href="/user/{{ user._id }}" class="btn-clean btn-clean-primary" style="padding: 8px 14px; font-size: 0.82rem;" title="Ver conversación">
+            <a href="/user/{{ user._id }}" class="btn-clean btn-clean-primary" style="padding: 7px 12px; font-size: 0.82rem;" title="Ver conversación">
                 <i class="bi bi-chat-left-text"></i>
                 <span>Ver Chat</span>
             </a>
 
-            <a href="/user/{{ user._id }}/gallery" class="btn-clean btn-clean-outline" style="padding: 8px 14px; font-size: 0.82rem;" title="Ver fotos analizadas">
+            <a href="/user/{{ user._id }}/gallery" class="btn-clean btn-clean-outline" style="padding: 7px 11px; font-size: 0.82rem;" title="Ver fotos analizadas">
                 <i class="bi bi-images"></i>
                 <span>Fotos</span>
             </a>
+
+            <!-- Botón Editar Perfil -->
+            <button onclick="openEditUserModal('{{ user._id }}', '{{ user.first_name or '' }}', '{{ user.age or '' }}')" 
+                class="btn-clean btn-clean-outline" style="padding: 7px 11px; font-size: 0.82rem;" title="Editar Nombre y Edad">
+                <i class="bi bi-pencil" style="color: var(--primary);"></i>
+            </button>
+
+            <!-- Botón Vaciar Chat -->
+            <button onclick="clearUserChat('{{ user._id }}', '{{ user.first_name or 'este usuario' }}')" 
+                class="btn-clean btn-clean-outline" style="padding: 7px 11px; font-size: 0.82rem;" title="Vaciar conversación (conservar perfil)">
+                <i class="bi bi-eraser" style="color: #f59e0b;"></i>
+            </button>
+
+            <!-- Botón Eliminar Usuario Completo -->
+            <button onclick="deleteUser('{{ user._id }}', '{{ user.first_name or 'este usuario' }}')" 
+                class="btn-clean btn-clean-outline" style="padding: 7px 11px; font-size: 0.82rem; border-color: rgba(239, 68, 68, 0.3);" title="Eliminar usuario y todos sus datos">
+                <i class="bi bi-trash3" style="color: #ef4444;"></i>
+            </button>
         </div>
     </div>
     {% else %}
@@ -76,7 +114,38 @@
     {% endfor %}
 </div>
 
+<!-- Modal para Editar Usuario -->
+<div id="editUserModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); backdrop-filter:blur(6px); z-index:9999; align-items:center; justify-content:center;">
+    <div class="glass-card" style="width:90%; max-width:420px; background:#ffffff; border-radius:20px; padding:28px; box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+            <h3 style="margin:0; font-size:1.25rem; font-weight:800; color:var(--text-title); display:flex; align-items:center; gap:8px;">
+                <i class="bi bi-person-gear" style="color:var(--primary);"></i> Editar Persona
+            </h3>
+            <button onclick="closeEditUserModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-muted);">&times;</button>
+        </div>
+        
+        <input type="hidden" id="editChatId">
+        
+        <div style="margin-bottom:14px;">
+            <label style="display:block; font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-bottom:6px;">NOMBRE O APODO</label>
+            <input type="text" id="editUserName" placeholder="Nombre..." style="width:100%; padding:10px 14px; border:1px solid var(--border-card); border-radius:10px; font-size:0.95rem;">
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <label style="display:block; font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-bottom:6px;">EDAD (Años para adaptación)</label>
+            <input type="number" id="editUserAge" placeholder="Ej: 25" min="5" max="110" style="width:100%; padding:10px 14px; border:1px solid var(--border-card); border-radius:10px; font-size:0.95rem;">
+            <small style="color:var(--text-muted); font-size:0.75rem; margin-top:4px; display:block;">Alex usará esta edad para ajustar su lenguaje y metáforas.</small>
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button onclick="closeEditUserModal()" class="btn-clean btn-clean-outline" style="padding:9px 16px;">Cancelar</button>
+            <button onclick="saveUserEdit()" class="btn-clean btn-clean-primary" style="padding:9px 18px;">Guardar Cambios</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    // Filtro de búsqueda en vivo
     document.getElementById('userSearch').addEventListener('keyup', function () {
         let filter = this.value.toUpperCase();
         document.querySelectorAll('.user-row').forEach(row => {
@@ -84,5 +153,116 @@
             row.style.display = text.indexOf(filter) > -1 ? "flex" : "none";
         });
     });
+
+    // Modal de edición
+    function openEditUserModal(chatId, name, age) {
+        document.getElementById('editChatId').value = chatId;
+        document.getElementById('editUserName').value = name;
+        document.getElementById('editUserAge').value = age;
+        document.getElementById('editUserModal').style.display = 'flex';
+    }
+
+    function closeEditUserModal() {
+        document.getElementById('editUserModal').style.display = 'none';
+    }
+
+    function saveUserEdit() {
+        const chatId = document.getElementById('editChatId').value;
+        const name = document.getElementById('editUserName').value.trim();
+        const age = document.getElementById('editUserAge').value.trim();
+
+        fetch('/api/db/user/update', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: chatId, first_name: name, age: age})
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.status === 'success') {
+                if (name) document.getElementById(`name-display-${chatId}`).innerText = name;
+                const ageBadge = document.getElementById(`age-badge-${chatId}`);
+                if (age) {
+                    ageBadge.className = 'friendly-pill friendly-pill-success';
+                    ageBadge.innerHTML = `<i class="bi bi-person-badge"></i> ${age} años`;
+                } else {
+                    ageBadge.className = 'friendly-pill';
+                    ageBadge.style.opacity = '0.6';
+                    ageBadge.innerText = 'Edad no definida';
+                }
+                closeEditUserModal();
+            } else {
+                alert('Error actualizando usuario: ' + (res.error || 'Desconocido'));
+            }
+        })
+        .catch(e => alert('Error de conexión: ' + e));
+    }
+
+    // Vaciar conversación
+    function clearUserChat(chatId, name) {
+        if (!confirm(`¿Estás seguro de que quieres vaciar la conversación de ${name}? Se borrarán todos los mensajes pero se conservará el perfil.`)) return;
+
+        fetch('/api/db/user/clear_messages', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: chatId})
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const countElem = document.getElementById(`msg-count-${chatId}`);
+                if (countElem) countElem.innerText = '0';
+                alert(res.message || 'Conversación vaciada correctamente.');
+            } else {
+                alert('Error vaciando mensajes: ' + (res.error || 'Desconocido'));
+            }
+        })
+        .catch(e => alert('Error de conexión: ' + e));
+    }
+
+    // Eliminar usuario por completo
+    function deleteUser(chatId, name) {
+        if (!confirm(`⚠️ ATENCIÓN: ¿Seguro que deseas eliminar definitivamente a ${name} (ID: ${chatId}) y TODOS sus mensajes de MongoDB?`)) return;
+
+        fetch('/api/db/user/delete', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: chatId})
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const row = document.getElementById(`user-row-${chatId}`);
+                if (row) {
+                    row.style.transition = 'all 0.3s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(20px)';
+                    setTimeout(() => row.remove(), 300);
+                }
+            } else {
+                alert('Error eliminando usuario: ' + (res.error || 'Desconocido'));
+            }
+        })
+        .catch(e => alert('Error de conexión: ' + e));
+    }
+
+    // Purgar benchmarks
+    function purgeBenchmarks() {
+        if (!confirm('¿Deseas purgar todos los mensajes y registros de prueba (Benchmark #1 al #10 y tests)?')) return;
+
+        fetch('/api/db/purge_benchmarks', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.status === 'success') {
+                alert(`Limpieza completada: ${res.deleted_messages} mensajes y ${res.deleted_users} usuarios de pruebas eliminados.`);
+                window.location.reload();
+            } else {
+                alert('Error purgando: ' + (res.error || 'Desconocido'));
+            }
+        })
+        .catch(e => alert('Error de conexión: ' + e));
+    }
 </script>
 {% endblock %}

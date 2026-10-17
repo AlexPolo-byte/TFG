@@ -3,11 +3,11 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4 fade-in" style="display: flex; justify-content: space-between; margin-bottom: 22px; align-items: center; flex-wrap: wrap; gap: 14px;">
     <div style="display: flex; align-items: center; gap: 14px;">
-        <a href="/users" class="btn-clean btn-clean-outline" style="padding: 8px 12px; font-size: 0.9rem;">
+        <a href="/users" class="btn-clean btn-clean-outline" style="padding: 8px 12px; font-size: 0.9rem;" title="Volver a lista de personas">
             <i class="bi bi-arrow-left"></i>
         </a>
         <div>
-            <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <div style="width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--primary) 0%, #06b6d4 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); flex-shrink: 0;">
                     <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
                         <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.35)" stroke-width="3" stroke-dasharray="8 6"/>
@@ -15,87 +15,289 @@
                     </svg>
                 </div>
                 <h1 style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--text-title); display: flex; align-items: center; gap: 6px;">
-                    Conversación con {{ name }} &bull; <span style="background: linear-gradient(135deg, var(--primary), #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Alex IA</span>
+                    Conversación con <span id="headerUserName">{{ name }}</span> &bull; <span style="background: linear-gradient(135deg, var(--primary), #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Alex IA</span>
                 </h1>
-                <span class="friendly-pill friendly-pill-primary">{{ msgs|length }} MENSAJES</span>
+                <span class="friendly-pill friendly-pill-primary" id="totalMsgsCount">{{ msgs|length }} MENSAJES</span>
+                {% if age %}
+                    <span class="friendly-pill friendly-pill-success" id="headerUserAge">
+                        <i class="bi bi-person-badge"></i> {{ age }} años
+                    </span>
+                {% else %}
+                    <span class="friendly-pill" style="opacity: 0.6;" id="headerUserAge">
+                        Sin edad
+                    </span>
+                {% endif %}
             </div>
-            <p style="color: var(--text-muted); font-size: 0.82rem; margin: 2px 0 0 0;">ID de Usuario: {{ chat_id }}</p>
+            <p style="color: var(--text-muted); font-size: 0.82rem; margin: 2px 0 0 0;">ID de Usuario: <code>{{ chat_id }}</code></p>
         </div>
     </div>
     
-    <a href="/user/{{ chat_id }}/gallery" class="btn-clean btn-clean-outline" style="padding: 8px 16px; font-size: 0.85rem;">
-        <i class="bi bi-images"></i>
-        <span>Ver Fotos de {{ name }}</span>
-    </a>
+    <!-- Barra de Gestión de la Conversación -->
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <button onclick="openEditModal()" class="btn-clean btn-clean-outline" style="padding: 8px 14px; font-size: 0.85rem;" title="Editar Nombre y Edad">
+            <i class="bi bi-pencil" style="color: var(--primary);"></i>
+            <span>Editar Perfil</span>
+        </button>
+
+        <a href="/user/{{ chat_id }}/gallery" class="btn-clean btn-clean-outline" style="padding: 8px 14px; font-size: 0.85rem;" title="Ver fotos analizadas">
+            <i class="bi bi-images"></i>
+            <span>Fotos</span>
+        </a>
+
+        <button onclick="exportChatText()" class="btn-clean btn-clean-outline" style="padding: 8px 14px; font-size: 0.85rem;" title="Exportar transcripción en texto">
+            <i class="bi bi-file-earmark-arrow-down"></i>
+            <span>Exportar</span>
+        </button>
+
+        <button onclick="clearCurrentChat()" class="btn-clean btn-clean-outline" style="padding: 8px 14px; font-size: 0.85rem;" title="Vaciar todos los mensajes de esta conversación">
+            <i class="bi bi-eraser" style="color: #f59e0b;"></i>
+            <span>Vaciar Chat</span>
+        </button>
+
+        <button onclick="deleteCurrentUser()" class="btn-clean btn-clean-outline" style="padding: 8px 14px; font-size: 0.85rem; border-color: rgba(239,68,68,0.3); color: #ef4444;" title="Eliminar usuario y mensajes definitivamente">
+            <i class="bi bi-trash3"></i>
+            <span>Eliminar Usuario</span>
+        </button>
+    </div>
 </div>
 
-<div class="glass-card" style="padding: 0; height: calc(100vh - 200px); display: flex; flex-direction: column; overflow: hidden; background: #ffffff;">
+<div class="glass-card" style="padding: 0; height: calc(100vh - 210px); display: flex; flex-direction: column; overflow: hidden; background: #ffffff;">
     <div style="padding: 12px 24px; border-bottom: 1px solid var(--border-card); background: #f8fafc; display: flex; justify-content: space-between; align-items: center;">
         <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">
-            REGISTRO DE LA CONVERSACIÓN
+            REGISTRO DE LA CONVERSACIÓN &bull; MONGODB
         </span>
-        <span class="friendly-pill friendly-pill-success" style="font-size: 0.72rem;">GUARDADO EN MONGODB</span>
+        <span class="friendly-pill friendly-pill-success" style="font-size: 0.72rem;">Sincronizado</span>
     </div>
 
-    <div style="flex: 1; overflow-y: auto; padding: 26px; display: flex; flex-direction: column; gap: 20px; background: #f8fafc;">
+    <div style="flex: 1; overflow-y: auto; padding: 26px; display: flex; flex-direction: column; gap: 20px; background: #f8fafc;" id="messagesBox">
         {% for msg in msgs %}
             
-            <!-- User Question Bubble -->
-            <div style="align-self: flex-end; max-width: 78%; display: flex; flex-direction: column; align-items: flex-end;" class="fade-in">
-                <div style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: #ffffff; padding: 14px 20px; border-radius: 20px 20px 4px 20px; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);">
-                    {% if msg.type == 'photo' %}
-                        <div class="friendly-pill friendly-pill-warning" style="margin-bottom: 8px; font-size: 0.75rem; background: rgba(255,255,255,0.2); color: #ffffff; border: none;">
-                            <i class="bi bi-camera-fill"></i> Foto Adjunta
-                        </div>
-                    {% endif %}
-                    <div style="line-height: 1.5; font-size: 0.95rem; word-break: break-word;">{{ msg.message.text }}</div>
-                </div>
-                <span style="font-size: 0.74rem; color: var(--text-muted); margin-top: 5px;">
-                    {{ msg.message.date | human_time }}
-                </span>
-            </div>
+            <!-- Message Container Card -->
+            <div id="msg-card-{{ msg._id }}" class="fade-in" style="display: flex; flex-direction: column; gap: 10px; position: relative; padding: 8px 12px; border-radius: 14px; transition: background 0.2s;"
+                onmouseover="this.querySelector('.btn-del-msg').style.opacity='1'" 
+                onmouseout="this.querySelector('.btn-del-msg').style.opacity='0'">
+                
+                <!-- Botón Flotante para Eliminar Este Mensaje -->
+                <button class="btn-del-msg" onclick="deleteSingleMessage('{{ msg._id }}')" 
+                    style="position: absolute; right: 14px; top: 12px; opacity: 0; transition: opacity 0.2s; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 6px; padding: 3px 8px; font-size: 0.72rem; cursor: pointer; z-index: 5;"
+                    title="Eliminar este mensaje de la base de datos">
+                    <i class="bi bi-trash3"></i> Borrar
+                </button>
 
-            <!-- Alex AI Response Bubble -->
-            {% if msg.ai_response %}
-            <div style="align-self: flex-start; max-width: 82%; display: flex; gap: 14px;" class="fade-in">
-                <div style="width: 38px; height: 38px; background: var(--primary-soft); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--primary); font-size: 1.2rem; border: 1px solid rgba(79, 70, 229, 0.2);">
-                    <i class="bi bi-robot"></i>
-                </div>
-                <div>
-                    <div style="background: #ffffff; border: 1px solid var(--border-card); color: var(--text-title); padding: 16px 20px; border-radius: 4px 20px 20px 20px; box-shadow: var(--shadow-subtle);">
-                        <div style="line-height: 1.6; font-size: 0.95rem; word-break: break-word;">{{ msg.ai_response }}</div>
-                    </div>
-                    
-                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 6px; padding-left: 4px;">
-                        <span class="friendly-pill" style="font-size: 0.72rem;">
-                            <i class="bi bi-stopwatch"></i>
-                            {{ "%.2f"|format(msg.processed_at - msg.message.date) if msg.processed_at else 0 }}s
-                        </span>
-                        
-                        {% if msg.sentiment == 'POSITIVO' %}
-                            <span class="friendly-pill friendly-pill-success" style="font-size: 0.72rem;">
-                                <span>●</span> Amable / Cercano
-                            </span>
-                        {% elif msg.sentiment == 'NEGATIVO' %}
-                            <span class="friendly-pill friendly-pill-warning" style="font-size: 0.72rem;">
-                                <span>●</span> Advertencia
-                            </span>
-                        {% else %}
-                            <span class="friendly-pill friendly-pill-primary" style="font-size: 0.72rem;">
-                                <span>●</span> Informativo
-                            </span>
+                <!-- User Question Bubble -->
+                <div style="align-self: flex-end; max-width: 78%; display: flex; flex-direction: column; align-items: flex-end;">
+                    <div style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: #ffffff; padding: 14px 20px; border-radius: 20px 20px 4px 20px; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);">
+                        {% if msg.type == 'photo' %}
+                            <div class="friendly-pill friendly-pill-warning" style="margin-bottom: 8px; font-size: 0.75rem; background: rgba(255,255,255,0.2); color: #ffffff; border: none;">
+                                <i class="bi bi-camera-fill"></i> Foto Adjunta
+                            </div>
                         {% endif %}
+                        <div style="line-height: 1.5; font-size: 0.95rem; word-break: break-word;">{{ msg.message.text }}</div>
+                    </div>
+                    <span style="font-size: 0.74rem; color: var(--text-muted); margin-top: 5px;">
+                        {{ msg.message.date | human_time }}
+                    </span>
+                </div>
+
+                <!-- Alex AI Response Bubble -->
+                {% if msg.ai_response %}
+                <div style="align-self: flex-start; max-width: 82%; display: flex; gap: 14px;">
+                    <div style="width: 38px; height: 38px; background: var(--primary-soft); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--primary); font-size: 1.2rem; border: 1px solid rgba(79, 70, 229, 0.2);">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <div>
+                        <div style="background: #ffffff; border: 1px solid var(--border-card); color: var(--text-title); padding: 16px 20px; border-radius: 4px 20px 20px 20px; box-shadow: var(--shadow-subtle);">
+                            <div style="line-height: 1.6; font-size: 0.95rem; word-break: break-word;">{{ msg.ai_response }}</div>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 6px; padding-left: 4px;">
+                            <span class="friendly-pill" style="font-size: 0.72rem;">
+                                <i class="bi bi-stopwatch"></i>
+                                {{ "%.2f"|format(msg.processed_at - msg.message.date) if msg.processed_at else 0 }}s
+                            </span>
+                            
+                            {% if msg.sentiment == 'POSITIVO' %}
+                                <span class="friendly-pill friendly-pill-success" style="font-size: 0.72rem;">
+                                    <span>●</span> Amable / Cercano
+                                </span>
+                            {% elif msg.sentiment == 'NEGATIVO' %}
+                                <span class="friendly-pill friendly-pill-warning" style="font-size: 0.72rem;">
+                                    <span>●</span> Advertencia
+                                </span>
+                            {% else %}
+                                <span class="friendly-pill friendly-pill-primary" style="font-size: 0.72rem;">
+                                    <span>●</span> Informativo
+                                </span>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
+                {% endif %}
             </div>
-            {% endif %}
 
         {% else %}
-            <div style="text-align: center; color: var(--text-muted); margin-top: 60px;">
+            <div style="text-align: center; color: var(--text-muted); margin-top: 60px;" id="emptyChatNotice">
                 <i class="bi bi-chat-heart" style="font-size: 2.5rem; opacity: 0.4; display: block; margin-bottom: 10px; color: var(--primary);"></i>
                 No hay mensajes registrados en esta conversación.
             </div>
         {% endfor %}
     </div>
 </div>
+
+<!-- Modal para Editar Perfil -->
+<div id="editProfileModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); backdrop-filter:blur(6px); z-index:9999; align-items:center; justify-content:center;">
+    <div class="glass-card" style="width:90%; max-width:400px; background:#ffffff; border-radius:20px; padding:28px; box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+            <h3 style="margin:0; font-size:1.25rem; font-weight:800; color:var(--text-title); display:flex; align-items:center; gap:8px;">
+                <i class="bi bi-person-gear" style="color:var(--primary);"></i> Editar Perfil de Usuario
+            </h3>
+            <button onclick="closeEditModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-muted);">&times;</button>
+        </div>
+
+        <div style="margin-bottom:14px;">
+            <label style="display:block; font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-bottom:6px;">NOMBRE</label>
+            <input type="text" id="inputProfileName" value="{{ name }}" style="width:100%; padding:10px 14px; border:1px solid var(--border-card); border-radius:10px; font-size:0.95rem;">
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <label style="display:block; font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-bottom:6px;">EDAD (Años)</label>
+            <input type="number" id="inputProfileAge" value="{{ age or '' }}" placeholder="Ej: 25" min="5" max="110" style="width:100%; padding:10px 14px; border:1px solid var(--border-card); border-radius:10px; font-size:0.95rem;">
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button onclick="closeEditModal()" class="btn-clean btn-clean-outline" style="padding:9px 16px;">Cancelar</button>
+            <button onclick="saveProfile()" class="btn-clean btn-clean-primary" style="padding:9px 18px;">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatId = "{{ chat_id }}";
+
+    function openEditModal() {
+        document.getElementById('editProfileModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editProfileModal').style.display = 'none';
+    }
+
+    function saveProfile() {
+        const name = document.getElementById('inputProfileName').value.trim();
+        const age = document.getElementById('inputProfileAge').value.trim();
+
+        fetch('/api/db/user/update', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: chatId, first_name: name, age: age})
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.status === 'success') {
+                if (name) document.getElementById('headerUserName').innerText = name;
+                const ageElem = document.getElementById('headerUserAge');
+                if (age) {
+                    ageElem.className = 'friendly-pill friendly-pill-success';
+                    ageElem.innerHTML = `<i class="bi bi-person-badge"></i> ${age} años`;
+                } else {
+                    ageElem.className = 'friendly-pill';
+                    ageElem.style.opacity = '0.6';
+                    ageElem.innerText = 'Sin edad';
+                }
+                closeEditModal();
+            } else {
+                alert('Error al actualizar: ' + (res.error || 'Desconocido'));
+            }
+        })
+        .catch(e => alert('Error: ' + e));
+    }
+
+    function deleteSingleMessage(msgId) {
+        if (!confirm('¿Eliminar este mensaje de MongoDB?')) return;
+
+        fetch('/api/db/message/delete', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({id: msgId})
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const card = document.getElementById(`msg-card-${msgId}`);
+                if (card) {
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(-10px)';
+                    setTimeout(() => card.remove(), 300);
+                }
+            } else {
+                alert('Error al eliminar mensaje: ' + (res.error || 'Desconocido'));
+            }
+        })
+        .catch(e => alert('Error: ' + e));
+    }
+
+    function clearCurrentChat() {
+        if (!confirm('¿Vaciar toda la conversación de este usuario? Se eliminarán todos los mensajes de MongoDB.')) return;
+
+        fetch('/api/db/user/clear_messages', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: chatId})
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.status === 'success') {
+                document.getElementById('messagesBox').innerHTML = `
+                    <div style="text-align: center; color: var(--text-muted); margin-top: 60px;">
+                        <i class="bi bi-chat-heart" style="font-size: 2.5rem; opacity: 0.4; display: block; margin-bottom: 10px; color: var(--primary);"></i>
+                        Conversación vaciada correctamente.
+                    </div>`;
+                document.getElementById('totalMsgsCount').innerText = '0 MENSAJES';
+            } else {
+                alert('Error vaciando mensajes: ' + (res.error || 'Desconocido'));
+            }
+        })
+        .catch(e => alert('Error: ' + e));
+    }
+
+    function deleteCurrentUser() {
+        if (!confirm('⚠️ ATENCIÓN: Se eliminará al usuario y TODAS sus conversaciones de la base de datos de forma irreversible. ¿Continuar?')) return;
+
+        fetch('/api/db/user/delete', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: chatId})
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.status === 'success') {
+                alert('Usuario eliminado correctamente.');
+                window.location.href = '/users';
+            } else {
+                alert('Error: ' + (res.error || 'Desconocido'));
+            }
+        })
+        .catch(e => alert('Error: ' + e));
+    }
+
+    function exportChatText() {
+        let text = `=== CONVERSACIÓN CON {{ name }} (ID: {{ chat_id }}) ===\nFecha exportación: ${new Date().toLocaleString()}\n\n`;
+        const cards = document.querySelectorAll('#messagesBox > div[id^="msg-card-"]');
+        cards.forEach(c => {
+            const userTextElem = c.querySelector('div[style*="border-radius: 20px 20px 4px 20px"]');
+            const aiTextElem = c.querySelector('div[style*="border-radius: 4px 20px 20px 20px"]');
+            if (userTextElem) text += `USUARIO: ${userTextElem.innerText.trim()}\n`;
+            if (aiTextElem) text += `ALEX IA: ${aiTextElem.innerText.trim()}\n\n`;
+        });
+
+        const blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat_{{ chat_id }}_${Date.now()}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+</script>
 {% endblock %}

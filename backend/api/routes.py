@@ -528,3 +528,313 @@ def api_metaphors():
         }
     ]
     return jsonify(metaphors)
+
+# =======================================================
+# --- GESTOR DE BASE DE DATOS MONGODB & CACHÉ REDIS ---
+# =======================================================
+
+@api_bp.route("/db/stats")
+@login_required
+def api_db_stats():
+    """Estadísticas detalladas de almacenamiento y colecciones"""
+    try:
+        from core.cache import cache
+        msg_count = db.messages.count_documents({})
+        user_count = db.users.count_documents({})
+        img_count = db.messages.count_documents({"image_data": {"$exists": True}})
+        err_count = db.messages.count_documents({
+            "$or": [
+                {"status": {"$nin": ["procesado_ia", "procesado_cloud", None]}},
+                {"ai_response": {"$regex": "^(Error|Estoy saturado|IA no disponible)", "$options": "i"}}
+            ]
+        })
+        benchmark_count = db.messages.count_documents({
+            "$or": [
+                {"message.chat.id": 999999},
+                {"message.chat.id": "999999"},
+                {"message.text": {"$regex": "^Ping benchmark", "$options": "i"}}
+            ]
+        })
+        
+        # Redis stats
+        redis_keys = 0
+        redis_mem = "0 KB"
+        try:
+            if cache.redis:
+                keys = cache.redis.keys("*")
+                redis_keys = len(keys)
+                info = cache.redis.info('memory')
+                redis_mem = info.get('used_memory_human', '0 KB')
+        except Exception:
+            pass
+            
+        return jsonify({
+            "status": "success",
+            "messages_count": msg_count,
+            "users_count": user_count,
+            "images_count": img_count,
+            "errors_count": err_count,
+            "benchmark_count": benchmark_count,
+            "redis_keys": redis_keys,
+            "redis_memory": redis_mem
+        })
+    except Exception as e:
+        logger.error(f"Error en /api/db/stats: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route("/db/user/delete", methods=['POST'])
+@login_required
+def api_db_user_delete():
+    """Elimina completamente un usuario y todos sus mensajes asociados"""
+    try:
+        data = request.get_json(silent=True, force=True) or {}
+        chat_id = data.get('chat_id')
+        if not chat_id:
+            return jsonify({"error": "chat_id requerido"}), 400
+            
+        possible_ids = [chat_id]
+        try: possible_ids.append(int(chat_id))
+        except (ValueError, TypeError): pass
+        try: possible_ids.append(str(chat_id))
+        except (ValueError, TypeError): pass
+
+        del_user = db.users.delete_many({"chat_id": {"$in": possible_ids}})
+        del_msgs = db.messages.delete_many({"message.chat.id": {"$in": possible_ids}})
+        
+        from core.cache import cache
+        try:
+            cache.delete(f"web:{chat_id}")
+        except Exception:
+            pass
+
+        return jsonify({
+            "status": "success",
+            "deleted_user_count": del_user.deleted_count,
+            "deleted_messages_count": del_msgs.deleted_count,
+            "message": f"Usuario {chat_id} y sus {del_msgs.deleted_count} mensajes eliminados."
+        })
+    except Exception as e:
+        logger.error(f"Error borrando usuario: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route("/db/user/update", methods=['POST'])
+@login_required
+def api_db_user_update():
+    """Actualiza edad o nombre del usuario"""
+    try:
+        data = request.get_json(silent=True, force=True) or {}
+        chat_id = data.get('chat_id')
+        first_name = data.get('first_name', '').strip()
+        age = data.get('age')
+        
+        if not chat_id:
+            return jsonify({"error": "chat_id requerido"}), 400
+
+        possible_ids = [chat_id]
+        try: possible_ids.append(int(chat_id))
+        except (ValueError, TypeError): pass
+        try: possible_ids.append(str(chat_id))
+        except (ValueError, TypeError): pass
+
+        update_fields = {}
+        if first_name:
+            update_fields["first_name"] = first_name
+        if age is not None and str(age).strip() != '':
+            try:
+                update_fields["age"] = int(age)
+            except ValueError:
+                return jsonify({"error": "La edad debe ser un número entero"}), 400
+
+        if update_fields:
+            db.users.update_many({"chat_id": {"$in": possible_ids}}, {"$set": update_fields})
+            if first_name:
+                db.messages.update_many(
+                    {"message.chat.id": {"$in": possible_ids}},
+                    {"$set": {"message.chat.first_name": first_name}}
+                )
+
+        return jsonify({"status": "success", "updated_fields": update_fields})
+    except Exception as e:
+        logger.error(f"Error actualizando usuario: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route("/db/user/clear_messages", methods=['POST'])
+@login_required
+def api_db_user_clear_messages():
+    """Vacía todos los mensajes de una conversación manteniendo el perfil del usuario"""
+    try:
+        data = request.get_json(silent=True, force=True) or {}
+        chat_id = data.get('chat_id')
+        if not chat_id:
+            return jsonify({"error": "chat_id requerido"}), 400
+
+        possible_ids = [chat_id]
+        try: possible_ids.append(int(chat_id))
+        except (ValueError, TypeError): pass
+        try: possible_ids.append(str(chat_id))
+        except (ValueError, TypeError): pass
+
+        del_msgs = db.messages.delete_many({"message.chat.id": {"$in": possible_ids}})
+        return jsonify({
+            "status": "success",
+            "deleted_messages_count": del_msgs.deleted_count,
+            "message": f"Se vaciaron {del_msgs.deleted_count} mensajes del chat {chat_id}."
+        })
+    except Exception as e:
+        logger.error(f"Error vaciando mensajes de usuario: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route("/db/message/delete", methods=['POST'])
+@login_required
+def api_db_message_delete():
+    """Elimina un mensaje específico por su ObjectId o message_id"""
+    try:
+        from bson.objectid import ObjectId
+        data = request.get_json(silent=True, force=True) or {}
+        msg_id_str = data.get('id') or data.get('_id')
+        message_id = data.get('message_id')
+
+        query = {}
+        if msg_id_str:
+            try:
+                query["_id"] = ObjectId(msg_id_str)
+            except Exception:
+                query["_id"] = msg_id_str
+        elif message_id:
+            try: message_id = int(message_id)
+            except (ValueError, TypeError): pass
+            query["message.message_id"] = message_id
+        else:
+            return jsonify({"error": "ID de mensaje requerido"}), 400
+
+        res = db.messages.delete_one(query)
+        return jsonify({
+            "status": "success",
+            "deleted": res.deleted_count > 0
+        })
+    except Exception as e:
+        logger.error(f"Error borrando mensaje: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route("/db/purge_benchmarks", methods=['POST'])
+@login_required
+def api_db_purge_benchmarks():
+    """Elimina mensajes de prueba de benchmarks y tests"""
+    try:
+        query = {
+            "$or": [
+                {"message.chat.id": 999999},
+                {"message.chat.id": "999999"},
+                {"message.text": {"$regex": "^Ping benchmark", "$options": "i"}},
+                {"message.chat.first_name": {"$regex": "^Benchmark_", "$options": "i"}},
+                {"message.chat.first_name": {"$regex": "^Test", "$options": "i"}}
+            ]
+        }
+        res_msgs = db.messages.delete_many(query)
+        res_users = db.users.delete_many({
+            "$or": [
+                {"chat_id": 999999},
+                {"chat_id": "999999"},
+                {"first_name": {"$regex": "^Benchmark_", "$options": "i"}}
+            ]
+        })
+        return jsonify({
+            "status": "success",
+            "deleted_messages": res_msgs.deleted_count,
+            "deleted_users": res_users.deleted_count
+        })
+    except Exception as e:
+        logger.error(f"Error purgando benchmarks: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route("/db/purge_errors", methods=['POST'])
+@login_required
+def api_db_purge_errors():
+    """Elimina mensajes con fallos o respuestas de error de la base de datos"""
+    try:
+        query = {
+            "$or": [
+                {"status": {"$nin": ["procesado_ia", "procesado_cloud", None]}},
+                {"ai_response": {"$regex": "^(Error|Estoy saturado|IA no disponible)", "$options": "i"}}
+            ]
+        }
+        res = db.messages.delete_many(query)
+        return jsonify({
+            "status": "success",
+            "deleted_errors": res.deleted_count
+        })
+    except Exception as e:
+        logger.error(f"Error purgando incidencias: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route("/db/flush_cache", methods=['POST'])
+@login_required
+def api_db_flush_cache():
+    """Vacía la memoria caché Redis"""
+    try:
+        from core.cache import cache
+        if cache.redis:
+            cache.redis.flushall()
+            return jsonify({"status": "success", "message": "Caché Redis vaciada completamente."})
+        return jsonify({"status": "warning", "message": "Redis no conectado."})
+    except Exception as e:
+        logger.error(f"Error vaciando caché: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route("/db/export")
+@login_required
+def api_db_export():
+    """Exporta todos los mensajes y perfiles en un archivo JSON descargable"""
+    try:
+        from flask import Response
+        import json
+        from bson import json_util
+
+        msgs = list(db.messages.find())
+        users = list(db.users.find())
+        export_payload = {
+            "exported_at": datetime.datetime.now(MADRID_TZ).isoformat(),
+            "system": "Alex IA - TFG",
+            "total_messages": len(msgs),
+            "total_users": len(users),
+            "users": users,
+            "messages": msgs
+        }
+        
+        json_str = json_util.dumps(export_payload, indent=2)
+        filename = f"alex_ia_backup_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        
+        return Response(
+            json_str,
+            mimetype="application/json",
+            headers={"Content-Disposition": f"attachment;filename={filename}"}
+        )
+    except Exception as e:
+        logger.error(f"Error exportando base de datos: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route("/db/reset_all", methods=['POST'])
+@login_required
+def api_db_reset_all():
+    """PELIGRO: Resetea por completo las colecciones de MongoDB y caché Redis"""
+    try:
+        data = request.get_json(silent=True, force=True) or {}
+        code = data.get('confirm_code', '')
+        if code != 'CONFIRMAR_RESET_TOTAL':
+            return jsonify({"error": "Código de confirmación incorrecto. Escribe CONFIRMAR_RESET_TOTAL"}), 400
+
+        del_m = db.messages.delete_many({})
+        del_u = db.users.delete_many({})
+        from core.cache import cache
+        if cache.redis:
+            try: cache.redis.flushall()
+            except Exception: pass
+
+        return jsonify({
+            "status": "success",
+            "message": f"Base de datos reseteada. {del_m.deleted_count} mensajes y {del_u.deleted_count} usuarios eliminados."
+        })
+    except Exception as e:
+        logger.error(f"Error en reset total: {e}")
+        return jsonify({"error": str(e)}), 500
+
