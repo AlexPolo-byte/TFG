@@ -69,6 +69,14 @@ def process_message(ch, method, properties, body):
         if not chat_id:
             ch.basic_ack(delivery_tag=method.delivery_tag)
             return
+
+        # Banco de Pruebas de Estrés / Benchmark: no registrar en MongoDB para no saturar la BD
+        if source == 'benchmark' or chat_id == 999999 or 'benchmark' in str(first_name).lower():
+            logger.info("⚡ Benchmark de estrés procesado en cola (omitido de MongoDB para no saturar la BD)")
+            MESSAGES_PROCESSED.labels(type='benchmark').inc()
+            PROCESSING_TIME.observe(time.time() - start)
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+            return
         
         user = user_manager.get_or_create(chat_id, first_name)
         
