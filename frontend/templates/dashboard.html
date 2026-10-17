@@ -1,198 +1,271 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<!-- Top Header Bar with Live Network Ping -->
 <div class="d-flex justify-content-between align-items-center mb-4 fade-in"
-    style="display: flex; justify-content: space-between; margin-bottom: 24px; align-items: center;">
+    style="display: flex; justify-content: space-between; margin-bottom: 28px; align-items: center; flex-wrap: wrap; gap: 16px;">
     <div>
-        <h1 style="font-size: 1.5rem; font-weight: 700; margin: 0;">Dashboard</h1>
-        <p style="color: #86868B; font-size: 0.9rem; margin: 0;">Sistema Central &bull; Madrid Node</p>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
+            <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.85rem; font-weight: 700; letter-spacing: -0.5px; margin: 0; background: linear-gradient(135deg, #ffffff 30%, var(--primary) 70%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Mission Control
+            </h1>
+            <span class="tech-pill tech-pill-primary" style="animation: pulseWave 3s infinite;">
+                <i class="bi bi-broadcast"></i> TELEMETRY ACTIVE
+            </span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
+            Centro de Operaciones Inteligente &bull; Nodo Madrid (RPi 5 ARM64)
+        </p>
     </div>
-    <div style="text-align: right;">
-        <span style="font-size: 0.7rem; color: #86868B; display: block; margin-bottom: 4px;">ÚLTIMO SYNC</span>
-        <span class="badge-soft" style="background: #E5E5EA; color: var(--text-main); font-family: monospace;"
-            id="last-update">Conectando...</span>
+    
+    <div style="display: flex; align-items: center; gap: 14px;">
+        <!-- Audio Chime Toggle -->
+        <button id="soundToggleBtn" onclick="toggleAudio()" class="tech-pill" style="cursor: pointer; background: rgba(0, 240, 255, 0.08); border-color: rgba(0, 240, 255, 0.3); color: var(--primary);" title="Efectos de sonido de telemetría">
+            <i class="bi bi-volume-up-fill" id="soundIcon"></i>
+            <span id="soundText">SFX ON</span>
+        </button>
+
+        <div style="text-align: right;">
+            <span style="font-size: 0.65rem; color: var(--text-dim); display: block; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.8px;">ÚLTIMA SINCRONIZACIÓN</span>
+            <span class="tech-pill" style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #ffffff;" id="last-update">Sincronizando...</span>
+        </div>
     </div>
 </div>
 
-<div class="card-std mb-4 fade-in" style="margin-bottom: 24px; padding: 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(0, 122, 255, 0.1); border: 1px solid rgba(0, 122, 255, 0.3);">
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <i class="bi bi-globe" style="color: #0A84FF; font-size: 1.2rem;"></i>
-        <span style="color: var(--text-main); font-weight: 600; font-size: 0.95rem;">Túnel Público (Ngrok):</span>
-        <a href="#" id="ngrok-link" target="_blank" style="color: #0A84FF; text-decoration: none; font-family: monospace; font-size: 0.9rem;">Cargando...</a>
+<!-- Public Tunnel Card (Ngrok) with 3D Tilt -->
+<div class="glass-card tilt-card mb-4 fade-in" style="margin-bottom: 26px; padding: 20px 26px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(0, 240, 255, 0.08), rgba(99, 102, 241, 0.12)); border: 1px solid rgba(0, 240, 255, 0.35); cursor: pointer;" onclick="copyTunnelUrl()">
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(99, 102, 241, 0.25)); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.35rem; box-shadow: 0 0 20px rgba(0, 240, 255, 0.3); border: 1px solid rgba(0, 240, 255, 0.4);">
+            <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 8px;">
+                <span>TÚNEL PÚBLICO CIFRADO (TLS 1.3 / HTTPS)</span>
+                <span class="tech-pill" style="font-size: 0.62rem; padding: 2px 8px;">CLICK TO COPY</span>
+            </div>
+            <a href="#" id="ngrok-link" target="_blank" onclick="event.stopPropagation();" style="color: var(--primary); text-decoration: none; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; margin-top: 2px;">
+                Cargando túnel...
+            </a>
+        </div>
     </div>
-    <span class="badge-soft" style="background: rgba(48, 209, 88, 0.2); color: #30D158;">Online</span>
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="tech-pill tech-pill-success" style="padding: 6px 14px; font-size: 0.8rem;">
+            <span class="live-dot" style="width: 7px; height: 7px;"></span>
+            GATEWAY ONLINE
+        </span>
+    </div>
 </div>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 24px;"
-    class="fade-in">
-    <a href="https://cloud.mongodb.com" target="_blank" style="text-decoration: none;">
-        <div class="card-std"
-            style="padding: 15px; display: flex; align-items: center; gap: 10px;">
-            <i class="bi bi-database-fill" style="color: #00ED64; font-size: 1.2rem;"></i>
-            <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">MongoDB</span>
+<!-- Quick External Access Stack with 3D Tilt -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; margin-bottom: 28px;" class="fade-in">
+    <a href="https://cloud.mongodb.com" target="_blank" style="text-decoration: none;" onclick="playChime(580)">
+        <div class="glass-card tilt-card" style="padding: 18px 22px; display: flex; align-items: center; gap: 16px; border-color: rgba(16, 185, 129, 0.25);">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16, 185, 129, 0.16); display: flex; align-items: center; justify-content: center; color: #10b981; font-size: 1.35rem; box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);">
+                <i class="bi bi-database-fill"></i>
+            </div>
+            <div>
+                <div style="color: var(--text-main); font-weight: 700; font-size: 1rem; font-family: 'Space Grotesk', sans-serif;">MongoDB</div>
+                <div style="color: var(--text-dim); font-size: 0.74rem; font-family: 'JetBrains Mono', monospace;">Atlas Cluster M0</div>
+            </div>
         </div>
     </a>
-    <a href="/rabbitmq/" target="_blank" style="text-decoration: none;">
-        <div class="card-std"
-            style="padding: 15px; display: flex; align-items: center; gap: 10px;">
-            <i class="bi bi-envelope-fill" style="color: #FF6600; font-size: 1.2rem;"></i>
-            <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">RabbitMQ</span>
+
+    <a href="/rabbitmq/" target="_blank" style="text-decoration: none;" onclick="playChime(640)">
+        <div class="glass-card tilt-card" style="padding: 18px 22px; display: flex; align-items: center; gap: 16px; border-color: rgba(245, 158, 11, 0.25);">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245, 158, 11, 0.16); display: flex; align-items: center; justify-content: center; color: #f59e0b; font-size: 1.35rem; box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);">
+                <i class="bi bi-inboxes-fill"></i>
+            </div>
+            <div>
+                <div style="color: var(--text-main); font-weight: 700; font-size: 1rem; font-family: 'Space Grotesk', sans-serif;">RabbitMQ</div>
+                <div style="color: var(--text-dim); font-size: 0.74rem; font-family: 'JetBrains Mono', monospace;">Broker AMQP</div>
+            </div>
         </div>
     </a>
-    <a href="/grafana/" target="_blank" style="text-decoration: none;">
-        <div class="card-std"
-            style="padding: 15px; display: flex; align-items: center; gap: 10px;">
-            <i class="bi bi-graph-up-arrow" style="color: #F46800; font-size: 1.2rem;"></i>
-            <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">Grafana / Loki</span>
+
+    <a href="/grafana/" target="_blank" style="text-decoration: none;" onclick="playChime(720)">
+        <div class="glass-card tilt-card" style="padding: 18px 22px; display: flex; align-items: center; gap: 16px; border-color: rgba(239, 68, 68, 0.25);">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(239, 68, 68, 0.16); display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 1.35rem; box-shadow: 0 0 20px rgba(239, 68, 68, 0.25);">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <div>
+                <div style="color: var(--text-main); font-weight: 700; font-size: 1rem; font-family: 'Space Grotesk', sans-serif;">Grafana / Loki</div>
+                <div style="color: var(--text-dim); font-size: 0.74rem; font-family: 'JetBrains Mono', monospace;">Observabilidad 360°</div>
+            </div>
         </div>
     </a>
 </div>
 
-<div
-    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 24px;">
-    <div class="card-std">
-        <div style="display: flex; justify-content: space-between; align-items: start;">
-            <span style="color: #86868B; font-size: 0.8rem; font-weight: 700;">PROCESADOS</span>
-            <i class="bi bi-database" style="color: var(--primary);"></i>
+<!-- 4 Key System Metrics -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; margin-bottom: 26px;">
+    <!-- Metrica 1: Total -->
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="color: var(--text-muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'JetBrains Mono', monospace;">TOTAL MENSAJES</span>
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(0, 240, 255, 0.12); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                <i class="bi bi-chat-left-text-fill"></i>
+            </div>
         </div>
-        <div style="font-size: 1.8rem; font-weight: 700; margin-top: 10px;" id="counter-total">0</div>
+        <div style="font-size: 2.1rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #ffffff;" id="counter-total">0</div>
+        <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Persistidos en MongoDB</div>
     </div>
 
-    <div class="card-std">
-        <div style="display: flex; justify-content: space-between; align-items: start;">
-            <span style="color: #86868B; font-size: 0.8rem; font-weight: 700;">HOY (24H)</span>
-            <i class="bi bi-calendar-check" style="color: #34C759;"></i>
+    <!-- Metrica 2: Hoy -->
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="color: var(--text-muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'JetBrains Mono', monospace;">VENTANA 24 HORAS</span>
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(16, 185, 129, 0.12); display: flex; align-items: center; justify-content: center; color: var(--success);">
+                <i class="bi bi-activity"></i>
+            </div>
         </div>
-        <div style="font-size: 1.8rem; font-weight: 700; margin-top: 10px;" id="counter-today">0</div>
+        <div style="font-size: 2.1rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--success);" id="counter-today">0</div>
+        <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Actividad de la sesión</div>
     </div>
 
-    <div class="card-std">
-        <div style="display: flex; justify-content: space-between; align-items: start;">
-            <span style="color: #86868B; font-size: 0.8rem; font-weight: 700;">CPU RPI 4</span>
-            <i class="bi bi-motherboard" style="color: #FF9500;"></i>
+    <!-- Metrica 3: CPU RPi -->
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="color: var(--text-muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'JetBrains Mono', monospace;">CARGA CPU RPI 5</span>
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(245, 158, 11, 0.12); display: flex; align-items: center; justify-content: center; color: var(--warning);">
+                <i class="bi bi-cpu-fill"></i>
+            </div>
         </div>
-        <div style="display: flex; align-items: baseline; gap: 5px; margin-top: 10px;">
-            <div style="font-size: 1.8rem; font-weight: 700;" id="cpu-val">0</div><span
-                style="font-size: 1rem;">%</span>
+        <div style="display: flex; align-items: baseline; gap: 4px;">
+            <div style="font-size: 2.1rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--warning);" id="cpu-val">0</div>
+            <span style="font-size: 1.1rem; font-weight: 600; color: var(--text-muted);">%</span>
         </div>
-        <div
-            style="width: 100%; height: 6px; background: #E5E5EA; border-radius: 3px; margin-top: 8px; overflow: hidden;">
-            <div id="cpu-bar"
-                style="width: 0%; height: 100%; background: #FF9500; transition: width 0.5s; border-radius: 3px;"></div>
+        <div style="width: 100%; height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: var(--radius-pill); margin-top: 10px; overflow: hidden;">
+            <div id="cpu-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #f59e0b, #ef4444); border-radius: var(--radius-pill); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);"></div>
         </div>
     </div>
 
-    <div class="card-std">
-        <div style="display: flex; justify-content: space-between; align-items: start;">
-            <span style="color: #86868B; font-size: 0.8rem; font-weight: 700;">CRÍTICOS</span>
-            <i class="bi bi-shield-exclamation" style="color: #FF3B30;"></i>
+    <!-- Metrica 4: Errores -->
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="color: var(--text-muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'JetBrains Mono', monospace;">INCIDENCIAS CRÍTICAS</span>
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(239, 68, 68, 0.12); display: flex; align-items: center; justify-content: center; color: var(--danger);">
+                <i class="bi bi-shield-x"></i>
+            </div>
         </div>
-        <div style="font-size: 1.8rem; font-weight: 700; margin-top: 10px; color: #FF3B30;" id="counter-errors">0</div>
+        <div style="font-size: 2.1rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--danger);" id="counter-errors">0</div>
+        <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Filtro de tasa &bull; Rate Limit</div>
     </div>
 </div>
 
-<div
-    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px;">
-    <div class="card-std">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="font-size: 1rem; font-weight: 600; margin: 0;">Flujo de Actividad</h3>
-            <span class="badge-soft" style="background: #E4F2FF; color: var(--primary);">Live</span>
+<!-- Charts Section -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 26px;">
+    <!-- Flujo de Actividad -->
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px;">
+            <div>
+                <h3 style="font-size: 1rem; font-weight: 700; margin: 0; color: #ffffff;">Flujo de Actividad</h3>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Mensajes procesados por minuto</span>
+            </div>
+            <span class="tech-pill tech-pill-primary">REAL-TIME</span>
         </div>
         <div style="height: 220px; width: 100%;">
             <canvas id="activityChart"></canvas>
         </div>
     </div>
 
-    <div class="card-std">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="font-size: 1rem; font-weight: 600; margin: 0;">IA Sentiment</h3>
-            <span class="badge-soft" style="background: #F2F2F7; color: #86868B;">Analysis</span>
+    <!-- Sentimiento IA -->
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+            <div>
+                <h3 style="font-size: 1rem; font-weight: 700; margin: 0; color: #ffffff;">Análisis de Sentimiento IA</h3>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Clasificación del modelo Gemini</span>
+            </div>
+            <span class="tech-pill tech-pill-success">NLP ENGINE</span>
         </div>
         <div style="height: 180px; width: 100%; position: relative;">
             <canvas id="sentimentChart"></canvas>
-            <div
-                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
-                <div style="font-weight: 700; font-size: 1.5rem; color: var(--text-main);">AI</div>
-                <div style="font-size: 0.6rem; color: var(--text-muted);">CORE</div>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
+                <div style="font-weight: 800; font-size: 1.6rem; color: var(--text-main); font-family: 'JetBrains Mono', monospace;">AI</div>
+                <div style="font-size: 0.65rem; color: var(--primary); font-weight: 700; letter-spacing: 1px;">CORE</div>
             </div>
         </div>
-        <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px; font-size: 0.8rem;">
-            <span style="display: flex; align-items: center; gap: 5px;"><span
-                    style="width: 8px; height: 8px; border-radius: 50%; background: #34C759;"></span> Positivo</span>
-            <span style="display: flex; align-items: center; gap: 5px;"><span
-                    style="width: 8px; height: 8px; border-radius: 50%; background: #E5E5EA;"></span> Neutro</span>
-            <span style="display: flex; align-items: center; gap: 5px;"><span
-                    style="width: 8px; height: 8px; border-radius: 50%; background: #FF3B30;"></span> Negativo</span>
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 18px; font-size: 0.8rem; font-family: 'JetBrains Mono', monospace;">
+            <span style="display: flex; align-items: center; gap: 6px; color: var(--text-muted);">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span> Positivo
+            </span>
+            <span style="display: flex; align-items: center; gap: 6px; color: var(--text-muted);">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8;"></span> Neutro
+            </span>
+            <span style="display: flex; align-items: center; gap: 6px; color: var(--text-muted);">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px #ef4444;"></span> Negativo
+            </span>
         </div>
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; width: 100%;">
-
-    <div class="card-std"
-        style="padding: 0; overflow: hidden; height: 400px; display: flex; flex-direction: column; grid-column: span 2;">
-        <div
-            style="padding: 15px 20px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin: 0; letter-spacing: 1px;">INTERACCIONES
-                RECIENTES</h3>
-            <i class="bi bi-arrow-repeat" style="color: var(--text-muted);"></i>
+<!-- Table & Terminal Logs Row -->
+<div style="display: grid; grid-template-columns: 1fr; gap: 26px;">
+    <!-- Interacciones Recientes -->
+    <div class="glass-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        <div style="padding: 18px 24px; border-bottom: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.02); display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="bi bi-chat-square-dots-fill" style="color: var(--primary);"></i>
+                <h3 style="font-size: 0.95rem; font-weight: 700; color: #ffffff; margin: 0; letter-spacing: 0.5px;">FEED DE INTERACCIONES EN VIVO</h3>
+            </div>
+            <span class="tech-pill" style="font-size: 0.72rem;">TELEGRAM GATEWAY</span>
         </div>
         <div style="overflow-x: auto; flex: 1;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
                 <thead>
-                    <tr
-                        style="text-align: left; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
-                        <th style="padding: 15px 20px; font-weight: 600;">Hora</th>
-                        <th style="padding: 15px 20px; font-weight: 600;">Usuario</th>
-                        <th style="padding: 15px 20px; font-weight: 600;">Mensaje</th>
-                        <th style="padding: 15px 20px; font-weight: 600; text-align: center;">IA Mood</th>
-                        <th style="padding: 15px 20px; font-weight: 600; text-align: right;">Estado</th>
+                    <tr style="text-align: left; color: var(--text-dim); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'JetBrains Mono', monospace; border-bottom: 1px solid var(--border-glass);">
+                        <th style="padding: 14px 24px; font-weight: 600;">Hora</th>
+                        <th style="padding: 14px 24px; font-weight: 600;">Usuario</th>
+                        <th style="padding: 14px 24px; font-weight: 600;">Contenido Mensaje</th>
+                        <th style="padding: 14px 24px; font-weight: 600; text-align: center;">Sentimiento</th>
+                        <th style="padding: 14px 24px; font-weight: 600; text-align: right;">Estado</th>
                     </tr>
                 </thead>
                 <tbody id="messages-body">
                     <tr>
-                        <td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">Cargando
-                            feed...</td>
+                        <td colspan="5" style="padding: 28px; text-align: center; color: var(--text-muted);">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                                <div class="live-dot" style="background: var(--primary); box-shadow: 0 0 10px var(--primary);"></div>
+                                <span>Sincronizando feed de eventos...</span>
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <div class="card-std"
-        style="padding: 0; height: 400px; display: flex; flex-direction: column; grid-column: span 2;">
-
-        <div style="padding: 15px; border-bottom: 1px solid var(--border);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h3 style="font-size: 0.9rem; font-weight: 600; margin: 0; letter-spacing: 1px;">SYSTEM LOGS</h3>
-                <i class="bi bi-arrow-clockwise" id="refresh-logs" style="cursor: pointer; color: var(--primary);"
-                    onclick="fetchLogs()"></i>
+    <!-- Terminal System Logs -->
+    <div class="glass-card" style="padding: 0; overflow: hidden; height: 420px; display: flex; flex-direction: column;">
+        <div style="padding: 16px 22px; border-bottom: 1px solid var(--border-glass); background: rgba(10, 15, 30, 0.7); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="bi bi-terminal-fill" style="color: var(--primary);"></i>
+                <h3 style="font-size: 0.95rem; font-weight: 700; margin: 0; color: #ffffff; letter-spacing: 0.5px;">CONSOLE LOGS</h3>
             </div>
 
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <select id="log-selector"
-                    style="flex: 1; padding: 6px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; background: rgba(255,255,255,0.05); color: var(--text-main); outline: none;">
-                    <option style="background-color: #1C1C1E; color: white;" value="worker">CONTAINER: WORKER</option>
-                    <option style="background-color: #1C1C1E; color: white;" value="backend_telegram">CONTAINER: BACKEND</option>
-                    <option style="background-color: #1C1C1E; color: white;" value="ngrok">CONTAINER: NGROK</option>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <select id="log-selector" style="padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-glass-bright); font-size: 0.8rem; background: rgba(15, 23, 42, 0.9); color: #ffffff; outline: none; font-family: 'JetBrains Mono', monospace;">
+                    <option value="worker">CONTAINER: WORKER</option>
+                    <option value="backend_telegram">CONTAINER: BACKEND</option>
+                    <option value="ngrok">CONTAINER: NGROK</option>
                 </select>
 
-                <div style="display: flex; gap: 4px;">
-                    <button onclick="setFilter('ALL', this)" class="badge-soft active-filter"
-                        style="border: 1px solid var(--primary); cursor: pointer; background: rgba(10, 132, 255, 0.2); color: var(--primary);">ALL</button>
-                    <button onclick="setFilter('INFO', this)" class="badge-soft"
-                        style="border: 1px solid var(--border); cursor: pointer; background: transparent; color: var(--text-muted);">INFO</button>
-                    <button onclick="setFilter('WARN', this)" class="badge-soft"
-                        style="border: 1px solid var(--border); cursor: pointer; background: transparent; color: var(--text-muted);">WARN</button>
-                    <button onclick="setFilter('ERROR', this)" class="badge-soft"
-                        style="border: 1px solid var(--border); cursor: pointer; background: transparent; color: var(--text-muted);">ERR</button>
+                <div style="display: flex; gap: 6px;">
+                    <button onclick="setFilter('ALL', this)" class="tech-pill tech-pill-primary" style="cursor: pointer;">ALL</button>
+                    <button onclick="setFilter('INFO', this)" class="tech-pill" style="cursor: pointer;">INFO</button>
+                    <button onclick="setFilter('WARN', this)" class="tech-pill" style="cursor: pointer;">WARN</button>
+                    <button onclick="setFilter('ERROR', this)" class="tech-pill" style="cursor: pointer;">ERR</button>
                 </div>
+
+                <button onclick="fetchLogs()" id="refresh-logs" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: var(--primary); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s ease;">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
             </div>
         </div>
 
-        <div id="logs-container"
-            style="flex: 1; overflow-y: auto; background: rgba(0,0,0,0.3); color: var(--text-main); padding: 15px; font-family: 'Courier New', monospace; font-size: 0.75rem; line-height: 1.5;">
-            <div style="text-align: center; color: var(--text-muted); margin-top: 50px;">Conectando a Docker Socket...</div>
+        <div id="logs-container" style="flex: 1; overflow-y: auto; background: rgba(5, 8, 18, 0.75); color: #e2e8f0; padding: 18px 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; line-height: 1.6;">
+            <div style="text-align: center; color: var(--text-dim); margin-top: 60px;">
+                <i class="bi bi-terminal" style="font-size: 1.8rem; opacity: 0.4; display: block; margin-bottom: 8px;"></i>
+                Capturando logs en tiempo real vía Docker Socket...
+            </div>
         </div>
     </div>
 </div>
@@ -200,20 +273,160 @@
 
 {% block scripts %}
 <script>
-    // --- 1. CONFIGURACIÓN CHARTS (Clean Style) ---
-    Chart.defaults.font.family = "'Inter', sans-serif";
-    Chart.defaults.color = '#8E8E93';
+    // --- 0. AUDIO TELEMETRY (Synthesizer via Web Audio API) ---
+    let audioCtx = null;
+    let sfxEnabled = true;
+
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function toggleAudio() {
+        sfxEnabled = !sfxEnabled;
+        const icon = document.getElementById('soundIcon');
+        const text = document.getElementById('soundText');
+        const btn = document.getElementById('soundToggleBtn');
+        if (sfxEnabled) {
+            icon.className = 'bi bi-volume-up-fill';
+            text.innerText = 'SFX ON';
+            btn.style.color = 'var(--primary)';
+            btn.style.borderColor = 'rgba(0, 240, 255, 0.3)';
+            playChime(880, 'sine', 0.12);
+        } else {
+            icon.className = 'bi bi-volume-mute-fill';
+            text.innerText = 'SFX OFF';
+            btn.style.color = 'var(--text-muted)';
+            btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+        }
+    }
+
+    function playChime(freq = 660, type = 'sine', duration = 0.15) {
+        if (!sfxEnabled) return;
+        try {
+            initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(freq * 1.4, audioCtx.currentTime + duration);
+            
+            gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        } catch (e) {}
+    }
+
+    // --- COPY TUNNEL URL WITH TOAST FEEDBACK ---
+    function copyTunnelUrl() {
+        const link = document.getElementById('ngrok-link');
+        const textToCopy = link.getAttribute('href') || link.innerText;
+        if (textToCopy && textToCopy !== '#' && textToCopy !== 'No disponible' && !textToCopy.includes('Cargando')) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                playChime(1040, 'triangle', 0.18);
+                if (window.showToast) {
+                    window.showToast('Gateway Copiado', 'Enlace TLS cifrado copiado al portapapeles', 'success');
+                }
+            }).catch(() => {
+                if (window.showToast) {
+                    window.showToast('Aviso', textToCopy, 'info');
+                }
+            });
+        }
+    }
+
+    // Number easing animation
+    function animateNumber(elementId, targetValue, duration = 800) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        const start = parseInt(el.innerText.replace(/[^0-9]/g, '')) || 0;
+        const end = parseInt(targetValue) || 0;
+        if (start === end) return;
+        const startTime = performance.now();
+        function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3);
+            const current = Math.round(start + (end - start) * ease);
+            el.innerText = current.toLocaleString();
+            if (progress < 1) {
+                requestAnimationFrame(update);
+            } else {
+                el.innerText = end.toLocaleString();
+            }
+        }
+        requestAnimationFrame(update);
+    }
+
+    // --- 1. CONFIGURACIÓN CHARTS (Cyberpunk Glass Style) ---
+    Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+    Chart.defaults.color = '#94a3b8';
 
     // Activity Line Chart
     const ctxLine = document.getElementById('activityChart').getContext('2d');
-    let gradientLine = ctxLine.createLinearGradient(0, 0, 0, 300);
-    gradientLine.addColorStop(0, 'rgba(0, 122, 255, 0.2)');
-    gradientLine.addColorStop(1, 'rgba(0, 122, 255, 0.0)');
+    let gradientLine = ctxLine.createLinearGradient(0, 0, 0, 260);
+    gradientLine.addColorStop(0, 'rgba(0, 240, 255, 0.35)');
+    gradientLine.addColorStop(1, 'rgba(0, 240, 255, 0.0)');
 
     const activityChart = new Chart(ctxLine, {
         type: 'line',
-        data: { labels: [], datasets: [{ label: 'Msgs', data: [], borderColor: '#0A84FF', borderWidth: 2, tension: 0.4, fill: true, backgroundColor: gradientLine, pointRadius: 0, pointHoverRadius: 4 }] },
-        options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { borderDash: [5, 5], color: 'rgba(255,255,255,0.1)' } } }, plugins: { legend: { display: false } } }
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Mensajes',
+                data: [],
+                borderColor: '#00f0ff',
+                borderWidth: 2.5,
+                tension: 0.38,
+                fill: true,
+                backgroundColor: gradientLine,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: '#00f0ff',
+                pointHoverBorderColor: '#ffffff',
+                pointHoverBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#64748b', font: { size: 10 } }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.05)',
+                        borderDash: [4, 4]
+                    },
+                    ticks: { color: '#64748b', font: { size: 10 } }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleColor: '#f8fafc',
+                    bodyColor: '#00f0ff',
+                    borderColor: 'rgba(0, 240, 255, 0.3)',
+                    borderWidth: 1,
+                    padding: 10,
+                    boxPadding: 4,
+                    usePointStyle: true
+                }
+            }
+        }
     });
 
     // Sentiment Donut Chart
@@ -224,31 +437,45 @@
             labels: ['Positivo', 'Neutro', 'Negativo'],
             datasets: [{
                 data: [0, 0, 0],
-                backgroundColor: ['#34C759', '#E5E5EA', '#FF3B30'],
+                backgroundColor: ['#10b981', '#94a3b8', '#ef4444'],
                 borderWidth: 0,
-                hoverOffset: 4
+                hoverOffset: 6
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '76%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleColor: '#f8fafc',
+                    bodyColor: '#94a3b8',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    padding: 10
+                }
+            }
+        }
     });
 
-    // --- 2. LÓGICA DE ACTUALIZACIÓN (AJAX) ---
+    // --- 2. LÓGICA DE ACTUALIZACIÓN DE TELEMETRÍA (AJAX) ---
     function updateStats() {
         fetch('/api/stats', {
             headers: { 'ngrok-skip-browser-warning': 'true' }
         }).then(r => r.json()).then(data => {
-            // Stats básicas
-            document.getElementById('counter-total').innerText = data.total;
-            document.getElementById('counter-today').innerText = data.today;
-            document.getElementById('counter-errors').innerText = data.errors;
-            document.getElementById('cpu-val').innerText = data.system.cpu;
+            animateNumber('counter-total', data.total);
+            animateNumber('counter-today', data.today);
+            animateNumber('counter-errors', data.errors);
+            animateNumber('cpu-val', data.system.cpu);
             document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
             document.getElementById('last-update').innerText = data.last_updated;
 
             // Actualizar URL de Ngrok
             const ngrokLink = document.getElementById('ngrok-link');
-            if(data.ngrok_url && data.ngrok_url !== "No disponible") {
-                ngrokLink.innerText = data.ngrok_url;
+            if (data.ngrok_url && data.ngrok_url !== "No disponible") {
+                ngrokLink.innerHTML = `${data.ngrok_url} <i class="bi bi-box-arrow-up-right" style="font-size:0.75rem;"></i>`;
                 ngrokLink.href = data.ngrok_url;
             } else {
                 ngrokLink.innerText = "No disponible";
@@ -256,9 +483,11 @@
             }
 
             // Actualizar Charts
-            activityChart.data.labels = data.chart_line.labels;
-            activityChart.data.datasets[0].data = data.chart_line.data;
-            activityChart.update();
+            if (data.chart_line && data.chart_line.labels) {
+                activityChart.data.labels = data.chart_line.labels;
+                activityChart.data.datasets[0].data = data.chart_line.data;
+                activityChart.update();
+            }
 
             if (data.sentiment_data) {
                 sentimentChart.data.datasets[0].data = data.sentiment_data;
@@ -270,47 +499,55 @@
             if (data.messages && data.messages.length > 0) {
                 tbody.innerHTML = '';
                 data.messages.forEach(msg => {
-                    let moodIcon = '<span style="color:#8E8E93">●</span>';
-                    if (msg.sentiment === 'POSITIVO') moodIcon = '<span style="color:#34C759">●</span>';
-                    if (msg.sentiment === 'NEGATIVO') moodIcon = '<span style="color:#FF3B30">●</span>';
+                    let moodPill = '<span class="tech-pill" style="font-size:0.7rem;"><span style="color:#94a3b8">●</span> NEUTRO</span>';
+                    if (msg.sentiment === 'POSITIVO') {
+                        moodPill = '<span class="tech-pill tech-pill-success" style="font-size:0.7rem;"><span style="color:#10b981">●</span> POSITIVO</span>';
+                    } else if (msg.sentiment === 'NEGATIVO') {
+                        moodPill = '<span class="tech-pill" style="font-size:0.7rem; background:rgba(239,68,68,0.1); border-color:rgba(239,68,68,0.3); color:#ef4444;"><span style="color:#ef4444">●</span> NEGATIVO</span>';
+                    }
 
-                    let statusBadge = `<span class="badge-soft" style="background:#E5E5EA; color:#8E8E93">${msg.status}</span>`;
-                    if (msg.status === 'procesado_ia') statusBadge = '<span class="badge-soft" style="background:#D1FAE5; color:#059669">Completado</span>';
+                    let statusBadge = `<span class="tech-pill" style="font-size:0.72rem;">${msg.status}</span>`;
+                    if (msg.status === 'procesado_ia') {
+                        statusBadge = '<span class="tech-pill tech-pill-primary" style="font-size:0.72rem;"><i class="bi bi-check-circle-fill"></i> PROCESADO</span>';
+                    }
 
-                    let textDisplay = msg.type === 'photo' ? '<span style="color:#FF9500"><i class="bi bi-camera-fill"></i> Imagen</span>' : `<span style="color:var(--text-main)">${msg.text.substring(0, 40)}${msg.text.length > 40 ? '...' : ''}</span>`;
+                    let textDisplay = msg.type === 'photo' 
+                        ? '<span class="tech-pill tech-pill-warning" style="font-size:0.75rem;"><i class="bi bi-camera-fill"></i> IMAGEN MULTIMODAL</span>' 
+                        : `<span style="color:var(--text-main); font-weight:500;">${msg.text.substring(0, 48)}${msg.text.length > 48 ? '...' : ''}</span>`;
 
                     tbody.innerHTML += `
-                        <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
-                            <td style="padding: 12px 20px; color: var(--text-muted);">${msg.time}</td>
-                            <td style="padding: 12px 20px; font-weight: 500; color: var(--text-main);">${msg.user}</td>
-                            <td style="padding: 12px 20px;">${textDisplay}</td>
-                            <td style="padding: 12px 20px; text-align: center;">${moodIcon}</td>
-                            <td style="padding: 12px 20px; text-align: right;">${statusBadge}</td>
+                        <tr style="border-bottom: 1px solid var(--border-glass); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+                            <td style="padding: 14px 24px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">${msg.time}</td>
+                            <td style="padding: 14px 24px; font-weight: 600; color: #ffffff;">${msg.user}</td>
+                            <td style="padding: 14px 24px;">${textDisplay}</td>
+                            <td style="padding: 14px 24px; text-align: center;">${moodPill}</td>
+                            <td style="padding: 14px 24px; text-align: right;">${statusBadge}</td>
                         </tr>`;
                 });
             } else {
-                tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">Sin datos recientes</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="padding: 24px; text-align: center; color: var(--text-muted);">Sin datos recientes en la base de datos</td></tr>';
             }
         }).catch(e => console.error(e));
     }
 
-    // --- 3. LÓGICA DE LOGS (Filtrado Cliente) ---
+    // --- 3. LÓGICA DE LOGS DE LA CONSOLA ---
     let allLogs = [];
     let currentFilter = 'ALL';
 
     function fetchLogs() {
         const container = document.getElementById('log-selector').value;
-        const icon = document.getElementById('refresh-logs');
-        icon.style.transition = 'transform 0.5s';
-        icon.style.transform = 'rotate(180deg)';
-        setTimeout(() => icon.style.transform = 'rotate(0deg)', 500);
+        const icon = document.querySelector('#refresh-logs i');
+        if (icon) {
+            icon.style.transition = 'transform 0.5s';
+            icon.style.transform = 'rotate(180deg)';
+            setTimeout(() => icon.style.transform = 'rotate(0deg)', 500);
+        }
 
         fetch(`/api/logs?container=${container}`, {
             headers: { 'ngrok-skip-browser-warning': 'true' }
         }).then(r => r.json()).then(data => {
             const logsText = data.logs || '';
 
-            // Si es un mensaje de error, mostrarlo directamente
             if (logsText.startsWith('⚠️') || logsText.startsWith('❌')) {
                 allLogs = [{
                     time: new Date().toLocaleTimeString(),
@@ -321,20 +558,17 @@
                 return;
             }
 
-            // Parsear logs línea por línea
             const lines = logsText.split('\n').filter(line => line.trim());
             allLogs = lines.map(line => {
-                // Intentar extraer timestamp, level y mensaje
                 const timestamp = new Date().toLocaleTimeString();
                 let level = 'INFO';
                 let msg = line;
 
-                // Detectar nivel de log
-                if (line.includes('ERROR') || line.includes('❌')) {
+                if (line.includes('ERROR') || line.includes('❌') || line.includes('Traceback')) {
                     level = 'ERROR';
                 } else if (line.includes('WARNING') || line.includes('WARN') || line.includes('⚠️')) {
                     level = 'WARN';
-                } else if (line.includes('INFO') || line.includes('✅') || line.includes('🔌')) {
+                } else if (line.includes('INFO') || line.includes('✅') || line.includes('🔌') || line.includes('🎧')) {
                     level = 'INFO';
                 }
 
@@ -346,7 +580,7 @@
             allLogs = [{
                 time: new Date().toLocaleTimeString(),
                 level: 'ERROR',
-                msg: `Error fetching logs: ${err.message}`
+                msg: `Error al leer logs: ${err.message}`
             }];
             renderLogs();
         });
@@ -354,12 +588,16 @@
 
     function setFilter(filter, btn) {
         currentFilter = filter;
-        // Reset estilos botones
         document.querySelectorAll('button[onclick^="setFilter"]').forEach(b => {
-            b.style.background = 'transparent'; b.style.color = 'var(--text-muted)'; b.style.border = '1px solid var(--border)';
+            b.className = 'tech-pill';
+            b.style.background = 'rgba(255,255,255,0.04)';
+            b.style.borderColor = 'var(--border-glass)';
+            b.style.color = 'var(--text-muted)';
         });
-        // Activar botón pulsado
-        btn.style.background = 'rgba(10, 132, 255, 0.2)'; btn.style.color = 'var(--primary)'; btn.style.border = '1px solid var(--primary)';
+        btn.className = 'tech-pill tech-pill-primary';
+        btn.style.background = 'rgba(0,240,255,0.12)';
+        btn.style.borderColor = 'rgba(0,240,255,0.4)';
+        btn.style.color = 'var(--primary)';
         renderLogs();
     }
 
@@ -368,28 +606,35 @@
         div.innerHTML = "";
         const filtered = allLogs.filter(log => currentFilter === 'ALL' || log.level === currentFilter).reverse();
 
-        if (filtered.length === 0) { div.innerHTML = '<div style="opacity:0.5; text-align:center; margin-top:20px;">Sin registros</div>'; return; }
+        if (filtered.length === 0) {
+            div.innerHTML = '<div style="opacity:0.5; text-align:center; margin-top:40px;">Sin registros para el filtro seleccionado</div>';
+            return;
+        }
 
         filtered.forEach(log => {
-            let color = '#E5E5EA';
-            if (log.level === 'ERROR') color = '#FF453A'; // Rojo Apple
-            if (log.level === 'WARN') color = '#FF9F0A';  // Naranja Apple
-            if (log.level === 'INFO') color = '#30D158';  // Verde Apple
+            let badgeStyle = 'color: #10b981; background: rgba(16,185,129,0.15);';
+            if (log.level === 'ERROR') badgeStyle = 'color: #ef4444; background: rgba(239,68,68,0.15);';
+            if (log.level === 'WARN') badgeStyle = 'color: #f59e0b; background: rgba(245,158,11,0.15);';
 
-            div.innerHTML += `<div style="margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
-                <span style="color:#636366; margin-right:5px;">${log.time}</span>
-                <span style="color:${color}; font-weight:bold; font-size:0.7rem; margin-right:5px;">${log.level}</span>
-                <span style="color:#D1D1D6;">${log.msg}</span>
+            div.innerHTML += `
+            <div style="margin-bottom: 6px; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.02); display: flex; align-items: flex-start; gap: 10px;">
+                <span style="color: var(--text-dim); font-size: 0.72rem; flex-shrink: 0;">${log.time}</span>
+                <span style="padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.65rem; flex-shrink: 0; ${badgeStyle}">${log.level}</span>
+                <span style="color: #cbd5e1; word-break: break-all;">${escapeHtml(log.msg)}</span>
             </div>`;
         });
     }
 
-    // Eventos e Intervalos
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // Listeners y polling
     document.getElementById('log-selector').addEventListener('change', fetchLogs);
     setInterval(updateStats, 3000);
     setInterval(fetchLogs, 5000);
 
-    // Iniciar
+    // Arranque inicial
     updateStats();
     fetchLogs();
 </script>

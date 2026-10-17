@@ -1,46 +1,74 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4 fade-in" style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in" style="display: flex; justify-content: space-between; margin-bottom: 28px; align-items: center; flex-wrap: wrap; gap: 16px;">
     <div>
-        <h1 style="font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--text-main);">Usuarios</h1>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Base de datos de interacciones</p>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+            <h1 style="font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; margin: 0; background: linear-gradient(135deg, #ffffff 40%, var(--primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Directorio de Usuarios
+            </h1>
+            <span class="tech-pill tech-pill-primary">{{ users|length }} REGISTRADOS</span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">
+            Historial de identidades y sesiones persistidas en MongoDB Atlas
+        </p>
     </div>
+
     <div style="position: relative;">
-        <i class="bi bi-search"
-            style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
-        <input type="text" id="userSearch" placeholder="Buscar usuario..."
-            style="padding: 10px 10px 10px 36px; border: 1px solid var(--border); border-radius: 10px; outline: none; width: 200px; font-family: inherit; background: rgba(0,0,0,0.3); color: white; transition: 0.3s;">
+        <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 0.9rem;"></i>
+        <input type="text" id="userSearch" placeholder="Buscar por nombre o ID..."
+            style="padding: 12px 16px 12px 40px; border: 1px solid var(--border-glass-bright); border-radius: var(--radius-md); outline: none; width: 260px; font-family: inherit; font-size: 0.88rem; background: rgba(15, 23, 42, 0.7); color: #ffffff; transition: var(--transition);">
     </div>
 </div>
 
-<div class="card-std" style="padding: 0; overflow: hidden;" id="usersContainer">
+<div class="glass-card" style="padding: 0; overflow: hidden;" id="usersContainer">
     {% for user in users %}
-    <div class="user-row" data-name="{{ user.first_name or 'Anónimo' }}"
-        style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <div
-                style="width: 40px; height: 40px; background: rgba(10, 132, 255, 0.15); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600;">
-                {{ (user.first_name or 'A')[:1] }}
+    <div class="user-row" data-name="{{ user.first_name or 'Anónimo' }} {{ user._id }}"
+        style="padding: 18px 24px; border-bottom: 1px solid var(--border-glass); display: flex; align-items: center; justify-content: space-between; transition: var(--transition); gap: 14px; flex-wrap: wrap;" 
+        onmouseover="this.style.background='rgba(255,255,255,0.03)'" 
+        onmouseout="this.style.background='transparent'">
+        
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 44px; height: 44px; background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(99, 102, 241, 0.2)); color: var(--primary); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);">
+                {{ (user.first_name or 'U')[:1] }}
             </div>
             <div>
-                <div style="font-weight: 600; font-size: 1rem; color: var(--text-main);">{{ user.first_name or 'Anónimo' }}</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">ID: {{ user._id }} &bull; {{
-                    user.last_msg_date | human_time }}</div>
+                <div style="font-weight: 700; font-size: 1.05rem; color: #ffffff; margin-bottom: 2px;">
+                    {{ user.first_name or 'Usuario Anónimo' }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 8px;">
+                    <span>ID: {{ user._id }}</span>
+                    <span>&bull;</span>
+                    <span style="color: var(--text-muted);"><i class="bi bi-clock"></i> {{ user.last_msg_date | human_time }}</span>
+                </div>
             </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <span class="badge-soft" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">{{ user.msg_count }}
-                msgs</span>
-            <a href="/user/{{ user._id }}" class="btn btn-sm"
-                style="text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(0,0,0,0.5); color: var(--primary); transition: 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span class="tech-pill tech-pill-primary" style="font-size: 0.78rem;">
                 <i class="bi bi-chat-dots-fill"></i>
+                {{ user.msg_count }} msgs
+            </span>
+
+            <a href="/user/{{ user._id }}" title="Ver historial conversacional"
+                style="text-decoration: none; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.25); color: var(--primary); transition: var(--transition);" 
+                onmouseover="this.style.transform='scale(1.08)'; this.style.boxShadow='0 0 15px rgba(0,240,255,0.4)'" 
+                onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
+                <i class="bi bi-chat-left-text"></i>
             </a>
-            <a href="/user/{{ user._id }}/gallery" class="btn btn-sm"
-                style="text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255, 149, 0, 0.15); color: #FF9500; transition: 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+
+            <a href="/user/{{ user._id }}/gallery" title="Ver galería multimedia"
+                style="text-decoration: none; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); color: #f59e0b; transition: var(--transition);" 
+                onmouseover="this.style.transform='scale(1.08)'; this.style.boxShadow='0 0 15px rgba(245,158,11,0.4)'" 
+                onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
                 <i class="bi bi-images"></i>
             </a>
         </div>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+        <i class="bi bi-people" style="font-size: 2.5rem; opacity: 0.3; display: block; margin-bottom: 12px;"></i>
+        No hay usuarios registrados en el sistema.
     </div>
     {% endfor %}
 </div>
@@ -49,8 +77,8 @@
     document.getElementById('userSearch').addEventListener('keyup', function () {
         let filter = this.value.toUpperCase();
         document.querySelectorAll('.user-row').forEach(row => {
-            let name = row.getAttribute('data-name').toUpperCase();
-            row.style.display = name.indexOf(filter) > -1 ? "flex" : "none";
+            let text = row.getAttribute('data-name').toUpperCase();
+            row.style.display = text.indexOf(filter) > -1 ? "flex" : "none";
         });
     });
 </script>

@@ -1,46 +1,67 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="page-header">
-    <h1 class="page-title">Registro de Errores</h1>
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in" style="display: flex; justify-content: space-between; margin-bottom: 28px; align-items: center; flex-wrap: wrap; gap: 14px;">
+    <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+            <h1 style="font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; margin: 0; background: linear-gradient(135deg, #ffffff 40%, #ef4444 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Registro de Errores e Incidencias
+            </h1>
+            <span class="tech-pill" style="background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3); color: #ef4444;">
+                {{ errors|length }} EVENTOS
+            </span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">
+            Seguimiento de fallos de red, timeouts de API y bloqueos por rate limiting
+        </p>
+    </div>
 </div>
 
-{% for err in errors %}
-<div class="card-std" style="margin-bottom: 16px; border-left: 4px solid #FF3B30; padding: 20px; animation: fadeUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;">
-    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-        <span style="font-weight: 600; color: #FF3B30;">{{ err.status | default('sin-status') }}</span>
-        <span style="font-size: 0.8rem; color: var(--text-muted);">
-            {{ err.get('processed_at') or err.get('message', {}).get('date') | human_time }}
-        </span>
-    </div>
+<div style="display: flex; flex-direction: column; gap: 18px;">
+    {% for err in errors %}
+    <div class="glass-card fade-in" style="border-left: 4px solid #ef4444; padding: 22px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="tech-pill" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.35); color: #ef4444; font-weight: 700;">
+                    <i class="bi bi-shield-exclamation"></i>
+                    {{ err.status | default('error-desconocido') }}
+                </span>
+            </div>
+            <span style="font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;">
+                <i class="bi bi-clock"></i> {{ err.get('processed_at') or err.get('message', {}).get('date') | human_time }}
+            </span>
+        </div>
 
-    <div style="margin-bottom: 10px; color: var(--text-main);">
-        <span style="font-weight: 600;">
-            {{ err.get('message', {}).get('chat', {}).get('first_name', 'Anónimo') }}
-        </span>:
-        {% if err.get('type') == 'photo' %}
-            <span style="color: #FF9500;"><i class="bi bi-camera-fill"></i> [Imagen]</span>
-        {% else %}
-            <span style="color: var(--text-muted);">"{{ err.get('message', {}).get('text', '—') }}"</span>
+        <div style="margin-bottom: 12px; color: var(--text-main); font-size: 0.94rem;">
+            <span style="font-weight: 700; color: #ffffff;">
+                {{ err.get('message', {}).get('chat', {}).get('first_name', 'Usuario Anónimo') }}
+            </span>:
+            {% if err.get('type') == 'photo' %}
+                <span class="tech-pill tech-pill-warning" style="font-size: 0.72rem;"><i class="bi bi-camera-fill"></i> [Imagen Multimodal]</span>
+            {% else %}
+                <span style="color: var(--text-muted);">"{{ err.get('message', {}).get('text', '—') }}"</span>
+            {% endif %}
+        </div>
+
+        {% if err.get('ai_response') %}
+        <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); padding: 12px 16px; border-radius: var(--radius-sm); font-size: 0.85rem; color: #fca5a5; margin-bottom: 14px; line-height: 1.5;">
+            <strong style="color: #ef4444;">Respuesta IA emitida:</strong> {{ err.ai_response }}
+        </div>
         {% endif %}
-    </div>
 
-    {% if err.get('ai_response') %}
-    <div style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); padding: 10px; border-radius: 8px; font-size: 0.8rem; color: #FF453A; margin-bottom: 10px;">
-        <strong>Respuesta IA:</strong> {{ err.ai_response }}
+        <!-- Raw JSON Inspector -->
+        <div style="background: rgba(5, 8, 18, 0.75); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #94a3b8; overflow-x: auto;">
+            <pre style="margin: 0; white-space: pre-wrap; word-break: break-all;">{{ err | tojson(indent=2) }}</pre>
+        </div>
     </div>
-    {% endif %}
-
-    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 0.75rem; color: var(--text-muted); overflow-x: auto;">
-        {{ err | tojson(indent=2) }}
+    {% else %}
+    <div class="glass-card" style="text-align: center; padding: 70px 20px;">
+        <div style="width: 56px; height: 56px; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.6rem; box-shadow: 0 0 20px rgba(16,185,129,0.25);">
+            <i class="bi bi-check-lg"></i>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: #ffffff; margin-bottom: 4px;">Sistema Operativo Óptimo</h3>
+        <p style="color: var(--text-dim); font-size: 0.85rem; margin: 0;">No se registran anomalías críticas ni errores de cuota en el historial.</p>
     </div>
+    {% endfor %}
 </div>
-{% else %}
-<div style="text-align: center; padding: 50px;">
-    <div style="width: 60px; height: 60px; background: rgba(48, 209, 88, 0.15); color: #30D158; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-        <i class="bi bi-check-lg" style="font-size: 1.5rem;"></i>
-    </div>
-    <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--text-main);">Todo Correcto</h3>
-    <p style="color: var(--text-muted);">No hay errores en el registro.</p>
-</div>
-{% endfor %}
 {% endblock %}

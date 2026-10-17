@@ -1,54 +1,311 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acceso Seguro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <title>Acceso Seguro &bull; TFG AI Gateway</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-        :root { --primary: #0A84FF; --bg-body: #050505; --text: #FFFFFF; --text-muted: #8E8E93; --border: rgba(255, 255, 255, 0.1); }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg-body); 
-            background-image: radial-gradient(circle at 15% 50%, rgba(10, 132, 255, 0.15), transparent 25%), radial-gradient(circle at 85% 30%, rgba(48, 209, 88, 0.1), transparent 25%);
-            display: flex; align-items: center; justify-content: center; height: 100vh; color: var(--text); overflow: hidden;
+        :root {
+            --bg-base: #060813;
+            --primary: #00f0ff;
+            --primary-glow: rgba(0, 240, 255, 0.4);
+            --secondary: #6366f1;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-glass-bright: rgba(255, 255, 255, 0.16);
+            --danger: #ef4444;
         }
-        .login-card { 
-            background: rgba(28, 28, 30, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            padding: 40px; width: 90%; max-width: 400px; border-radius: 24px; border: 1px solid var(--border);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3); text-align: center; 
-            animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
         }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .icon-circle { width: 60px; height: 60px; background: rgba(10, 132, 255, 0.15); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 20px; box-shadow: inset 0 0 10px rgba(10,132,255,0.2); }
-        h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
-        p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 30px; }
-        .form-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
-        input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 12px; font-size: 1rem; outline: none; background: rgba(0,0,0,0.3); color: white; transition: 0.3s; }
-        input:focus { background: rgba(0,0,0,0.5); border-color: var(--primary); box-shadow: 0 0 0 3px rgba(10,132,255,0.2); }
-        button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        button:hover { background: #0070E0; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(10,132,255,0.3); }
-        .alert-error { background: rgba(255,69,58,0.1); color: #FF453A; padding: 10px; border-radius: 10px; font-size: 0.9rem; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid rgba(255,69,58,0.2); }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: var(--text-main);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Dynamic Light Orbs */
+        .ambient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: 0.28;
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            top: -15%;
+            left: 15%;
+            background: radial-gradient(circle, var(--primary) 0%, rgba(99, 102, 241, 0) 70%);
+        }
+
+        .orb-2 {
+            width: 550px;
+            height: 550px;
+            bottom: -20%;
+            right: 15%;
+            background: radial-gradient(circle, var(--secondary) 0%, rgba(168, 85, 247, 0) 70%);
+        }
+
+        .login-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(24px) saturate(190%);
+            -webkit-backdrop-filter: blur(24px) saturate(190%);
+            padding: 44px 38px;
+            width: 90%;
+            max-width: 420px;
+            border-radius: 28px;
+            border: 1px solid var(--border-glass-bright);
+            box-shadow: 0 24px 60px -15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 240, 255, 0.06);
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            animation: cardAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20%;
+            right: 20%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .icon-circle {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(99, 102, 241, 0.2));
+            color: var(--primary);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.7rem;
+            margin: 0 auto 22px;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .icon-circle:hover {
+            transform: scale(1.08) rotate(4deg);
+            box-shadow: 0 0 35px rgba(0, 240, 255, 0.4);
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #ffffff 40%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            transition: all 0.25s ease;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: 1px solid var(--border-glass);
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            background: rgba(8, 12, 24, 0.6);
+            color: #ffffff;
+            transition: all 0.25s ease;
+        }
+
+        input:focus {
+            background: rgba(12, 18, 36, 0.9);
+            border-color: rgba(0, 240, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15), 0 0 15px rgba(0, 240, 255, 0.1);
+        }
+
+        input:focus + i, .input-wrapper:focus-within i {
+            color: var(--primary);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, #00b4d8 50%, var(--secondary) 100%);
+            color: #040814;
+            border: none;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            margin-top: 14px;
+            box-shadow: 0 8px 24px -4px rgba(0, 240, 255, 0.4);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px -4px rgba(0, 240, 255, 0.55);
+            filter: brightness(1.08);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.12);
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .system-pill {
+            margin-top: 32px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+        }
     </style>
 </head>
+
 <body>
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+
     <div class="login-card">
-        <div class="icon-circle"><i class="bi bi-shield-lock-fill"></i></div>
-        <h1>Bienvenido</h1>
-        <p>Introduce tus credenciales de administrador</p>
+        <div class="icon-circle">
+            <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <h1>Acceso Seguro</h1>
+        <p>Panel de Administración &bull; TFG Gateway</p>
+
         {% if error %}
-        <div class="alert-error"><i class="bi bi-exclamation-triangle-fill"></i> {{ error }}</div>
+        <div class="alert-error">
+            <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+        </div>
         {% endif %}
+
         <form method="POST" action="/login">
-            <div class="form-group"><label>Usuario</label><input type="text" name="username" placeholder="admin" required autofocus></div>
-            <div class="form-group"><label>Contraseña</label><input type="password" name="password" placeholder="••••••••" required></div>
-            <button type="submit">Iniciar Sesión</button>
+            <div class="form-group">
+                <label><i class="bi bi-person-fill"></i> Usuario</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-person"></i>
+                    <input type="text" name="username" placeholder="admin" required autofocus autocomplete="username">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="bi bi-key-fill"></i> Contraseña</label>
+                <div class="input-wrapper">
+                    <i class="bi bi-lock"></i>
+                    <input type="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+            </div>
+
+            <button type="submit">
+                <span>Ingresar al Sistema</span>
+                <i class="bi bi-arrow-right"></i>
+            </button>
         </form>
-        <div style="margin-top: 30px; font-size: 0.7rem; color: #C7C7CC;">System v2.4 &bull; Madrid Node</div>
+
+        <div class="system-pill">
+            <span class="status-dot"></span>
+            <span>Raspberry Pi 5 &bull; Node Madrid</span>
+        </div>
     </div>
 </body>
+
 </html>
