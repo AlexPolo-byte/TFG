@@ -28,6 +28,69 @@
             --user-bubble: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
         }
 
+        /* Dark Mode Theme */
+        body.theme-dark {
+            --bg-canvas: #0b0f17;
+            --text-title: #f8fafc;
+            --text-body: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-card: #28334a;
+            --bot-bubble: #151d30;
+        }
+
+        body.theme-dark .chat-header,
+        body.theme-dark .input-bar {
+            background: rgba(14, 20, 34, 0.95) !important;
+            border-color: #28334a !important;
+        }
+
+        body.theme-dark .input-wrapper,
+        body.theme-dark .modal-content,
+        body.theme-dark .modal-content input {
+            background: #151d30 !important;
+            border-color: #28334a !important;
+            color: #f8fafc !important;
+        }
+
+        body.theme-dark .msg-bot {
+            background: #151d30 !important;
+            border-color: #28334a !important;
+            color: #f8fafc !important;
+        }
+
+        /* High Contrast Theme */
+        body.theme-contrast {
+            --bg-canvas: #000000;
+            --text-title: #ffff00;
+            --text-body: #ffffff;
+            --text-muted: #ffff00;
+            --border-card: #ffff00;
+            --bot-bubble: #000000;
+            --user-bubble: #ffff00;
+        }
+
+        body.theme-contrast .chat-header,
+        body.theme-contrast .input-bar,
+        body.theme-contrast .modal-content,
+        body.theme-contrast .modal-content input,
+        body.theme-contrast .input-wrapper {
+            background: #000000 !important;
+            border: 2px solid #ffff00 !important;
+            color: #ffffff !important;
+        }
+
+        body.theme-contrast .msg-bot {
+            background: #000000 !important;
+            border: 2px solid #ffff00 !important;
+            color: #ffffff !important;
+        }
+
+        body.theme-contrast .msg-user {
+            background: #ffff00 !important;
+            color: #000000 !important;
+            font-weight: 700 !important;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -386,6 +449,12 @@
     </div>
 
     <script>
+        // Aplicar tema guardado
+        const savedChatTheme = localStorage.getItem('alex_theme') || 'light';
+        if (savedChatTheme !== 'light') {
+            document.body.className = `theme-${savedChatTheme}`;
+        }
+
         let sid = localStorage.getItem('chat_sid');
         if (!sid) {
             sid = 'web_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);

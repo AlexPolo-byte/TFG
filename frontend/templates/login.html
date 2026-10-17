@@ -28,6 +28,66 @@
             --radius-lg: 24px;
         }
 
+        /* Dark Mode Theme */
+        body.theme-dark {
+            --bg-canvas: #0b0f17;
+            --text-title: #f8fafc;
+            --text-body: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-card: #28334a;
+        }
+
+        body.theme-dark .login-card {
+            background: #111827 !important;
+            border-color: #28334a !important;
+        }
+
+        body.theme-dark input {
+            background: #151d30 !important;
+            border-color: #28334a !important;
+            color: #f8fafc !important;
+        }
+
+        body.theme-dark .system-pill {
+            background: #151d30 !important;
+            border-color: #28334a !important;
+            color: #94a3b8 !important;
+        }
+
+        /* High Contrast Theme */
+        body.theme-contrast {
+            --bg-canvas: #000000;
+            --text-title: #ffff00;
+            --text-body: #ffffff;
+            --text-muted: #ffff00;
+            --border-card: #ffff00;
+        }
+
+        body.theme-contrast .login-card {
+            background: #000000 !important;
+            border: 2px solid #ffff00 !important;
+            box-shadow: none !important;
+        }
+
+        body.theme-contrast input {
+            background: #000000 !important;
+            border: 2px solid #ffff00 !important;
+            color: #ffffff !important;
+        }
+
+        body.theme-contrast button {
+            background: #ffff00 !important;
+            color: #000000 !important;
+            font-weight: 800 !important;
+            border: 2px solid #ffffff !important;
+        }
+
+        body.theme-contrast .system-pill {
+            background: #000000 !important;
+            border: 2px solid #ffff00 !important;
+            color: #ffff00 !important;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -284,6 +344,13 @@
             <span>Raspberry Pi 5 &bull; En Línea</span>
         </div>
     </div>
+
+    <script>
+        const savedLoginTheme = localStorage.getItem('alex_theme') || 'light';
+        if (savedLoginTheme !== 'light') {
+            document.body.className = `theme-${savedLoginTheme}`;
+        }
+    </script>
 </body>
 
 </html>
