@@ -81,16 +81,22 @@ class AIService:
         
         return None
 
-    def generate_response(self, prompt, max_retries=2):
-        """Genera respuesta de la IA con reintentos automáticos y backoff ante rate limit / microcortes"""
+    def generate_response(self, prompt, system_prompt=None, max_retries=2):
+        """
+        Genera respuesta de la IA.
+        Admite 'prompt' como string simple o como lista estructurada multi-turno
+        [{"role": "user", "parts": [...]}, {"role": "model", "parts": [...]}]
+        """
         if not self.model:
             return None
+        
+        sys_instruction = system_prompt or SYSTEM_PROMPT
         
         for attempt in range(max_retries + 1):
             try:
                 temp_model = genai.GenerativeModel(
                     model_name=self.model._model_name,
-                    system_instruction=SYSTEM_PROMPT,
+                    system_instruction=sys_instruction,
                     generation_config=self.model._generation_config
                 )
                 

@@ -4,6 +4,7 @@ Usa la nueva arquitectura modular
 """
 import sys
 import os
+import re
 
 # Añadir backend al path para imports
 sys.path.insert(0, os.path.dirname(__file__))
@@ -19,7 +20,7 @@ import io
 
 from config.settings import (
     RABBITMQ_URI, QUEUE_NAME, WORKER_EXPORTER_PORT,
-    validate_config, logger
+    validate_config, logger, SYSTEM_PROMPT
 )
 from core.database import db
 from core.cache import cache
@@ -36,7 +37,11 @@ commands = CommandHandlers()
 MESSAGES_PROCESSED = Counter('worker_messages_total', 'Mensajes procesados', ['type'])
 PROCESSING_TIME = Histogram('worker_processing_seconds', 'Tiempo de proceso')
 
-def get_chat_context(chat_id, limit=5):
+def get_chat_history(chat_id, limit=8):
+    """
+    Recupera el historial multi-turno estructurado para Gemini (roles: 'user' y 'model')
+    Garantiza memoria conversacional persistente entre preguntas y respuestas previas.
+    """
     try:
         possible_ids = [chat_id]
         try:
@@ -53,16 +58,19 @@ def get_chat_context(chat_id, limit=5):
             {"message.text": 1, "ai_response": 1}
         ).sort("processed_at", -1).limit(limit)
         
-        history = ""
+        history_turns = []
         for doc in reversed(list(cursor)):
             u_text = doc.get('message', {}).get('text', '')
             ai_text = doc.get('ai_response', '')
             if u_text and ai_text:
-                history += f"Usuario: {u_text}\nAlex: {ai_text}\n"
-        return history
+                # Limpiar cualquier tag interno de sentimiento del historial
+                clean_ai = re.sub(r'^\[(POSITIVO|NEUTRO|NEGATIVO)\]\s*', '', ai_text).strip()
+                history_turns.append({"role": "user", "parts": [u_text]})
+                history_turns.append({"role": "model", "parts": [clean_ai]})
+        return history_turns
     except Exception as e:
-        logger.error(f"⚠️ Error recuperando contexto: {e}")
-        return ""
+        logger.error(f"⚠️ Error recuperando historial multi-turno: {e}")
+        return []
 
 def process_message(ch, method, properties, body):
     start = time.time()
@@ -142,30 +150,27 @@ def process_message(ch, method, properties, body):
                     response_text, sentiment = commands.handle_edad(chat_id, user_text)
                     msg_status = "procesado_ia"
                 
-                # Pregunta normal a la IA
+                # Pregunta normal a la IA con memoria persistente multi-turno
                 elif ai.model:
                     try:
-                        # Generar el prompt completo con contexto y edad ANTES de buscar en caché
                         age_info = user.get('age', 'Desconocida (asume adulto joven)')
-                        history = get_chat_context(chat_id)
-                        has_prior_history = bool(history and history.strip())
+                        history_turns = get_chat_history(chat_id, limit=8)
+                        has_prior_history = len(history_turns) > 0
                         
-                        # Protocolo inteligente de saludos:
-                        # Si ya existe conversación previa y el usuario no está saludando expresamente, PROHIBIR decir "Hola"
                         first_words = [w.lower().strip("¿?!¡.,") for w in user_text.split()[:4]]
                         user_is_greeting = any(w in ["hola", "buenas", "buenos", "hey", "saludos"] for w in first_words)
                         
+                        # Directiva de sistema adaptada a la edad y a la memoria conversacional
+                        custom_sys_prompt = SYSTEM_PROMPT + f"\n\nDATOS DE LA SESIÓN:\n- EDAD DEL USUARIO: {age_info}. Adapta vocabulario, complejidad y metáforas a este grupo."
                         if has_prior_history and not user_is_greeting:
-                            saludo_rule = "ESTADO CONVERSACIONAL: Conversación continua ya en curso. REGLA ESTRICTA: NO digas '¡Hola!', 'Hola', 'Buenas' ni saludes de nuevo. Ve DIRECTAMENTE a responder la consulta de forma natural y fluida."
-                        elif not has_prior_history and not user_is_greeting:
-                            saludo_rule = "ESTADO CONVERSACIONAL: Primer mensaje de la interacción. Saluda brevemente antes de responder."
-                        else:
-                            saludo_rule = "ESTADO CONVERSACIONAL: El usuario te está saludando. Salúdale cordialmente y ofrece tu ayuda tecnológica."
+                            custom_sys_prompt += "\n- CONTINUIDAD CONVERSACIONAL: Conversación activa en curso. PROHIBIDO decir '¡Hola!' y PROHIBIDO presentarte diciendo 'Soy Alex'. Conecta directamente con lo conversado anteriormente."
                         
-                        prompt = f"EDAD DEL USUARIO: {age_info}\n{saludo_rule}\n\nHISTORIAL PREVIO DEL CHAT:\n{history}\n\nUSUARIO:\n{user_text}"
+                        # Formato multi-turno nativo de Gemini (turnos previos + turno actual)
+                        contents = list(history_turns) + [{"role": "user", "parts": [user_text]}]
                         
-                        # Verificar caché usando el hash del prompt exacto
-                        cache_key = f"ai:{hash(prompt)}"
+                        # Cache inteligente
+                        last_ctx_sig = history_turns[-1]["parts"][0][:40] if history_turns else "init"
+                        cache_key = f"ai:{hash(user_text)}:{hash(last_ctx_sig)}:{age_info}"
                         cached = cache.get(cache_key)
                         
                         if cached:
@@ -174,12 +179,11 @@ def process_message(ch, method, properties, body):
                             sentiment = cached['sentiment']
                             msg_status = "procesado_ia"
                         else:
-                            # Generar respuesta con reintentos automáticos y backoff
-                            raw = ai.generate_response(prompt)
+                            # Inferencia multi-turno en Gemini
+                            raw = ai.generate_response(contents, system_prompt=custom_sys_prompt)
                             
                             if raw:
                                 msg_status = "procesado_ia"
-                                # Analizar sentimiento para métricas (pero no mostrar al usuario)
                                 if "[POSITIVO]" in raw:
                                     sentiment = "POSITIVO"
                                     response_text = raw.replace("[POSITIVO]", "").strip()
