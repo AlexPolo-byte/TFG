@@ -1,35 +1,52 @@
-# 🤖 TFG - Bot de Telegram con IA (Raspberry Pi)
+# 🤖 Alex IA - Asistente Adaptativo con Arquitectura de Microservicios en Raspberry Pi
 
-Sistema de bot de Telegram con inteligencia artificial (Google Gemini), monitorización completa y túnel ngrok para acceso público desde Raspberry Pi.
+Sistema integral de asistente conversacional inteligente (Google Gemini), diseñado para democratizar el acceso a la tecnología mediante explicaciones adaptadas a la edad del usuario (niños, adultos y personas mayores). Implementa una arquitectura orientada a eventos (EDA) sobre Docker en Raspberry Pi 5, monitorización completa, caché semántica, tolerancia a fallos y túnel seguro ngrok.
+
+---
+
+## 🌟 Características Principales
+
+- 🧠 **Capa de IA Multimodelo con Resiliencia 429 (Cascada de Fallback):** Pool dinámico de modelos Google Gemini (`gemini-3.5-flash`, `gemini-3.6-flash`, `gemini-3-flash-preview`, `gemini-2.5-flash`). Si un modelo agota la cuota gratuita (HTTP 429 Rate Limit), conmuta automáticamente al siguiente modelo del pool sin interrumpir la experiencia del usuario.
+- 💬 **Memoria Persistente Multi-Turno y Adaptación por Edad:** Historial estructurado nativo en MongoDB que permite preguntas sucesivas de seguimiento (*"¿por qué?"*, *"¿cómo se crea?"*) manteniendo el contexto y suprimiendo saludos repetitivos tras el primer turno.
+- 🌐 **Doble Canal de Acceso (Omnicanal):**
+  - **Telegram Bot:** Interacción conversacional móvil y envío de fotos técnicas para visión artificial multimodal.
+  - **Terminal Web Pública (`/public/terminal`):** Interfaz web accesible (WCAG 2.1) con síntesis de voz (Web Speech API) y temas intercambiables (claro, oscuro, alto contraste).
+- ⚡ **Caché Semántica y Rate Limiting con Redis:** Respuestas instantáneas en <2 ms para consultas idénticas frecuentes y protección contra spam por ventana deslizante.
+- 📊 **Panel de Administración & Exportación de Informe Ejecutivo:** 
+  - Telemetría en tiempo real del hardware BCM2712 de la Raspberry Pi 5 (temperatura del SoC, uso de núcleos, RAM, almacenamiento).
+  - Estado y latencia de microservicios (RabbitMQ, Redis, MongoDB).
+  - Métricas de sostenibilidad (*Green IT*) y ahorro energético frente a instancias cloud tradicionales.
+  - Generación de informe técnico oficial exportable a PDF/impresión con diseño optimizado vía directivas `@media print`.
+
+---
 
 ## 📋 Requisitos Previos
 
 ### Hardware
-- Raspberry Pi 3/4/5 (recomendado 2GB+ RAM)
-- Conexión a Internet
+- Raspberry Pi 3/4/5 (Recomendado: Raspberry Pi 5 con 4GB o 8GB de RAM).
+- Tarjeta MicroSD (mínimo 16GB, Clase 10 o A2) o SSD NVMe.
+- Conexión a Internet.
 
 ### Software
-- Raspberry Pi OS (Bullseye o superior)
-- Docker y Docker Compose instalados
-- Git
+- Raspberry Pi OS (Bullseye o Bookworm de 64 bits).
+- Docker Engine y Docker Compose Plugin instalados.
+- Git.
 
 ### Instalación de Docker en Raspberry Pi
 
 ```bash
-# Instalar Docker
+# Descargar e instalar Docker oficial
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 
-# Añadir tu usuario al grupo docker (evita usar sudo)
+# Añadir el usuario al grupo docker
 sudo usermod -aG docker $USER
+newgrp docker
 
-# IMPORTANTE: Cierra sesión y vuelve a entrar para aplicar cambios
-# O ejecuta: newgrp docker
+# Instalar plugin de Docker Compose
+sudo apt-get install -y docker-compose-plugin
 
-# Instalar Docker Compose
-sudo apt-get install docker-compose-plugin
-
-# Verificar instalación
+# Verificar versiones
 docker --version
 docker compose version
 ```
@@ -42,216 +59,65 @@ docker compose version
 
 ```bash
 cd ~
-git clone <tu-repositorio>
+git clone https://github.com/<tu-usuario>/TFG.git
 cd TFG
 ```
 
-### 2. Crear Archivo `.env`
+### 2. Archivo de Variables de Entorno (`.env`)
 
-Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+Crea un archivo `.env` en la raíz del proyecto basándote en la plantilla:
 
 ```bash
-# Token del Bot de Telegram
-# Obtenerlo de @BotFather en Telegram
+# Token de Bot de Telegram (obtenido de @BotFather)
 TELEGRAM_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
 
-# API Key de Google Gemini
-# Obtenerla en: https://makersuite.google.com/app/apikey
+# API Key de Google Gemini (Google AI Studio)
 GOOGLE_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-# MongoDB Atlas (Gratis)
-# Crear cluster en: https://www.mongodb.com/cloud/atlas/register
-MONGO_URI=mongodb+srv://usuario:password@cluster.mongodb.net/tfg?retryWrites=true&w=majority
+# Authtoken de ngrok (Dashboard de ngrok)
+NGROK_AUTHTOKEN=tu_ngrok_token_aqui
 
-# RabbitMQ CloudAMQP (Gratis)
-# Crear instancia en: https://www.cloudamqp.com/
-RABBITMQ_URI=amqps://usuario:password@servidor.cloudamqp.com/vhost
+# Persistencia MongoDB (Local en Docker o MongoDB Atlas)
+MONGO_URI=mongodb://mongo:27017/chatbot
+
+# Cola de Mensajes RabbitMQ (Local en Docker o CloudAMQP)
+RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672/
 RABBITMQ_QUEUE=telegram_queue
 
-# Puertos de Monitorización (Opcional)
-FLASK_EXPORTER_PORT=9091
-WORKER_EXPORTER_PORT=9092
+# Caché y Rate Limiting Redis
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+# Credenciales Panel de Administración
+ADMIN_USER=admin
+ADMIN_PASS=tfg2025
 ```
-
-### 3. Obtener Credenciales
-
-#### 🤖 Telegram Bot Token
-1. Abre Telegram y busca `@BotFather`
-2. Envía `/newbot`
-3. Sigue las instrucciones y copia el token
-
-#### 🧠 Google Gemini API Key
-1. Ve a [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Crea una API Key
-3. Cópiala al `.env`
-
-#### 🗄️ MongoDB Atlas (Base de Datos)
-1. Crea cuenta en [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register)
-2. Crea un cluster gratuito (M0)
-3. En "Database Access" → Crea un usuario
-4. En "Network Access" → Añade `0.0.0.0/0` (permitir todas las IPs)
-5. En "Clusters" → Click "Connect" → "Connect your application"
-6. Copia la URI y reemplaza `<password>` con tu contraseña
-
-#### 🐰 RabbitMQ CloudAMQP (Cola de Mensajes)
-1. Crea cuenta en [CloudAMQP](https://www.cloudamqp.com/)
-2. Crea una instancia gratuita "Little Lemur"
-3. Copia la "AMQP URL" al `.env`
 
 ---
 
-## 🚀 Despliegue
+## 🚀 Despliegue del Sistema
 
-### Iniciar el Sistema
+El script `start.sh` orquesta el ciclo de vida de los contenedores, levanta el túnel ngrok y registra automáticamente el webhook de Telegram:
 
 ```bash
-# Dar permisos de ejecución al script
 chmod +x start.sh
-
-# Lanzar todo el sistema
 ./start.sh
 ```
 
-El script automáticamente:
-1. ✅ Levanta todos los contenedores Docker
-2. ✅ Crea un túnel ngrok público
-3. ✅ Configura el webhook de Telegram
-4. ✅ Muestra la URL pública de acceso
+### Salida de Éxito en Consola:
 
-### Salida Esperada
+```text
+🚀 Iniciando Arquitectura del TFG...
+✅ Red Docker y volúmenes verificados
+✅ Contenedores iniciados correctamente
+⏳ Esperando a que el túnel ngrok genere la URL pública...
+✅ Túnel ACTIVO en: https://chronometrically-unbreaking-kyrie.ngrok-free.dev
 
-```
-🚀 Iniciando Arquitectura del TFG (Modo Limpieza)...
-🧹 Borrando túnel anterior para limpiar logs...
-⏳ Esperando 15 segundos a que ngrok genere la URL...
-✅ Túnel ACTIVO en: https://xxxxx.ngrok.io
-
-🎉 ¡ÉXITO! Sistema 100% Operativo.
-🔐 Admin Dashboard: https://xxxxx.ngrok.io (Login: admin/tfg2025)
-💬 Chat Público:    https://xxxxx.ngrok.io/public/terminal
-🌐 ngrok UI:        http://localhost:4040
-```
-
----
-
-## 🎛️ Acceso al Sistema
-
-### Panel de Administración
-- **URL**: La que muestra `start.sh`
-- **Usuario**: `admin`
-- **Contraseña**: `tfg2025`
-
-### Monitorización (Grafana)
-- **URL**: `http://<IP-raspberry>:3000`
-- **Acceso**: Anónimo (configurado para desarrollo)
-
-### Prometheus
-- **URL**: `http://<IP-raspberry>:9090`
-
----
-
-## 🛠️ Comandos Útiles
-
-### Ver Logs en Tiempo Real
-
-```bash
-# Logs del backend (Flask)
-docker logs -f backend_telegram
-
-# Logs del worker (IA)
-docker logs -f worker
-
-# Logs del túnel ngrok
-docker logs -f ngrok_tunnel
-```
-
-### Reiniciar Servicios
-
-```bash
-# Reiniciar todo
-docker compose restart
-
-# Reiniciar solo el worker
-docker restart worker
-
-# Reiniciar solo el backend
-docker restart backend_telegram
-```
-
-### Detener el Sistema
-
-```bash
-docker compose down
-```
-
-### Ver Estado de Contenedores
-
-```bash
-docker ps
-```
-
----
-
-## 🐛 Troubleshooting
-
-### ❌ Error: "FALTAN VARIABLES DE ENTORNO"
-
-**Causa**: Falta el archivo `.env` o faltan variables
-
-**Solución**:
-```bash
-# Verifica que existe el archivo
-ls -la .env
-
-# Verifica que tiene las variables necesarias
-cat .env
-```
-
-### ❌ Error: "ERROR CONECTANDO A MONGODB"
-
-**Causa**: URI de MongoDB incorrecta o red bloqueada
-
-**Solución**:
-1. Verifica la URI en MongoDB Atlas
-2. Asegúrate de haber añadido `0.0.0.0/0` en Network Access
-3. Reemplaza `<password>` en la URI con tu contraseña real
-
-### ❌ Error: "Sin permisos Docker"
-
-**Causa**: Tu usuario no está en el grupo `docker`
-
-**Solución**:
-```bash
-sudo usermod -aG docker $USER
-# Cierra sesión y vuelve a entrar
-```
-
-### ❌ El túnel ngrok no genera URL
-
-**Causa**: Token inválido o problemas de red
-
-**Solución**:
-
-```bash
-# Verificar token en .env
-cat .env | grep NGROK_AUTHTOKEN
-
-# Reiniciar el túnel
-docker restart ngrok_tunnel
-sleep 20
-
-# Ver logs
-docker logs ngrok_tunnel
-```
-
-**Alternativa**: Obtener la URL desde la UI:
-
-```bash
-# Visitar en el navegador
-http://localhost:4040
-
-# Configura manualmente el webhook (reemplaza <TOKEN> y <URL>)
-curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=<URL>/webhook/<TOKEN>"
+🎉 ¡ÉXITO! Sistema 100% Operativo:
+🔐 Panel de Administración: https://chronometrically-unbreaking-kyrie.ngrok-free.dev (admin / tfg2025)
+💬 Terminal Web Pública:    https://chronometrically-unbreaking-kyrie.ngrok-free.dev/public/terminal
+📈 Métricas Prometheus:     http://<IP_LOCAL>:9090
+📊 Dashboards Grafana:      http://<IP_LOCAL>:3000
 ```
 
 ---
@@ -259,66 +125,80 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=<URL>/webhook/<TOKEN>"
 ## 📊 Arquitectura del Sistema
 
 ```text
-┌─────────────────────────────────────────────────────┐
-│                  RASPBERRY PI                       │
-│                                                     │
-│  ┌──────────────┐      ┌──────────────┐           │
-│  │   Backend    │◄────►│    Worker    │           │
-│  │   (Flask)    │      │  (IA Gemini) │           │
-│  └──────┬───────┘      └──────┬───────┘           │
-│         │                     │                     │
-│         ▼                     ▼                     │
-│  ┌──────────────────────────────────┐              │
-│  │         RabbitMQ (Cloud)         │              │
-│  └──────────────────────────────────┘              │
-│         │                     │                     │
-│         ▼                     ▼                     │
-│  ┌──────────────────────────────────┐              │
-│  │        MongoDB (Cloud)           │              │
-│  └──────────────────────────────────┘              │
-│                                                     │
-│  ┌──────────────┐      ┌──────────────┐           │
-│  │  Prometheus  │◄────►│   Grafana    │           │
-│  │ (+ Hardware) │      │  (Dashboard) │           │
-│  └──────────────┘      └──────┬───────┘           │
-│                               │                     │
-│  ┌──────────────┐      ┌──────▼───────┐           │
-│  │     Loki     │◄────►│    Nginx     │           │
-│  │   (Logs)     │      │   (Proxy)    │           │
-│  └──────────────┘      └──────┬───────┘           │
-│                               │                     │
-│  ┌──────────────┐             │                     │
-│  │     ngrok    │ ◄───────────┘                     │
-│  │    Tunnel    │                                  │
-│  └──────┬───────┘                                  │
-└─────────┼──────────────────────────────────────────┘
-          │
-          ▼
-    🌍 INTERNET
+                                  🌍 INTERNET (Usuarios)
+                                     │              │
+                       Telegram Webhook            Navegador Web
+                             │                      │
+                             ▼                      ▼
+                     ┌──────────────────────────────────────┐
+                     │          ngrok Secure Tunnel         │
+                     └──────────────────┬───────────────────┘
+                                        │
+                                        ▼
+    ┌────────────────────────────────────────────────────────────────────────┐
+    │                        RASPBERRY PI 5 (Docker)                         │
+    │                                                                        │
+    │  ┌──────────────────────────────────────────────────────────────────┐  │
+    │  │                   Nginx Reverse Proxy (:80)                      │  │
+    │  └─────────┬──────────────────────────────┬───────────────────┬─────┘  │
+    │            │                              │                   │        │
+    │            ▼                              ▼                   ▼        │
+    │  ┌──────────────────┐           ┌──────────────────┐ ┌───────────────┐ │
+    │  │ backend_telegram │           │ Grafana (:3000)  │ │ RabbitMQ UI   │ │
+    │  │ (Flask Gateway)  │           └─────────▲────────┘ │ (:15672)      │ │
+    │  └─────────┬────────┘                     │          └───────────────┘ │
+    │            │                              │                            │
+    │    Publica Evento (AMQP)                  │ Métricas                   │
+    │            ▼                              ▼                            │
+    │  ┌──────────────────┐           ┌──────────────────┐                   │
+    │  │  RabbitMQ Queue  │           │    Prometheus    │                   │
+    │  └─────────┬────────┘           │     (:9090)      │                   │
+    │            │                    └─────────▲────────┘                   │
+    │     Consume Mensaje                       │ Scrape                     │
+    │            ▼                              │                            │
+    │  ┌──────────────────┐           ┌─────────┴────────┐                   │
+    │  │      Worker      ├──────────►│  Node Exporter   │                   │
+    │  │ (Inferencia IA)  │           │  (CPU/Temp/RAM)  │                   │
+    │  └───┬────────────┬─┘           └──────────────────┘                   │
+    │      │            │                                                    │
+    │      │            └───────────────┐                                    │
+    │      ▼                            ▼                                    │
+    │ ┌──────────────┐          ┌──────────────┐                             │
+    │ │ Redis Cache  │          │ MongoDB      │                             │
+    │ │ & Limiter    │          │ Persistencia │                             │
+    │ └──────────────┘          └──────────────┘                             │
+    └──────┬─────────────────────────────────────────────────────────────────┘
+           │
+           ▼
+    🧠 GOOGLE GEMINI API (Pool en cascada: 3.5-flash / 3.6-flash / 3-preview)
 ```
 
 ---
 
-## 📝 Notas Importantes
+## 🛠️ Comandos de Mantenimiento
 
-1. **Seguridad**: Cambia las contraseñas por defecto (`admin:tfg2025`) en producción
-2. **Túnel ngrok**: Con cuenta gratis puedes tener URL fija. Más estable que Cloudflare.
-3. **Recursos**: El sistema usa ~500MB de RAM. Asegúrate de tener suficiente.
-4. **Persistencia**: Los datos se guardan en MongoDB Atlas (nube), no en la Raspberry Pi
+```bash
+# Ver estado de los contenedores
+docker compose ps
+
+# Ver logs en tiempo real del worker de IA
+docker logs -f worker
+
+# Ver logs del backend y peticiones HTTP
+docker logs -f backend_telegram
+
+# Reiniciar servicios tras cambios de código
+docker restart worker backend_telegram
+
+# Detener el sistema completo
+docker compose down
+```
 
 ---
 
-## 📞 Soporte
+## 🎓 Trabajo de Fin de Grado (TFG)
 
-Si encuentras problemas:
-1. Revisa los logs: `docker logs -f <contenedor>`
-2. Verifica las variables de entorno: `cat .env`
-3. Asegúrate de tener permisos de Docker: `docker ps`
-
----
-
-## 🎓 Proyecto TFG
-
-Este proyecto es parte de un Trabajo de Fin de Grado sobre arquitecturas de microservicios con IA.
-
-**Tecnologías**: Docker, Flask, RabbitMQ, MongoDB, Google Gemini, Prometheus, Grafana, ngrok
+- **Título:** Arquitectura de Microservicios con Inteligencia Artificial, Telegram y Monitorización en Raspberry Pi.
+- **Autor:** Alex Polo Rodríguez
+- **Tutora:** Liliana Patricia Santacruz Valencia
+- **Universidad:** Universidad Rey Juan Carlos (URJC) — Escuela Técnica Superior de Ingeniería Informática (ETSII).
