@@ -55,7 +55,6 @@ def get_chat_context(chat_id, limit=5):
         return ""
 
 def process_message(ch, method, properties, body):
-    # TODO: Refactorizar esto algun dia, esta cogiendo demasiado tamaño
     start = time.time()
     
     try:
@@ -80,7 +79,7 @@ def process_message(ch, method, properties, body):
         
         user = user_manager.get_or_create(chat_id, first_name)
         
-        # limitador cutre
+        # Limitador de tasa
         allowed, remaining, retry_after = rate_limiter.check_message_limit(chat_id, limit=10, window=60)
         if not allowed:
             if source != 'web':
@@ -90,39 +89,48 @@ def process_message(ch, method, properties, body):
         
         response_text = "Error procesando."
         sentiment = "NEUTRO"
+        msg_status = "procesado_ia"
         msg_type = "text" if 'text' in message else "photo" if 'photo' in message else "other"
         
         if msg_type == 'text':
             user_text = message.get('text', '').strip()
             
-            # forzamos edad si es nuevo
+            # Forzamos edad si es nuevo
             if user.get('age') is None and not user_text.startswith('/edad') and user_text != '/start':
                 response_text = "¡Espera! 🛑 Antes de seguir, necesito saber tu edad para poder explicarte las cosas a tu nivel.\n\nPor favor, responde con `/edad <tu_edad>` (ejemplo: `/edad 25`)."
                 sentiment = "NEUTRO"
+                msg_status = "aviso_edad"
             else:
                 valid, error = input_validator.validate_command_input(user_text)
                 if not valid:
                     response_text = f"❌ {error}"
                     sentiment = "NEGATIVO"
+                    msg_status = "error_validacion"
                 
                 # Detectar URLs sospechosas
                 elif user_text.startswith('http'):
                     suspicious = input_validator.extract_and_validate_urls(user_text)
                     if suspicious:
-                        response_text = f"⚠️ URL sospechosa detectada. No puedo procesar este mensaje."
+                        response_text = "⚠️ URL sospechosa detectada. No puedo procesar este mensaje."
                         sentiment = "NEGATIVO"
+                        msg_status = "error_seguridad"
                 
                 # Comandos
                 elif user_text == "/start":
                     response_text, sentiment = commands.handle_start(chat_id, first_name)
+                    msg_status = "procesado_ia"
                 elif user_text == "/help":
                     response_text, sentiment = commands.handle_help()
+                    msg_status = "procesado_ia"
                 elif user_text == "/stats":
                     response_text, sentiment = commands.handle_stats(chat_id)
+                    msg_status = "procesado_ia"
                 elif user_text == "/reset":
                     response_text, sentiment = commands.handle_reset(chat_id)
+                    msg_status = "procesado_ia"
                 elif user_text.startswith("/edad"):
                     response_text, sentiment = commands.handle_edad(chat_id, user_text)
+                    msg_status = "procesado_ia"
                 
                 # Pregunta normal a la IA
                 elif ai.model:
@@ -140,11 +148,13 @@ def process_message(ch, method, properties, body):
                             logger.info("⚡ Respuesta desde caché")
                             response_text = cached['text']
                             sentiment = cached['sentiment']
+                            msg_status = "procesado_ia"
                         else:
-                            # Generar respuesta
+                            # Generar respuesta con reintentos automáticos y backoff
                             raw = ai.generate_response(prompt)
                             
                             if raw:
+                                msg_status = "procesado_ia"
                                 # Analizar sentimiento para métricas (pero no mostrar al usuario)
                                 if "[POSITIVO]" in raw:
                                     sentiment = "POSITIVO"
@@ -156,20 +166,25 @@ def process_message(ch, method, properties, body):
                                     sentiment = "NEUTRO"
                                     response_text = raw.replace("[NEUTRO]", "").strip()
                                 else:
-                                    # Si no hay etiqueta, asumimos neutro
                                     sentiment = "NEUTRO"
                                     response_text = raw.strip()
                                 
-                                # Guardar en caché
+                                # Guardar en caché únicamente respuestas válidas
                                 cache.set(cache_key, {'text': response_text, 'sentiment': sentiment})
                             else:
-                                response_text = "Error generando respuesta."
+                                msg_status = "error_ia"
+                                sentiment = "NEGATIVO"
+                                response_text = "¡Uy! He recibido muchas consultas seguidas y me he quedado un momento pensando. 🧠💭 ¿Podrías repetirme tu duda ahora, por favor?"
                     
                     except Exception as e:
                         logger.error(f"IA Error: {e}")
-                        response_text = "Estoy saturado, dame un momento."
+                        msg_status = "error_ia"
+                        sentiment = "NEGATIVO"
+                        response_text = "Disculpa las molestias, he tenido un pequeño atasco temporal de conexión. ¿Me lo vuelves a escribir en un segundo?"
                 else:
-                    response_text = "IA no disponible."
+                    msg_status = "error_ia"
+                    sentiment = "NEGATIVO"
+                    response_text = "El servicio de inteligencia artificial no está disponible temporalmente. Inténtalo de nuevo más tarde."
         
         elif msg_type == 'photo':
             if source != 'web':
@@ -184,29 +199,41 @@ def process_message(ch, method, properties, body):
                         img = Image.open(io.BytesIO(photo_data))
                         raw = ai.analyze_image(img, "Describe esta imagen técnica en detalle. Formato: [SENTIMIENTO]\n\nDescripción")
                         
-                        if "[POSITIVO]" in raw:
-                            sentiment = "POSITIVO"
-                            response_text = raw.replace("[POSITIVO]", "").strip()
-                        elif "[NEGATIVO]" in raw:
-                            sentiment = "NEGATIVO"
-                            response_text = raw.replace("[NEGATIVO]", "").strip()
-                        elif "[NEUTRO]" in raw:
-                            sentiment = "NEUTRO"
-                            response_text = raw.replace("[NEUTRO]", "").strip()
+                        if raw:
+                            msg_status = "procesado_ia"
+                            if "[POSITIVO]" in raw:
+                                sentiment = "POSITIVO"
+                                response_text = raw.replace("[POSITIVO]", "").strip()
+                            elif "[NEGATIVO]" in raw:
+                                sentiment = "NEGATIVO"
+                                response_text = raw.replace("[NEGATIVO]", "").strip()
+                            elif "[NEUTRO]" in raw:
+                                sentiment = "NEUTRO"
+                                response_text = raw.replace("[NEUTRO]", "").strip()
+                            else:
+                                sentiment = "NEUTRO"
+                                response_text = raw.strip()
                         else:
-                            # Si no hay etiqueta, asumimos neutro
-                            sentiment = "NEUTRO"
-                            response_text = raw.strip()
+                            msg_status = "error_ia"
+                            sentiment = "NEGATIVO"
+                            response_text = "No he podido analizar los detalles de esta fotografía en este momento. ¿Podrías volver a enviarla asegurándote de que tenga buena iluminación?"
                     else:
-                        response_text = "Error descargando imagen."
+                        msg_status = "error_ia"
+                        sentiment = "NEGATIVO"
+                        response_text = "No he podido descargar la fotografía desde Telegram. Por favor, reenvíala."
                 except Exception as e:
                     logger.error(f"Error analizando imagen: {e}")
-                    response_text = "Error analizando imagen."
+                    msg_status = "error_ia"
+                    sentiment = "NEGATIVO"
+                    response_text = "Ha ocurrido un problema al procesar la imagen. Por favor, inténtalo de nuevo."
             else:
-                response_text = "IA no disponible."
+                msg_status = "error_ia"
+                sentiment = "NEGATIVO"
+                response_text = "El módulo de visión artificial no está disponible temporalmente."
         
         else:
             response_text = "Solo entiendo texto y fotos por ahora."
+            msg_status = "aviso_formato"
         
         if source == 'web':
             # Guardamos en caché para que la web lo lea inmediatamente mediante polling
@@ -215,10 +242,10 @@ def process_message(ch, method, properties, body):
             cache.set(cache_key, {"text": response_text, "timestamp": time.time()}, ttl=300)
 
         # Guardar en MongoDB (persistente para Telegram y Web)
-        logger.info(f"💾 Guardando respuesta para chat_id={chat_id}, message_id={message_id}")
+        logger.info(f"💾 Guardando respuesta para chat_id={chat_id}, message_id={message_id}, status={msg_status}")
         update_data = {
             "message": message,
-            "status": "procesado_ia",
+            "status": msg_status,
             "processed_at": time.time(),
             "ai_response": response_text,
             "type": msg_type,
@@ -234,7 +261,7 @@ def process_message(ch, method, properties, body):
             upsert=True
         )
         
-        # Responder
+        # Responder al usuario
         if source != 'web':
             clean_msg = response_text.replace('**', '').replace('__', '')
             telegram.send_message(chat_id, clean_msg, message_id)

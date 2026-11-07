@@ -1318,6 +1318,8 @@
                 let statusBadge = `<span class="friendly-pill">${msg.status}</span>`;
                 if (msg.status === 'procesado_ia') {
                     statusBadge = '<span class="friendly-pill friendly-pill-success"><i class="bi bi-check2"></i> Resuelto</span>';
+                } else if (msg.status === 'error_ia' || msg.status === 'error') {
+                    statusBadge = '<span class="friendly-pill friendly-pill-warning" style="color:#ef4444; border-color:rgba(239,68,68,0.3); background:#fee2e2;"><i class="bi bi-exclamation-triangle"></i> Fallo IA</span>';
                 }
 
                 let textDisplay = msg.type === 'photo' 
