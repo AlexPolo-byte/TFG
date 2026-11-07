@@ -38,8 +38,18 @@ PROCESSING_TIME = Histogram('worker_processing_seconds', 'Tiempo de proceso')
 
 def get_chat_context(chat_id, limit=5):
     try:
+        possible_ids = [chat_id]
+        try:
+            possible_ids.append(int(chat_id))
+        except (ValueError, TypeError):
+            pass
+        try:
+            possible_ids.append(str(chat_id))
+        except (ValueError, TypeError):
+            pass
+
         cursor = db.messages.find(
-            {"message.chat.id": chat_id, "type": "text", "status": "procesado_ia"},
+            {"message.chat.id": {"$in": possible_ids}, "type": "text", "status": "procesado_ia"},
             {"message.text": 1, "ai_response": 1}
         ).sort("processed_at", -1).limit(limit)
         
@@ -48,7 +58,7 @@ def get_chat_context(chat_id, limit=5):
             u_text = doc.get('message', {}).get('text', '')
             ai_text = doc.get('ai_response', '')
             if u_text and ai_text:
-                history += f"Usuario: {u_text}\nIA: {ai_text}\n"
+                history += f"Usuario: {u_text}\nAlex: {ai_text}\n"
         return history
     except Exception as e:
         logger.error(f"⚠️ Error recuperando contexto: {e}")
@@ -137,8 +147,22 @@ def process_message(ch, method, properties, body):
                     try:
                         # Generar el prompt completo con contexto y edad ANTES de buscar en caché
                         age_info = user.get('age', 'Desconocida (asume adulto joven)')
-                        history = get_chat_context(chat_id) if source != 'web' else ""
-                        prompt = f"EDAD DEL USUARIO: {age_info}\n\nHISTORIAL:\n{history}\n\nUSUARIO:\n{user_text}"
+                        history = get_chat_context(chat_id)
+                        has_prior_history = bool(history and history.strip())
+                        
+                        # Protocolo inteligente de saludos:
+                        # Si ya existe conversación previa y el usuario no está saludando expresamente, PROHIBIR decir "Hola"
+                        first_words = [w.lower().strip("¿?!¡.,") for w in user_text.split()[:4]]
+                        user_is_greeting = any(w in ["hola", "buenas", "buenos", "hey", "saludos"] for w in first_words)
+                        
+                        if has_prior_history and not user_is_greeting:
+                            saludo_rule = "ESTADO CONVERSACIONAL: Conversación continua ya en curso. REGLA ESTRICTA: NO digas '¡Hola!', 'Hola', 'Buenas' ni saludes de nuevo. Ve DIRECTAMENTE a responder la consulta de forma natural y fluida."
+                        elif not has_prior_history and not user_is_greeting:
+                            saludo_rule = "ESTADO CONVERSACIONAL: Primer mensaje de la interacción. Saluda brevemente antes de responder."
+                        else:
+                            saludo_rule = "ESTADO CONVERSACIONAL: El usuario te está saludando. Salúdale cordialmente y ofrece tu ayuda tecnológica."
+                        
+                        prompt = f"EDAD DEL USUARIO: {age_info}\n{saludo_rule}\n\nHISTORIAL PREVIO DEL CHAT:\n{history}\n\nUSUARIO:\n{user_text}"
                         
                         # Verificar caché usando el hash del prompt exacto
                         cache_key = f"ai:{hash(prompt)}"
