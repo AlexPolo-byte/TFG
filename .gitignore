@@ -10,3 +10,6 @@ pytest.ini
 # Documentacion de la memoria y material de ayuda
 MEMORIA/
 AYUDA/
+
+# Archivos temporales de desarrollo
+scratch/
